@@ -62,7 +62,7 @@ func TestLink_String(t *testing.T) {
 				To:     &Node{ID: 456},
 				Length: 0,
 			},
-			want: "\t123 --> 456",
+			want: "\t123 --> 456\n",
 		},
 		{
 			name: "Link with text",
@@ -75,7 +75,7 @@ func TestLink_String(t *testing.T) {
 				To:     &Node{ID: 456},
 				Length: 0,
 			},
-			want: "\t123 -->|This is a test| 456",
+			want: "\t123 -->|This is a test| 456\n",
 		},
 		{
 			name: "Longer link",
@@ -88,7 +88,7 @@ func TestLink_String(t *testing.T) {
 				To:     &Node{ID: 456},
 				Length: 10,
 			},
-			want: "\t123 ------------> 456",
+			want: "\t123 ------------> 456\n",
 		},
 		{
 			name: "Negative length",
@@ -101,7 +101,7 @@ func TestLink_String(t *testing.T) {
 				To:     &Node{ID: 456},
 				Length: -10,
 			},
-			want: "\t123 --> 456",
+			want: "\t123 --> 456\n",
 		},
 	}
 	for _, tt := range tests {

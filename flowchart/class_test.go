@@ -23,7 +23,8 @@ func TestNewClass(t *testing.T) {
 				name: "TestName",
 			},
 			wantNewClass: &Class{
-				Name: "TestName",
+				Name:  "TestName",
+				Style: NewNodeStyle(),
 			},
 		},
 	}

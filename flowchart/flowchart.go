@@ -10,7 +10,8 @@ type curveStyle string
 
 var Counter uint64 = 0
 
-// Flowchart directions, defined at https://mermaid.js.org/syntax/flowchart.html#direction
+// List of possible Flowchart directions.
+// Reference: https://mermaid.js.org/syntax/flowchart.html#direction
 const (
 	FlowchartDirectionTopToBottom flowchartDirection = "TB"
 	FlowchartDirectionTopDown     flowchartDirection = "TD"
@@ -19,6 +20,8 @@ const (
 	FlowchartDirectionLeftRight   flowchartDirection = "LR"
 )
 
+// List of possible Flowchart directions.
+// Reference: https://mermaid.js.org/syntax/flowchart.html#styling-line-curves
 const (
 	CurveStyleNone       curveStyle = ""
 	CurveStyleBasis      curveStyle = "basis"
@@ -41,6 +44,10 @@ const (
 	baseFlowchartDirectionString string = "flowchart %s\n"
 )
 
+// Flowcharts are composed of nodes (geometric shapes) and links (arrows or lines).
+// The Mermaid code defines how nodes and links are made and accommodates different arrow types,
+// multi-directional arrows, and any linking to and from subgraphs.
+// Reference: https://mermaid.js.org/syntax/flowchart.html
 type Flowchart struct {
 	Title      string
 	Direction  flowchartDirection
@@ -51,6 +58,7 @@ type Flowchart struct {
 	links      []*Link
 }
 
+// Creates a new Flowchart and sets default values to some attributes
 func NewFlowchart() (newFlowchart *Flowchart) {
 	newFlowchart = &Flowchart{
 		Direction:  FlowchartDirectionTopToBottom,
@@ -60,6 +68,7 @@ func NewFlowchart() (newFlowchart *Flowchart) {
 	return
 }
 
+// Returns a new ID to be used when registering new elements that require an ID
 func NewID() (newID uint64) {
 	newID = Counter
 	Counter++
@@ -67,6 +76,7 @@ func NewID() (newID uint64) {
 	return
 }
 
+// Builds a new string based on the current Flowchart elements
 func (f *Flowchart) String() string {
 	var sb strings.Builder
 
@@ -99,6 +109,7 @@ func (f *Flowchart) String() string {
 	return sb.String()
 }
 
+// Adds a new Subgraph to the Flowchart
 func (f *Flowchart) AddSubgraph(title string) (newSubgraph *Subgraph) {
 	newSubgraph = NewSubgraph(NewID(), title)
 
@@ -107,6 +118,7 @@ func (f *Flowchart) AddSubgraph(title string) (newSubgraph *Subgraph) {
 	return
 }
 
+// Adds a new Node to the Flowchart
 func (f *Flowchart) AddNode(text string) (newNode *Node) {
 	newNode = NewNode(NewID(), text)
 
@@ -115,6 +127,7 @@ func (f *Flowchart) AddNode(text string) (newNode *Node) {
 	return
 }
 
+// Adds a new Link to the Flowchart
 func (f *Flowchart) AddLink(from *Node, to *Node) (newLink *Link) {
 	newLink = NewLink(from, to)
 
@@ -123,6 +136,7 @@ func (f *Flowchart) AddLink(from *Node, to *Node) (newLink *Link) {
 	return
 }
 
+// Adds a new Class to the Flowchart
 func (f *Flowchart) AddClass(name string) (newClass *Class) {
 	newClass = NewClass(name)
 

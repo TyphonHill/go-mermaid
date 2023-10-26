@@ -8,6 +8,8 @@ import (
 type linkShape string
 type linkArrowType string
 
+// List of possible Link shapes.
+// Reference: https://mermaid.js.org/syntax/flowchart.html#links-between-nodes
 const (
 	LinkShapeOpen      linkShape = "--%s"
 	LinkShapeDotted    linkShape = "-.%s-"
@@ -15,6 +17,8 @@ const (
 	LinkShapeInvisible linkShape = "~~%s"
 )
 
+// List of possible Link arrow types.
+// Reference: https://mermaid.js.org/syntax/flowchart.html#links-between-nodes
 const (
 	LinkArrowTypeNone      linkArrowType = ""
 	LinkArrowTypeArrow     linkArrowType = ">"
@@ -24,10 +28,12 @@ const (
 )
 
 const (
-	baseLinkString     string = "\t%d %s%s%s%s %d"
+	baseLinkString     string = "\t%d %s%s%s%s %d\n"
 	baseLinkTextString string = "|%s|"
 )
 
+// Nodes can be connected with links/edges. It is possible to have different types of links or attach a text string to a link.
+// Reference: https://mermaid.js.org/syntax/flowchart.html#links-between-nodes
 type Link struct {
 	Shape  linkShape
 	Head   linkArrowType
@@ -38,6 +44,7 @@ type Link struct {
 	Length int
 }
 
+// Creates a new Link and sets default values to some attributes
 func NewLink(from *Node, to *Node) (newLink *Link) {
 	newLink = &Link{
 		From:   from,
@@ -51,6 +58,7 @@ func NewLink(from *Node, to *Node) (newLink *Link) {
 	return
 }
 
+// Builds a new string based on the current elements
 func (l *Link) String() string {
 	var sb strings.Builder
 

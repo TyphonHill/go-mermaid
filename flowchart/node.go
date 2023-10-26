@@ -7,6 +7,8 @@ import (
 
 type nodeShape string
 
+// List of possible Node shapes.
+// Reference: https://mermaid.js.org/syntax/flowchart.html#node-shapes
 const (
 	NodeShapeRoundEdges       nodeShape = `("%s")`
 	NodeShapeStadium          nodeShape = `(["%s"])`
@@ -37,6 +39,7 @@ type Node struct {
 	Class *Class
 }
 
+// Creates a new Node and sets default values to some attributes
 func NewNode(id uint64, text string) (newNode *Node) {
 	newNode = &Node{
 		ID:    id,
@@ -47,6 +50,7 @@ func NewNode(id uint64, text string) (newNode *Node) {
 	return
 }
 
+// Builds a new string based on the current elements
 func (n *Node) String() string {
 	var sb strings.Builder
 

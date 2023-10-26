@@ -1,5 +1,7 @@
 # Go-Mermaid
 
+![example workflow](https://github.com/BruceNocentini13/go-mermaid/actions/workflows/go.yml/badge.svg)
+
 Go-Mermaid is an open-source Go language (Golang) project designed to streamline and automate the creation of Mermaid diagrams.  
 Mermaid is a popular diagramming and charting tool that uses a simple and intuitive text-based syntax to generate a wide variety of diagrams, including flowcharts, sequence diagrams, Gantt charts, and more.
 

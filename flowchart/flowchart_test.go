@@ -92,7 +92,8 @@ flowchart LR
 	subgraph 999 [Title]
 		123 --> 456
 	end
-	123 =======>|Link Text| 456`,
+	123 =======>|Link Text| 456
+`,
 		},
 		{
 			name: "No title",
@@ -116,7 +117,8 @@ flowchart LR
 	123(("Test Node")):::TestClass
 	456[\"Test Node 2"\]
 	style 456 stroke-width:1,stroke-dasharray:0
-	123 =======>|Link Text| 456`,
+	123 =======>|Link Text| 456
+`,
 		},
 		{
 			name: "CurveStyle is CurveStyleNone",
@@ -144,7 +146,8 @@ flowchart LR
 	123(("Test Node")):::TestClass
 	456[\"Test Node 2"\]
 	style 456 stroke-width:1,stroke-dasharray:0
-	123 =======>|Link Text| 456`,
+	123 =======>|Link Text| 456
+`,
 		},
 		{
 			name: "No classes",
@@ -170,7 +173,8 @@ flowchart LR
 	123(("Test Node")):::TestClass
 	456[\"Test Node 2"\]
 	style 456 stroke-width:1,stroke-dasharray:0
-	123 =======>|Link Text| 456`,
+	123 =======>|Link Text| 456
+`,
 		},
 		{
 			name: "No Nodes",
@@ -190,7 +194,8 @@ title: Test flowchart
 
 %%{ init: { 'flowchart': { 'curve': 'linear' } } }%%
 flowchart LR
-	123 =======>|Link Text| 456`,
+	123 =======>|Link Text| 456
+`,
 		},
 		{
 			name: "No Links",
@@ -336,7 +341,8 @@ func TestFlowchart_AddClass(t *testing.T) {
 				name: "TestClass",
 			},
 			wantNewClass: &Class{
-				Name: "TestClass",
+				Name:  "TestClass",
+				Style: NewNodeStyle(),
 			},
 		},
 	}

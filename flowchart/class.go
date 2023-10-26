@@ -19,7 +19,8 @@ type Class struct {
 // Creates a new Class and sets default values to some attributes
 func NewClass(name string) (newClass *Class) {
 	newClass = &Class{
-		Name: name,
+		Name:  name,
+		Style: NewNodeStyle(),
 	}
 
 	return

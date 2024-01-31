@@ -1,3 +1,7 @@
+<head>
+<meta name="google-site-verification" content="j94IkHu19Am6TroNXqgXc1AnHUZ5oJdIR_xoZB8yI88" />
+</head>
+
 # Go-Mermaid
 
 ![example workflow](https://github.com/BruceNocentini13/go-mermaid/actions/workflows/go.yml/badge.svg)

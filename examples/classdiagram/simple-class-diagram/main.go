@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/BruceNocentini13/go-mermaid/classdiagram"
+	"github.com/TyphonHill/go-mermaid/classdiagram"
 )
 
 func main() {

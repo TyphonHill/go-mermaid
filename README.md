@@ -4,8 +4,8 @@
 
 # Go-Mermaid
 
-![example workflow](https://github.com/BruceNocentini13/go-mermaid/actions/workflows/go.yml/badge.svg)
-[![Go Coverage](https://github.com/BruceNocentini13/go-mermaid/wiki/coverage.svg)](https://raw.githack.com/wiki/BruceNocentini13/go-mermaid/coverage.html)
+![example workflow](https://github.com/TyphonHill/go-mermaid/actions/workflows/go.yml/badge.svg)
+[![Go Coverage](https://github.com/TyphonHill/go-mermaid/wiki/coverage.svg)](https://raw.githack.com/wiki/TyphonHill/go-mermaid/coverage.html)
 
 Go-Mermaid is an open-source Go language (Golang) project designed to streamline and automate the creation of Mermaid diagrams.  
 Mermaid is a popular diagramming and charting tool that uses a simple and intuitive text-based syntax to generate a wide variety of diagrams, including flowcharts, sequence diagrams, Gantt charts, and more.
@@ -14,11 +14,11 @@ Go-Mermaid is tailored for automation and batch diagram generation, making it an
 
 ## Instalation
 
-`go get -u github.com/BruceNocentini13/go-mermaid`
+`go get -u github.com/TyphonHill/go-mermaid`
 
 ### Example
 
-All examples are available [here](https://github.com/BruceNocentini13/go-mermaid/blob/main/examples)
+All examples are available [here](https://github.com/TyphonHill/go-mermaid/blob/main/examples)
 
 ```go
 package main
@@ -26,7 +26,7 @@ package main
 import (
     "fmt"
 
-    "github.com/BruceNocentini13/go-mermaid/flowchart"
+    "github.com/TyphonHill/go-mermaid/flowchart"
 )
 
 func main() {

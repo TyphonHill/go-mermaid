@@ -45,6 +45,7 @@ func NewNode(id uint64, text string) (newNode *Node) {
 		ID:    id,
 		Text:  text,
 		Shape: NodeShapeRoundEdges,
+		Style: NewNodeStyle(),
 	}
 
 	return

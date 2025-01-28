@@ -1,7 +1,9 @@
-package classdiagram
+package class_diagram
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -23,12 +25,23 @@ const (
 )
 
 type ClassDiagram struct {
-	Title      string
-	Direction  classDiagramDirection
-	namespaces []*Namespace
-	notes      []*Note
-	classes    []*Class
-	relations  []*Relation
+	Title         string
+	Direction     classDiagramDirection
+	namespaces    []*Namespace
+	notes         []*Note
+	classes       []*Class
+	relations     []*Relation
+	markdownFence bool
+}
+
+// EnableMarkdownFence enables markdown fencing in the output
+func (cd *ClassDiagram) EnableMarkdownFence() {
+	cd.markdownFence = true
+}
+
+// DisableMarkdownFence disables markdown fencing in the output
+func (cd *ClassDiagram) DisableMarkdownFence() {
+	cd.markdownFence = false
 }
 
 func NewClassDiagram() (newClassDiagram *ClassDiagram) {
@@ -41,6 +54,11 @@ func NewClassDiagram() (newClassDiagram *ClassDiagram) {
 
 func (cd *ClassDiagram) String() string {
 	var sb strings.Builder
+
+	// Add markdown fence if enabled
+	if cd.markdownFence {
+		sb.WriteString("```mermaid\n")
+	}
 
 	if len(cd.Title) > 0 {
 		sb.WriteString(fmt.Sprintf(string(baseClassDiagramTitleString), cd.Title))
@@ -66,7 +84,41 @@ func (cd *ClassDiagram) String() string {
 		sb.WriteString(relation.String())
 	}
 
+	// Close markdown fence if enabled
+	if cd.markdownFence {
+		sb.WriteString("```\n")
+	}
+
 	return sb.String()
+}
+
+// RenderToFile saves the diagram to a file at the specified path
+// If the file extension is .md, markdown fencing is automatically enabled
+func (cd *ClassDiagram) RenderToFile(path string) error {
+	// Create directory if it doesn't exist
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	// If file has .md extension, enable markdown fencing
+	originalFenceState := cd.markdownFence
+	if strings.ToLower(filepath.Ext(path)) == ".md" {
+		cd.EnableMarkdownFence()
+	}
+
+	// Generate diagram content
+	content := cd.String()
+
+	// Restore original fence state
+	cd.markdownFence = originalFenceState
+
+	// Write to file
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		return fmt.Errorf("failed to write file: %w", err)
+	}
+
+	return nil
 }
 
 func (cd *ClassDiagram) AddNamespace(name string) (newNamespace *Namespace) {

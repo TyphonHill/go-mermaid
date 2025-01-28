@@ -1,4 +1,4 @@
-package classdiagram
+package class_diagram
 
 import (
 	"reflect"

@@ -2,6 +2,8 @@ package flowchart
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -49,13 +51,24 @@ const (
 // multi-directional arrows, and any linking to and from subgraphs.
 // Reference: https://mermaid.js.org/syntax/flowchart.html
 type Flowchart struct {
-	Title      string
-	Direction  flowchartDirection
-	CurveStyle curveStyle
-	classes    []*Class
-	nodes      []*Node
-	subgraphs  []*Subgraph
-	links      []*Link
+	Title         string
+	Direction     flowchartDirection
+	CurveStyle    curveStyle
+	classes       []*Class
+	nodes         []*Node
+	subgraphs     []*Subgraph
+	links         []*Link
+	markdownFence bool
+}
+
+// EnableMarkdownFence enables markdown fencing in the output
+func (f *Flowchart) EnableMarkdownFence() {
+	f.markdownFence = true
+}
+
+// DisableMarkdownFence disables markdown fencing in the output
+func (f *Flowchart) DisableMarkdownFence() {
+	f.markdownFence = false
 }
 
 // Creates a new Flowchart and sets default values to some attributes
@@ -79,6 +92,11 @@ func NewID() (newID uint64) {
 // Builds a new string based on the current Flowchart elements
 func (f *Flowchart) String() string {
 	var sb strings.Builder
+
+	// Add markdown fence if enabled
+	if f.markdownFence {
+		sb.WriteString("```mermaid\n")
+	}
 
 	if len(f.Title) > 0 {
 		sb.WriteString(fmt.Sprintf(string(baseTitleString), f.Title))
@@ -106,7 +124,41 @@ func (f *Flowchart) String() string {
 		sb.WriteString(link.String())
 	}
 
+	// Close markdown fence if enabled
+	if f.markdownFence {
+		sb.WriteString("```\n")
+	}
+
 	return sb.String()
+}
+
+// RenderToFile saves the diagram to a file at the specified path
+// If the file extension is .md, markdown fencing is automatically enabled
+func (f *Flowchart) RenderToFile(path string) error {
+	// Create directory if it doesn't exist
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	// If file has .md extension, enable markdown fencing
+	originalFenceState := f.markdownFence
+	if strings.ToLower(filepath.Ext(path)) == ".md" {
+		f.EnableMarkdownFence()
+	}
+
+	// Generate diagram content
+	content := f.String()
+
+	// Restore original fence state
+	f.markdownFence = originalFenceState
+
+	// Write to file
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		return fmt.Errorf("failed to write file: %w", err)
+	}
+
+	return nil
 }
 
 // Adds a new Subgraph to the Flowchart

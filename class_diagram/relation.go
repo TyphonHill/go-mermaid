@@ -5,10 +5,16 @@ import (
 	"strings"
 )
 
+// relationType represents the type of relationship between classes.
 type relationType string
+
+// relationLink represents the visual style of the relationship line.
 type relationLink string
+
+// relationCardinality represents the multiplicity of the relationship.
 type relationCardinality string
 
+// Relationship type constants define different types of class relationships.
 const (
 	RelationTypeAssociation     relationType = ">"
 	RelationTypeAssociationLeft relationType = "<"
@@ -18,11 +24,13 @@ const (
 	RelationTypeAggregation     relationType = "o"
 )
 
+// Relationship link constants define the line style for relationships.
 const (
 	RelationLinkSolid  relationLink = "--"
 	RelationLinkDashed relationLink = ".."
 )
 
+// Relationship cardinality constants define the multiplicity of relationships.
 const (
 	RelationCardinalityOnlyOne   relationCardinality = "\"1\""
 	RelationCardinalityZeroOrOne relationCardinality = "\"0..1\""
@@ -33,11 +41,15 @@ const (
 	RelationCardinalityOneToN    relationCardinality = "\"1..n\""
 )
 
+// Formatting constants for relation string representation.
 const (
 	baseRelationString     string = "\t%s %s%s%s%s%s %s%s\n"
 	baseRelationTextString string = " : %s"
 )
 
+// Relation represents a relationship between two classes in a class diagram.
+// It includes information about the related classes, relationship types,
+// cardinalities, link style, and optional label.
 type Relation struct {
 	ClassA              *Class
 	ClassB              *Class
@@ -49,6 +61,8 @@ type Relation struct {
 	Label               string
 }
 
+// NewRelation creates a new Relation between two classes.
+// It initializes the relation with a default solid link.
 func NewRelation(classA *Class, classB *Class) (newRelation *Relation) {
 	newRelation = &Relation{
 		ClassA: classA,
@@ -59,6 +73,8 @@ func NewRelation(classA *Class, classB *Class) (newRelation *Relation) {
 	return
 }
 
+// String generates the Mermaid syntax representation of the relationship.
+// It includes the related classes, relationship types, cardinalities, link style, and optional label.
 func (r *Relation) String() string {
 	var sb strings.Builder
 

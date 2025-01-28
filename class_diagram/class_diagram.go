@@ -24,6 +24,8 @@ const (
 	baseClassDiagramDirectionString string = "\tdirection %s\n"
 )
 
+// ClassDiagram represents a Mermaid class diagram with various diagram components
+// such as classes, namespaces, relations, and notes.
 type ClassDiagram struct {
 	Title         string
 	Direction     classDiagramDirection
@@ -34,16 +36,20 @@ type ClassDiagram struct {
 	markdownFence bool
 }
 
-// EnableMarkdownFence enables markdown fencing in the output
+// EnableMarkdownFence enables markdown code fencing for the diagram output,
+// which adds ```mermaid markers when converting the diagram to a string.
 func (cd *ClassDiagram) EnableMarkdownFence() {
 	cd.markdownFence = true
 }
 
-// DisableMarkdownFence disables markdown fencing in the output
+// DisableMarkdownFence disables markdown code fencing for the diagram output,
+// removing the ```mermaid markers when converting the diagram to a string.
 func (cd *ClassDiagram) DisableMarkdownFence() {
 	cd.markdownFence = false
 }
 
+// NewClassDiagram creates and returns a new ClassDiagram with default settings.
+// The default direction is set to top-to-bottom.
 func NewClassDiagram() (newClassDiagram *ClassDiagram) {
 	newClassDiagram = &ClassDiagram{
 		Direction: ClassDiagramDirectionTopToBottom,
@@ -52,10 +58,11 @@ func NewClassDiagram() (newClassDiagram *ClassDiagram) {
 	return
 }
 
+// String generates the Mermaid syntax representation of the class diagram.
+// It includes title, direction, notes, namespaces, classes, and relations.
 func (cd *ClassDiagram) String() string {
 	var sb strings.Builder
 
-	// Add markdown fence if enabled
 	if cd.markdownFence {
 		sb.WriteString("```mermaid\n")
 	}
@@ -84,7 +91,6 @@ func (cd *ClassDiagram) String() string {
 		sb.WriteString(relation.String())
 	}
 
-	// Close markdown fence if enabled
 	if cd.markdownFence {
 		sb.WriteString("```\n")
 	}
@@ -92,28 +98,24 @@ func (cd *ClassDiagram) String() string {
 	return sb.String()
 }
 
-// RenderToFile saves the diagram to a file at the specified path
-// If the file extension is .md, markdown fencing is automatically enabled
+// RenderToFile saves the diagram to a file at the specified path.
+// If the file extension is .md, markdown fencing is automatically enabled.
+// It creates the directory if it does not exist and writes the diagram content.
 func (cd *ClassDiagram) RenderToFile(path string) error {
-	// Create directory if it doesn't exist
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
-	// If file has .md extension, enable markdown fencing
 	originalFenceState := cd.markdownFence
 	if strings.ToLower(filepath.Ext(path)) == ".md" {
 		cd.EnableMarkdownFence()
 	}
 
-	// Generate diagram content
 	content := cd.String()
 
-	// Restore original fence state
 	cd.markdownFence = originalFenceState
 
-	// Write to file
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
@@ -121,6 +123,8 @@ func (cd *ClassDiagram) RenderToFile(path string) error {
 	return nil
 }
 
+// AddNamespace creates and adds a new namespace to the class diagram.
+// It returns the newly created Namespace.
 func (cd *ClassDiagram) AddNamespace(name string) (newNamespace *Namespace) {
 	newNamespace = NewNamespace(name)
 
@@ -129,12 +133,17 @@ func (cd *ClassDiagram) AddNamespace(name string) (newNamespace *Namespace) {
 	return
 }
 
+// AddNote creates and adds a new note to the class diagram.
+// The note can be associated with a specific class or be a general diagram note.
 func (cd *ClassDiagram) AddNote(text string, class *Class) {
 	newNote := NewNote(text, class)
 
 	cd.notes = append(cd.notes, newNote)
 }
 
+// AddClass creates and adds a new class to the class diagram.
+// If namespace is nil, the class is added directly to the diagram.
+// Returns the newly created Class.
 func (cd *ClassDiagram) AddClass(name string, namespace *Namespace) (newClass *Class) {
 	if namespace == nil {
 		newClass = NewClass(name)
@@ -146,6 +155,8 @@ func (cd *ClassDiagram) AddClass(name string, namespace *Namespace) (newClass *C
 	return
 }
 
+// AddRelation creates and adds a new relation between two classes.
+// Returns the newly created Relation.
 func (cd *ClassDiagram) AddRelation(classA *Class, classB *Class) (newRelation *Relation) {
 	newRelation = NewRelation(classA, classB)
 

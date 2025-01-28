@@ -23,6 +23,8 @@ const (
 	baseClassMemberString     string = "\t%s\n"
 )
 
+// Class represents a class in the Mermaid class diagram,
+// containing information about its name, label, annotation, methods, and fields.
 type Class struct {
 	Name       string
 	Label      string
@@ -31,7 +33,8 @@ type Class struct {
 	fields     []*Field
 }
 
-// Creates a new Class and sets default values to some attributes
+// NewClass creates a new Class with the given name.
+// It initializes the class with default values and returns a pointer to the new Class.
 func NewClass(name string) (newClass *Class) {
 	newClass = &Class{
 		Name: name,
@@ -40,6 +43,8 @@ func NewClass(name string) (newClass *Class) {
 	return
 }
 
+// AddMethod creates and adds a new method to the class.
+// It returns the newly created Method, allowing for further configuration.
 func (c *Class) AddMethod(name string) (newMethod *Method) {
 	newMethod = NewMethod(name)
 
@@ -48,6 +53,8 @@ func (c *Class) AddMethod(name string) (newMethod *Method) {
 	return
 }
 
+// AddField creates and adds a new field to the class.
+// It returns the newly created Field, allowing for further configuration.
 func (c *Class) AddField(fieldName string, fieldType string) (newField *Field) {
 	newField = NewField(fieldName, fieldType)
 
@@ -56,6 +63,9 @@ func (c *Class) AddField(fieldName string, fieldType string) (newField *Field) {
 	return
 }
 
+// String generates the Mermaid syntax representation of the class.
+// The curIndentation parameter allows for nested formatting of the class diagram.
+// It includes the class name, label, annotation, fields, and methods.
 func (c *Class) String(curIndentation string) string {
 	var sb strings.Builder
 

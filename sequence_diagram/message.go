@@ -1,4 +1,4 @@
-package sequence_diagram
+package sequencediagram
 
 // MessageType represents the different types of messages in a sequence diagram.
 type MessageType string

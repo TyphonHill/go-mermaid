@@ -1,4 +1,4 @@
-package sequence_diagram
+package sequencediagram
 
 import (
 	"reflect"

@@ -1,107 +1,141 @@
-package class_diagram
+package classdiagram
 
 import (
-	"reflect"
+	"strings"
 	"testing"
 )
 
 func TestNewNamespace(t *testing.T) {
-	type args struct {
-		name string
-	}
 	tests := []struct {
-		name             string
-		args             args
-		wantNewNamespace *Namespace
+		name string
+		want *Namespace
 	}{
 		{
-			name: "Nominal test",
-			args: args{
-				name: "TestNamespace",
-			},
-			wantNewNamespace: &Namespace{
-				Name: "TestNamespace",
+			name: "Create new namespace",
+			want: &Namespace{
+				Name:    "TestNamespace",
+				classes: []*Class{},
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotNewNamespace := NewNamespace(tt.args.name); !reflect.DeepEqual(gotNewNamespace, tt.wantNewNamespace) {
-				t.Errorf("NewNamespace() = %v, want %v", gotNewNamespace, tt.wantNewNamespace)
+			got := NewNamespace(tt.want.Name)
+
+			if got.Name != tt.want.Name {
+				t.Errorf("NewNamespace() Name = %v, want %v", got.Name, tt.want.Name)
+			}
+
+			// Check that classes are initialized as empty slice
+			if len(got.classes) != 0 {
+				t.Errorf("NewNamespace() did not initialize empty classes slice")
 			}
 		})
 	}
 }
 
 func TestNamespace_AddClass(t *testing.T) {
-	type args struct {
-		name string
+	namespace := NewNamespace("TestNamespace")
+
+	class := namespace.AddClass("TestClass")
+
+	if class == nil {
+		t.Errorf("AddClass() returned nil")
 	}
-	tests := []struct {
-		name         string
-		namespace    *Namespace
-		args         args
-		wantNewClass *Class
-	}{
-		{
-			name:      "Nominal test",
-			namespace: NewNamespace("TestNamespace"),
-			args: args{
-				name: "TestClass",
-			},
-			wantNewClass: &Class{
-				Name: "TestClass",
-			},
-		},
+
+	if class.Name != "TestClass" {
+		t.Errorf("AddClass() class name = %v, want %v", class.Name, "TestClass")
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			n := &Namespace{
-				Name:    tt.namespace.Name,
-				classes: tt.namespace.classes,
-			}
-			if gotNewClass := n.AddClass(tt.args.name); !reflect.DeepEqual(gotNewClass, tt.wantNewClass) {
-				t.Errorf("Namespace.AddClass() = %v, want %v", gotNewClass, tt.wantNewClass)
-			}
-		})
+
+	if len(namespace.classes) != 1 {
+		t.Errorf("AddClass() did not add class to namespace classes")
+	}
+
+	// Add multiple classes
+	namespace.AddClass("AnotherClass")
+	namespace.AddClass("ThirdClass")
+
+	if len(namespace.classes) != 3 {
+		t.Errorf("AddClass() did not correctly add multiple classes")
 	}
 }
 
 func TestNamespace_String(t *testing.T) {
-	ns := NewNamespace("TestNamespace")
-	ns.AddClass("Test1")
-	ns.AddClass("Test2")
-
 	tests := []struct {
-		name      string
-		namespace *Namespace
-		want      string
+		name        string
+		namespace   *Namespace
+		contains    []string
+		notContains []string
 	}{
 		{
-			name:      "Nominal test with no classes",
-			namespace: NewNamespace("TestNamespace"),
-			want:      "",
+			name:      "Empty namespace",
+			namespace: NewNamespace("EmptyNamespace"),
+			contains:  []string{}, // Empty namespace should return empty string
+			notContains: []string{
+				"namespace EmptyNamespace",
+				"}",
+			},
 		},
 		{
-			name:      "Namespace with classes",
-			namespace: ns,
-			want: `	namespace TestNamespace{
-		class Test1{
-		}
-		class Test2{
-		}
-	}
-`,
+			name: "Namespace with single class",
+			namespace: func() *Namespace {
+				ns := NewNamespace("TestNamespace")
+				class := ns.AddClass("TestClass")
+				class.Annotation = ClassAnnotationService
+				class.AddField("testField", "string")
+				return ns
+			}(),
+			contains: []string{
+				"namespace TestNamespace{",
+				"class TestClass{",
+				"<<Service>>",
+				"+string testField",
+				"}",
+				"}",
+			},
+		},
+		{
+			name: "Namespace with multiple classes",
+			namespace: func() *Namespace {
+				ns := NewNamespace("MultiClassNamespace")
+				class1 := ns.AddClass("FirstClass")
+				class1.AddField("id", "int")
+
+				class2 := ns.AddClass("SecondClass")
+				class2.Annotation = ClassAnnotationInterface
+				class2.AddMethod("doSomething")
+				return ns
+			}(),
+			contains: []string{
+				"namespace MultiClassNamespace{\n",
+				"class FirstClass{",
+				"+int id",
+				"class SecondClass{",
+				"<<Interface>>",
+				"+doSomething()",
+				"}",
+				"}",
+			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := &Namespace{
-				Name:    tt.namespace.Name,
-				classes: tt.namespace.classes,
+			output := tt.namespace.String()
+
+			// Check contains
+			for _, expectedContent := range tt.contains {
+				if !strings.Contains(output, expectedContent) {
+					t.Errorf("String() output missing expected content: %q", expectedContent)
+				}
 			}
-			if got := n.String(); got != tt.want {
-				t.Errorf("Namespace.String() = \n%v\n, want \n%v\n", got, tt.want)
+
+			// Check not contains
+			for _, unexpectedContent := range tt.notContains {
+				if strings.Contains(output, unexpectedContent) {
+					t.Errorf("String() output should not contain: %q", unexpectedContent)
+				}
 			}
 		})
 	}

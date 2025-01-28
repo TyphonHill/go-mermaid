@@ -44,7 +44,7 @@ type Link struct {
 	Length int
 }
 
-// Creates a new Link and sets default values to some attributes
+// NewLink creates a new Link and sets default values to some attributes
 func NewLink(from *Node, to *Node) (newLink *Link) {
 	newLink = &Link{
 		From:   from,
@@ -58,7 +58,8 @@ func NewLink(from *Node, to *Node) (newLink *Link) {
 	return
 }
 
-// Builds a new string based on the current elements
+// String generates a Mermaid string representation of the link,
+// including its shape, arrow types, text, and length.
 func (l *Link) String() string {
 	var sb strings.Builder
 

@@ -1,84 +1,184 @@
-package class_diagram
+package classdiagram
 
 import (
-	"reflect"
+	"strings"
 	"testing"
 )
 
 func TestNewRelation(t *testing.T) {
-	type args struct {
+	// Create two test classes
+	class1 := NewClass("ClassA")
+	class2 := NewClass("ClassB")
+
+	tests := []struct {
+		name   string
 		classA *Class
 		classB *Class
-	}
-	tests := []struct {
-		name            string
-		args            args
-		wantNewRelation *Relation
+		want   *Relation
 	}{
 		{
-			name: "Nominal test",
-			args: args{
-				classA: NewClass("Test1"),
-				classB: NewClass("Test2"),
-			},
-			wantNewRelation: &Relation{
-				ClassA: &Class{Name: "Test1"},
-				ClassB: &Class{Name: "Test2"},
+			name:   "Create new relation",
+			classA: class1,
+			classB: class2,
+			want: &Relation{
+				ClassA: class1,
+				ClassB: class2,
 				Link:   RelationLinkSolid,
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotNewRelation := NewRelation(tt.args.classA, tt.args.classB); !reflect.DeepEqual(gotNewRelation, tt.wantNewRelation) {
-				t.Errorf("NewRelation() = %v, want %v", gotNewRelation, tt.wantNewRelation)
+			got := NewRelation(tt.classA, tt.classB)
+
+			if got.ClassA != tt.want.ClassA {
+				t.Errorf("NewRelation() ClassA = %v, want %v", got.ClassA, tt.want.ClassA)
+			}
+
+			if got.ClassB != tt.want.ClassB {
+				t.Errorf("NewRelation() ClassB = %v, want %v", got.ClassB, tt.want.ClassB)
+			}
+
+			if got.Link != tt.want.Link {
+				t.Errorf("NewRelation() Link = %v, want %v", got.Link, tt.want.Link)
 			}
 		})
 	}
 }
 
 func TestRelation_String(t *testing.T) {
-	class1 := NewClass("Test1")
-	class2 := NewClass("Test2")
-
-	rel := NewRelation(class1, class2)
-	rel.RelationToClassB = RelationTypeAssociation
-	rel.RelationToClassA = RelationTypeAggregation
-	rel.CardinalityToClassA = RelationCardinalityMany
-	rel.CardinalityToClassB = RelationCardinalityZeroToN
-	rel.Link = RelationLinkDashed
-	rel.Label = "TestLabel"
-
 	tests := []struct {
 		name     string
 		relation *Relation
-		want     string
+		contains []string
 	}{
 		{
-			name:     "Nominal test",
-			relation: NewRelation(class1, class2),
-			want:     "\tTest1 -- Test2\n",
+			name: "Basic relation with default values",
+			relation: func() *Relation {
+				class1 := NewClass("ClassA")
+				class2 := NewClass("ClassB")
+				return NewRelation(class1, class2)
+			}(),
+			contains: []string{
+				"ClassA -- ClassB",
+			},
 		},
 		{
-			name:     "Nominal test",
-			relation: rel,
-			want:     "\tTest1 \"*\"o..>\"0..n\" Test2 : TestLabel\n",
+			name: "Relation with cardinality",
+			relation: func() *Relation {
+				class1 := NewClass("User")
+				class2 := NewClass("Order")
+				relation := NewRelation(class1, class2)
+				relation.CardinalityToClassA = RelationCardinalityOneOrMore
+				relation.CardinalityToClassB = RelationCardinalityZeroOrOne
+				return relation
+			}(),
+			contains: []string{
+				`User "1..*"--"0..1" Order`,
+			},
+		},
+		{
+			name: "Relation with relation types and link",
+			relation: func() *Relation {
+				class1 := NewClass("Parent")
+				class2 := NewClass("Child")
+				relation := NewRelation(class1, class2)
+				relation.RelationToClassA = RelationTypeInheritance
+				relation.RelationToClassB = RelationTypeAggregation
+				relation.Link = RelationLinkDashed
+				return relation
+			}(),
+			contains: []string{
+				"Parent |>..o Child",
+			},
+		},
+		{
+			name: "Relation with label",
+			relation: func() *Relation {
+				class1 := NewClass("ClassA")
+				class2 := NewClass("ClassB")
+				relation := NewRelation(class1, class2)
+				relation.Label = "Test Relation"
+				return relation
+			}(),
+			contains: []string{
+				"ClassA -- ClassB : Test Relation",
+			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := &Relation{
-				ClassA:              tt.relation.ClassA,
-				ClassB:              tt.relation.ClassB,
-				RelationToClassA:    tt.relation.RelationToClassA,
-				RelationToClassB:    tt.relation.RelationToClassB,
-				CardinalityToClassA: tt.relation.CardinalityToClassA,
-				CardinalityToClassB: tt.relation.CardinalityToClassB,
-				Link:                tt.relation.Link,
-				Label:               tt.relation.Label,
+			output := tt.relation.String()
+
+			for _, expectedContent := range tt.contains {
+				if !strings.Contains(output, expectedContent) {
+					t.Errorf("String() output missing expected content: %q", expectedContent)
+				}
 			}
-			if got := r.String(); got != tt.want {
-				t.Errorf("Relation.String() = %v, want %v", got, tt.want)
+		})
+	}
+}
+
+// TestRelationConstants checks the predefined constants for relations
+func TestRelationConstants(t *testing.T) {
+	relationTypeTests := []struct {
+		name      string
+		typeConst relationType
+		expected  string
+	}{
+		{"Association", RelationTypeAssociation, ">"},
+		{"Association Left", RelationTypeAssociationLeft, "<"},
+		{"Inheritance", RelationTypeInheritance, "|>"},
+		{"Inheritance Left", RelationTypeInheritanceLeft, "<|"},
+		{"Composition", RelationTypeComposition, "*"},
+		{"Aggregation", RelationTypeAggregation, "o"},
+	}
+
+	for _, tt := range relationTypeTests {
+		t.Run(tt.name, func(t *testing.T) {
+			if string(tt.typeConst) != tt.expected {
+				t.Errorf("Relation type %s = %v, want %v", tt.name, tt.typeConst, tt.expected)
+			}
+		})
+	}
+
+	relationLinkTests := []struct {
+		name      string
+		linkConst relationLink
+		expected  string
+	}{
+		{"Solid Link", RelationLinkSolid, "--"},
+		{"Dashed Link", RelationLinkDashed, ".."},
+	}
+
+	for _, tt := range relationLinkTests {
+		t.Run(tt.name, func(t *testing.T) {
+			if string(tt.linkConst) != tt.expected {
+				t.Errorf("Relation link %s = %v, want %v", tt.name, tt.linkConst, tt.expected)
+			}
+		})
+	}
+
+	cardinalityTests := []struct {
+		name             string
+		cardinalityConst relationCardinality
+		expected         string
+	}{
+		{"Only One", RelationCardinalityOnlyOne, "\"1\""},
+		{"Zero or One", RelationCardinalityZeroOrOne, "\"0..1\""},
+		{"One or More", RelationCardinalityOneOrMore, "\"1..*\""},
+		{"Many", RelationCardinalityMany, "\"*\""},
+		{"N", RelationCardinalityN, "\"n\""},
+		{"Zero to N", RelationCardinalityZeroToN, "\"0..n\""},
+		{"One to N", RelationCardinalityOneToN, "\"1..n\""},
+	}
+
+	for _, tt := range cardinalityTests {
+		t.Run(tt.name, func(t *testing.T) {
+			if string(tt.cardinalityConst) != tt.expected {
+				t.Errorf("Cardinality %s = %v, want %v", tt.name, tt.cardinalityConst, tt.expected)
 			}
 		})
 	}

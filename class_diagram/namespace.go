@@ -1,4 +1,4 @@
-package class_diagram
+package classdiagram
 
 import (
 	"fmt"

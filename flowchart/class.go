@@ -16,7 +16,7 @@ type Class struct {
 	Style *NodeStyle
 }
 
-// Creates a new Class and sets default values to some attributes
+// NewClass creates a new Class with the given name and a default node style.
 func NewClass(name string) (newClass *Class) {
 	newClass = &Class{
 		Name:  name,
@@ -26,7 +26,8 @@ func NewClass(name string) (newClass *Class) {
 	return
 }
 
-// Builds a new string based on the current elements
+// String generates a Mermaid string representation of the class definition,
+// including its name and style properties.
 func (c *Class) String() string {
 	var sb strings.Builder
 

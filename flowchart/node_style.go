@@ -21,7 +21,7 @@ type NodeStyle struct {
 	StrokeDash  string
 }
 
-// Creates a new Node Style and sets default values to some attributes
+// NewNodeStyle creates a new NodeStyle with default stroke width and dash settings.
 func NewNodeStyle() (newNodeStyle *NodeStyle) {
 	newNodeStyle = &NodeStyle{
 		StrokeWidth: 1,
@@ -31,7 +31,8 @@ func NewNodeStyle() (newNodeStyle *NodeStyle) {
 	return
 }
 
-// Builds a new string based on the current elements
+// String generates a formatted string representation of the node style,
+// including color, fill, stroke, width, and dash properties.
 func (n *NodeStyle) String() string {
 	var sb strings.Builder
 

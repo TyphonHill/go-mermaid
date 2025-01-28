@@ -5,8 +5,6 @@ import (
 	"strings"
 )
 
-type subgraphDirection string
-
 const (
 	baseSubgraphString          string = "\tsubgraph %d [%s]\n"
 	baseSubgraphDirectionString string = "\t\tdirection %s\n"
@@ -25,15 +23,19 @@ const (
 	SubgraphDirectionLeftRight   subgraphDirection = "LR"
 )
 
+type subgraphDirection string
+
 type Subgraph struct {
-	ID        uint64
-	Title     string
-	Direction subgraphDirection
-	subgraphs []*Subgraph
-	links     []*Link
+	ID          uint64
+	Title       string
+	Direction   subgraphDirection
+	subgraphs   []*Subgraph
+	links       []*Link
+	idGenerator IDGenerator
 }
 
-// Creates a new Subgraph and sets default values to some attributes
+// NewSubgraph creates a new Subgraph with the given ID and title,
+// setting the default direction to none.
 func NewSubgraph(id uint64, title string) (newSubgraph *Subgraph) {
 	newSubgraph = &Subgraph{
 		ID:        id,
@@ -44,16 +46,21 @@ func NewSubgraph(id uint64, title string) (newSubgraph *Subgraph) {
 	return
 }
 
-// Adds a new Subgraph to the Subgraph
+// AddSubgraph adds a new Subgraph to the current Subgraph and returns the created subgraph.
 func (s *Subgraph) AddSubgraph(title string) (newSubgraph *Subgraph) {
-	newSubgraph = NewSubgraph(NewID(), title)
+	if s.idGenerator == nil {
+		s.idGenerator = &DefaultIDGenerator{}
+	}
+
+	newSubgraph = NewSubgraph(s.idGenerator.NextID(), title)
+	newSubgraph.idGenerator = s.idGenerator
 
 	s.subgraphs = append(s.subgraphs, newSubgraph)
 
 	return
 }
 
-// Adds a new Link to the Subgraph
+// AddLink adds a new Link to the Subgraph and returns the created link.
 func (s *Subgraph) AddLink(from *Node, to *Node) (newLink *Link) {
 	newLink = NewLink(from, to)
 
@@ -62,7 +69,8 @@ func (s *Subgraph) AddLink(from *Node, to *Node) (newLink *Link) {
 	return
 }
 
-// Builds a new string based on the current elements
+// String generates a Mermaid string representation of the Subgraph,
+// including its subgraphs, direction, and links with the specified indentation.
 func (s *Subgraph) String(curIndentation string) string {
 	var sb strings.Builder
 
@@ -76,7 +84,8 @@ func (s *Subgraph) String(curIndentation string) string {
 	sb.WriteString(direction)
 
 	for _, subgraph := range s.subgraphs {
-		sb.WriteString(subgraph.String(fmt.Sprintf(string(baseSubgraphSubgraphString), string(curIndentation))))
+		nextIndentation := fmt.Sprintf(string(baseSubgraphSubgraphString), string(curIndentation))
+		sb.WriteString(subgraph.String(nextIndentation))
 	}
 
 	for _, link := range s.links {

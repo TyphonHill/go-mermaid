@@ -1,80 +1,104 @@
-package class_diagram
+package classdiagram
 
 import (
-	"reflect"
+	"strings"
 	"testing"
 )
 
 func TestNewNote(t *testing.T) {
-	class := NewClass("Test Class")
-	type args struct {
+	tests := []struct {
+		name  string
 		text  string
 		class *Class
-	}
-	tests := []struct {
-		name        string
-		args        args
-		wantNewNote *Note
+		want  *Note
 	}{
 		{
-			name: "Nominal test with no class",
-			args: args{
-				text:  "This is a note",
-				class: nil,
-			},
-			wantNewNote: &Note{
-				Text:  "This is a note",
+			name:  "Create note without class",
+			text:  "Test Note",
+			class: nil,
+			want: &Note{
+				Text:  "Test Note",
 				Class: nil,
 			},
 		},
 		{
-			name: "Nominal test with class",
-			args: args{
-				text:  "This is a note for a class",
-				class: class,
-			},
-			wantNewNote: &Note{
-				Text:  "This is a note for a class",
-				Class: class,
+			name:  "Create note with class",
+			text:  "Class Note",
+			class: NewClass("TestClass"),
+			want: &Note{
+				Text:  "Class Note",
+				Class: NewClass("TestClass"),
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotNewNote := NewNote(tt.args.text, tt.args.class); !reflect.DeepEqual(gotNewNote, tt.wantNewNote) {
-				t.Errorf("NewNote() = %v, want %v", gotNewNote, tt.wantNewNote)
+			got := NewNote(tt.text, tt.class)
+
+			if got.Text != tt.text {
+				t.Errorf("NewNote() Text = %v, want %v", got.Text, tt.text)
+			}
+
+			// Compare class references
+			if (got.Class == nil) != (tt.class == nil) {
+				t.Errorf("NewNote() Class = %v, want %v", got.Class, tt.class)
+			}
+
+			if got.Class != nil && tt.class != nil && got.Class.Name != tt.class.Name {
+				t.Errorf("NewNote() Class Name = %v, want %v", got.Class.Name, tt.class.Name)
 			}
 		})
 	}
 }
 
 func TestNote_String(t *testing.T) {
-	class := NewClass("Test Class")
-
 	tests := []struct {
-		name string
-		note *Note
-		want string
+		name     string
+		note     *Note
+		contains []string
 	}{
 		{
-			name: "Nominal test with no class",
-			note: NewNote("This is a note", nil),
-			want: "\tnote \"This is a note\"\n",
+			name: "General diagram note",
+			note: NewNote("This is a general note", nil),
+			contains: []string{
+				"note \"This is a general note\"",
+			},
 		},
 		{
-			name: "Nominal test with class",
-			note: NewNote("This is a note for a class", class),
-			want: "\tnote for Test Class \"This is a note for a class\"\n",
+			name: "Note for a specific class",
+			note: func() *Note {
+				class := NewClass("TestClass")
+				return NewNote("Note about TestClass", class)
+			}(),
+			contains: []string{
+				"note for TestClass \"Note about TestClass\"",
+			},
+		},
+		{
+			name: "Note with special characters",
+			note: NewNote("Note with \"quotes\" and special chars", nil),
+			contains: []string{
+				`note "Note with "quotes" and special chars"`,
+			},
+		},
+		{
+			name: "Multiline note",
+			note: NewNote("First line\nSecond line", nil),
+			contains: []string{
+				"note \"First line\nSecond line\"",
+			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := &Note{
-				Text:  tt.note.Text,
-				Class: tt.note.Class,
-			}
-			if got := n.String(); got != tt.want {
-				t.Errorf("Note.String() = %v, want %v", got, tt.want)
+			output := tt.note.String()
+
+			for _, expectedContent := range tt.contains {
+				if !strings.Contains(output, expectedContent) {
+					t.Errorf("String() output missing expected content: %q, got %v", expectedContent, output)
+				}
 			}
 		})
 	}

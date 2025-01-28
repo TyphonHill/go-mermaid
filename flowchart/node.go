@@ -39,7 +39,7 @@ type Node struct {
 	Class *Class
 }
 
-// Creates a new Node and sets default values to some attributes
+// NewNode creates a new Node with the given ID and text, setting default shape to round edges.
 func NewNode(id uint64, text string) (newNode *Node) {
 	newNode = &Node{
 		ID:    id,
@@ -50,7 +50,7 @@ func NewNode(id uint64, text string) (newNode *Node) {
 	return
 }
 
-// Builds a new string based on the current elements
+// String generates a Mermaid string representation of the node, including its shape, class, and style.
 func (n *Node) String() string {
 	var sb strings.Builder
 

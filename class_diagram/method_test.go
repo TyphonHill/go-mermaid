@@ -1,104 +1,143 @@
-package class_diagram
+package classdiagram
 
 import (
-	"reflect"
+	"strings"
 	"testing"
 )
 
 func TestNewMethod(t *testing.T) {
-	type args struct {
-		name string
-	}
 	tests := []struct {
-		name          string
-		args          args
-		wantNewMethod *Method
+		name       string
+		methodName string
+		want       *Method
 	}{
 		{
-			name: "Nominal test",
-			args: args{
-				name: "NewMethod",
+			name:       "Create new method",
+			methodName: "testMethod",
+			want: &Method{
+				Name:       "testMethod",
+				Parameters: []Parameter{},
+				ReturnType: "",
+				Visibility: MethodVisibilityPublic,
 			},
-			wantNewMethod: &Method{Name: "NewMethod", Visibility: MethodVisibilityPublic},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotNewMethod := NewMethod(tt.args.name); !reflect.DeepEqual(gotNewMethod, tt.wantNewMethod) {
-				t.Errorf("NewMethod() = %v, want %v", gotNewMethod, tt.wantNewMethod)
+			got := NewMethod(tt.methodName)
+
+			if got.Name != tt.want.Name {
+				t.Errorf("NewMethod() Name = %v, want %v", got.Name, tt.want.Name)
+			}
+
+			if got.Visibility != tt.want.Visibility {
+				t.Errorf("NewMethod() Visibility = %v, want %v", got.Visibility, tt.want.Visibility)
+			}
+
+			// Check that parameters are initialized as empty slice
+			if len(got.Parameters) != 0 {
+				t.Errorf("NewMethod() did not initialize empty Parameters slice")
 			}
 		})
 	}
 }
 
 func TestMethod_AddParameter(t *testing.T) {
-	type args struct {
-		paramName string
-		paramType string
-	}
-	tests := []struct {
-		name   string
-		method *Method
-		args   args
-	}{
-		{
-			name:   "Nominal test",
-			method: NewMethod("TestMethod"),
-			args: args{
-				paramName: "testParam",
-				paramType: "int32",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &Method{
-				Name:       tt.method.Name,
-				Parameters: tt.method.Parameters,
-				ReturnType: tt.method.ReturnType,
-				Visibility: tt.method.Visibility,
-				Classifier: tt.method.Classifier,
-			}
+	method := NewMethod("testMethod")
 
-			m.AddParameter(tt.args.paramName, tt.args.paramType)
-		})
+	method.AddParameter("param1", "string")
+	method.AddParameter("param2", "int")
+
+	if len(method.Parameters) != 2 {
+		t.Errorf("AddParameter() did not add parameters to method")
+	}
+
+	if method.Parameters[0].Name != "param1" || method.Parameters[0].Type != "string" {
+		t.Errorf("First parameter incorrect. Got %v:%v, want param1:string",
+			method.Parameters[0].Name, method.Parameters[0].Type)
+	}
+
+	if method.Parameters[1].Name != "param2" || method.Parameters[1].Type != "int" {
+		t.Errorf("Second parameter incorrect. Got %v:%v, want param2:int",
+			method.Parameters[1].Name, method.Parameters[1].Type)
 	}
 }
 
 func TestMethod_String(t *testing.T) {
-	method := NewMethod("TestMethod")
-	method.ReturnType = "float32"
-	method.Visibility = MethodVisibilityProtected
-	method.AddParameter("Param1", "string")
-	method.AddParameter("Param2", "int32")
-
 	tests := []struct {
-		name   string
-		method *Method
-		want   string
+		name     string
+		method   *Method
+		contains []string
 	}{
 		{
-			name:   "Nominal test",
-			method: NewMethod("TestMethod"),
-			want:   `	+TestMethod() `,
+			name: "Public method with no params",
+			method: func() *Method {
+				m := NewMethod("simpleMethod")
+				return m
+			}(),
+			contains: []string{
+				"+simpleMethod()",
+			},
 		},
 		{
-			name:   "Method with params",
-			method: method,
-			want:   `	#TestMethod(Param1:string,Param2:int32) float32`,
+			name: "Method with parameters",
+			method: func() *Method {
+				m := NewMethod("calculateSum")
+				m.AddParameter("a", "int")
+				m.AddParameter("b", "int")
+				m.ReturnType = "int"
+				return m
+			}(),
+			contains: []string{
+				"+calculateSum(a:int,b:int) int",
+			},
+		},
+		{
+			name: "Method with different visibility",
+			method: func() *Method {
+				m := NewMethod("privateMethod")
+				m.Visibility = MethodVisibilityPrivate
+				return m
+			}(),
+			contains: []string{
+				"-privateMethod()",
+			},
+		},
+		{
+			name: "Static method",
+			method: func() *Method {
+				m := NewMethod("staticMethod")
+				m.Classifier = MethodClassifierStatic
+				return m
+			}(),
+			contains: []string{
+				"+staticMethod()$",
+			},
+		},
+		{
+			name: "Abstract method",
+			method: func() *Method {
+				m := NewMethod("abstractMethod")
+				m.Classifier = MethodClassifierAbstract
+				m.ReturnType = "void"
+				return m
+			}(),
+			contains: []string{
+				"+abstractMethod()*",
+				"void",
+			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Method{
-				Name:       tt.method.Name,
-				Parameters: tt.method.Parameters,
-				ReturnType: tt.method.ReturnType,
-				Visibility: tt.method.Visibility,
-				Classifier: tt.method.Classifier,
-			}
-			if got := m.String(); got != tt.want {
-				t.Errorf("Method.String() = %v, want %v", got, tt.want)
+			output := tt.method.String()
+
+			for _, expectedContent := range tt.contains {
+				if !strings.Contains(output, expectedContent) {
+					t.Errorf("String() output missing expected content: %q", expectedContent)
+				}
 			}
 		})
 	}

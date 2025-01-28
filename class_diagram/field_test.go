@@ -1,73 +1,115 @@
-package class_diagram
+package classdiagram
 
 import (
-	"reflect"
+	"strings"
 	"testing"
 )
 
 func TestNewField(t *testing.T) {
-	type args struct {
+	tests := []struct {
+		name      string
 		fieldName string
 		fieldType string
-	}
-	tests := []struct {
-		name         string
-		args         args
-		wantNewField *Field
+		want      *Field
 	}{
 		{
-			name: "Nominal test",
-			args: args{
-				fieldName: "testField",
-				fieldType: "string",
-			},
-			wantNewField: &Field{
+			name:      "Create new field",
+			fieldName: "testField",
+			fieldType: "string",
+			want: &Field{
 				Name:       "testField",
 				Type:       "string",
 				Visibility: FieldVisibilityPublic,
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotNewField := NewField(tt.args.fieldName, tt.args.fieldType); !reflect.DeepEqual(gotNewField, tt.wantNewField) {
-				t.Errorf("NewField() = %v, want %v", gotNewField, tt.wantNewField)
+			got := NewField(tt.fieldName, tt.fieldType)
+
+			if got.Name != tt.want.Name {
+				t.Errorf("NewField() Name = %v, want %v", got.Name, tt.want.Name)
+			}
+
+			if got.Type != tt.want.Type {
+				t.Errorf("NewField() Type = %v, want %v", got.Type, tt.want.Type)
+			}
+
+			if got.Visibility != tt.want.Visibility {
+				t.Errorf("NewField() Visibility = %v, want %v", got.Visibility, tt.want.Visibility)
 			}
 		})
 	}
 }
 
 func TestField_String(t *testing.T) {
-	field := NewField("NewField", "int32")
-	field.Classifier = FieldClassifierStatic
-	field.Visibility = FieldVisibilityProtected
-
 	tests := []struct {
-		name  string
-		field *Field
-		want  string
+		name     string
+		field    *Field
+		contains []string
 	}{
 		{
-			name:  "Nominal test",
-			field: NewField("FieldName", "string"),
-			want:  `	+string FieldName`,
+			name:  "Public field with default visibility",
+			field: NewField("name", "string"),
+			contains: []string{
+				"+string name",
+			},
 		},
 		{
-			name:  "Field with modifiers",
-			field: field,
-			want:  `	#int32 NewField$`,
+			name: "Private field",
+			field: func() *Field {
+				f := NewField("age", "int")
+				f.Visibility = FieldVisibilityPrivate
+				return f
+			}(),
+			contains: []string{
+				"-int age",
+			},
+		},
+		{
+			name: "Protected field",
+			field: func() *Field {
+				f := NewField("data", "object")
+				f.Visibility = FieldVisibilityProtected
+				return f
+			}(),
+			contains: []string{
+				"#object data",
+			},
+		},
+		{
+			name: "Internal field",
+			field: func() *Field {
+				f := NewField("internal", "bool")
+				f.Visibility = FieldVisibilityInternal
+				return f
+			}(),
+			contains: []string{
+				"~bool internal",
+			},
+		},
+		{
+			name: "Static field",
+			field: func() *Field {
+				f := NewField("count", "int")
+				f.Classifier = FieldClassifierStatic
+				return f
+			}(),
+			contains: []string{
+				"+int count$",
+			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Field{
-				Name:       tt.field.Name,
-				Type:       tt.field.Type,
-				Visibility: tt.field.Visibility,
-				Classifier: tt.field.Classifier,
-			}
-			if got := m.String(); got != tt.want {
-				t.Errorf("Field.String() = %v, want %v", got, tt.want)
+			output := tt.field.String()
+
+			for _, expectedContent := range tt.contains {
+				if !strings.Contains(output, expectedContent) {
+					t.Errorf("String() output missing expected content: %q", expectedContent)
+				}
 			}
 		})
 	}

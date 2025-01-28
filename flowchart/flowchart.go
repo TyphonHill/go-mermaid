@@ -10,8 +10,6 @@ import (
 type flowchartDirection string
 type curveStyle string
 
-var Counter uint64 = 0
-
 // List of possible Flowchart directions.
 // Reference: https://mermaid.js.org/syntax/flowchart.html#direction
 const (
@@ -59,41 +57,93 @@ type Flowchart struct {
 	subgraphs     []*Subgraph
 	links         []*Link
 	markdownFence bool
+	idGenerator   IDGenerator
 }
 
-// EnableMarkdownFence enables markdown fencing in the output
+// IDGenerator is an interface for generating unique IDs
+type IDGenerator interface {
+	NextID() uint64
+}
+
+// DefaultIDGenerator is a simple ID generator
+type DefaultIDGenerator struct {
+	counter uint64
+}
+
+// EnableMarkdownFence enables markdown code fencing for the flowchart output.
 func (f *Flowchart) EnableMarkdownFence() {
 	f.markdownFence = true
 }
 
-// DisableMarkdownFence disables markdown fencing in the output
+// DisableMarkdownFence disables markdown code fencing for the flowchart output.
 func (f *Flowchart) DisableMarkdownFence() {
 	f.markdownFence = false
 }
 
-// Creates a new Flowchart and sets default values to some attributes
-func NewFlowchart() (newFlowchart *Flowchart) {
-	newFlowchart = &Flowchart{
-		Direction:  FlowchartDirectionTopToBottom,
-		CurveStyle: CurveStyleNone,
+// RenderToFile saves the flowchart diagram to a file at the specified path.
+// If the file has a .md extension, markdown fencing is automatically enabled.
+func (f *Flowchart) RenderToFile(path string) error {
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
+	originalFenceState := f.markdownFence
+	if strings.ToLower(filepath.Ext(path)) == ".md" {
+		f.EnableMarkdownFence()
+	}
+
+	content := f.String()
+
+	f.markdownFence = originalFenceState
+
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		return fmt.Errorf("failed to write file: %w", err)
+	}
+
+	return nil
+}
+
+// AddSubgraph adds a new subgraph to the flowchart and returns the created subgraph.
+func (f *Flowchart) AddSubgraph(title string) (newSubgraph *Subgraph) {
+	newSubgraph = NewSubgraph(f.idGenerator.NextID(), title)
+
+	f.subgraphs = append(f.subgraphs, newSubgraph)
+
 	return
 }
 
-// Returns a new ID to be used when registering new elements that require an ID
-func NewID() (newID uint64) {
-	newID = Counter
-	Counter++
+// AddNode adds a new node to the flowchart and returns the created node.
+func (f *Flowchart) AddNode(text string) (newNode *Node) {
+	newNode = NewNode(f.idGenerator.NextID(), text)
+
+	f.nodes = append(f.nodes, newNode)
 
 	return
 }
 
-// Builds a new string based on the current Flowchart elements
+// AddLink adds a new link between two nodes in the flowchart and returns the created link.
+func (f *Flowchart) AddLink(from *Node, to *Node) (newLink *Link) {
+	newLink = NewLink(from, to)
+
+	f.links = append(f.links, newLink)
+
+	return
+}
+
+// AddClass adds a new class to the flowchart and returns the created class.
+func (f *Flowchart) AddClass(name string) (newClass *Class) {
+	newClass = NewClass(name)
+
+	f.classes = append(f.classes, newClass)
+
+	return
+}
+
+// String generates a Mermaid flowchart string representation of the flowchart.
 func (f *Flowchart) String() string {
 	var sb strings.Builder
 
-	// Add markdown fence if enabled
 	if f.markdownFence {
 		sb.WriteString("```mermaid\n")
 	}
@@ -124,7 +174,6 @@ func (f *Flowchart) String() string {
 		sb.WriteString(link.String())
 	}
 
-	// Close markdown fence if enabled
 	if f.markdownFence {
 		sb.WriteString("```\n")
 	}
@@ -132,67 +181,25 @@ func (f *Flowchart) String() string {
 	return sb.String()
 }
 
-// RenderToFile saves the diagram to a file at the specified path
-// If the file extension is .md, markdown fencing is automatically enabled
-func (f *Flowchart) RenderToFile(path string) error {
-	// Create directory if it doesn't exist
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
+// NewFlowchart creates and initializes a new Flowchart with default settings.
+func NewFlowchart() (newFlowchart *Flowchart) {
+	newFlowchart = &Flowchart{
+		Direction:     FlowchartDirectionTopToBottom,
+		CurveStyle:    CurveStyleNone,
+		classes:       make([]*Class, 0),
+		nodes:         make([]*Node, 0),
+		subgraphs:     make([]*Subgraph, 0),
+		links:         make([]*Link, 0),
+		markdownFence: false,
+		idGenerator:   &DefaultIDGenerator{},
 	}
 
-	// If file has .md extension, enable markdown fencing
-	originalFenceState := f.markdownFence
-	if strings.ToLower(filepath.Ext(path)) == ".md" {
-		f.EnableMarkdownFence()
-	}
-
-	// Generate diagram content
-	content := f.String()
-
-	// Restore original fence state
-	f.markdownFence = originalFenceState
-
-	// Write to file
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write file: %w", err)
-	}
-
-	return nil
-}
-
-// Adds a new Subgraph to the Flowchart
-func (f *Flowchart) AddSubgraph(title string) (newSubgraph *Subgraph) {
-	newSubgraph = NewSubgraph(NewID(), title)
-
-	f.subgraphs = append(f.subgraphs, newSubgraph)
-
 	return
 }
 
-// Adds a new Node to the Flowchart
-func (f *Flowchart) AddNode(text string) (newNode *Node) {
-	newNode = NewNode(NewID(), text)
-
-	f.nodes = append(f.nodes, newNode)
-
-	return
-}
-
-// Adds a new Link to the Flowchart
-func (f *Flowchart) AddLink(from *Node, to *Node) (newLink *Link) {
-	newLink = NewLink(from, to)
-
-	f.links = append(f.links, newLink)
-
-	return
-}
-
-// Adds a new Class to the Flowchart
-func (f *Flowchart) AddClass(name string) (newClass *Class) {
-	newClass = NewClass(name)
-
-	f.classes = append(f.classes, newClass)
-
-	return
+// NextID returns the next unique ID for the DefaultIDGenerator.
+func (g *DefaultIDGenerator) NextID() uint64 {
+	current := g.counter
+	g.counter++
+	return current
 }

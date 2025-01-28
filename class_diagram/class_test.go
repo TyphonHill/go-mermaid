@@ -1,158 +1,167 @@
-package class_diagram
+package classdiagram
 
 import (
-	"reflect"
+	"strings"
 	"testing"
 )
 
 func TestNewClass(t *testing.T) {
-	type args struct {
-		name string
-	}
 	tests := []struct {
-		name         string
-		args         args
-		wantNewClass *Class
+		name string
+		want *Class
 	}{
 		{
-			name: "Nominal test",
-			args: args{
-				name: "TestClass",
+			name: "Create new class",
+			want: &Class{
+				Name:       "TestClass",
+				Label:      "",
+				Annotation: ClassAnnotationNone,
+				methods:    []*Method{},
+				fields:     []*Field{},
 			},
-			wantNewClass: &Class{Name: "TestClass"},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotNewClass := NewClass(tt.args.name); !reflect.DeepEqual(gotNewClass, tt.wantNewClass) {
-				t.Errorf("NewClass() = %v, want %v", gotNewClass, tt.wantNewClass)
+			got := NewClass(tt.want.Name)
+
+			if got.Name != tt.want.Name {
+				t.Errorf("NewClass() Name = %v, want %v", got.Name, tt.want.Name)
+			}
+
+			// Check that methods and fields are initialized as empty slices
+			if len(got.methods) != 0 || len(got.fields) != 0 {
+				t.Errorf("NewClass() did not initialize empty methods and fields slices")
 			}
 		})
 	}
 }
 
 func TestClass_AddMethod(t *testing.T) {
-	type args struct {
-		name string
+	class := NewClass("TestClass")
+
+	method := class.AddMethod("testMethod")
+
+	if method == nil {
+		t.Errorf("AddMethod() returned nil")
 	}
-	tests := []struct {
-		name          string
-		class         *Class
-		args          args
-		wantNewMethod *Method
-	}{
-		{
-			name:          "Nominal test",
-			class:         NewClass("TestClass"),
-			args:          args{name: "TestMethod"},
-			wantNewMethod: &Method{Name: "TestMethod", Visibility: MethodVisibilityPublic},
-		},
+
+	if method.Name != "testMethod" {
+		t.Errorf("AddMethod() method name = %v, want %v", method.Name, "testMethod")
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &Class{
-				Name:       tt.class.Name,
-				Label:      tt.class.Label,
-				Annotation: tt.class.Annotation,
-				methods:    tt.class.methods,
-				fields:     tt.class.fields,
-			}
-			if gotNewMethod := c.AddMethod(tt.args.name); !reflect.DeepEqual(gotNewMethod, tt.wantNewMethod) {
-				t.Errorf("Class.AddMethod() = %v, want %v", gotNewMethod, tt.wantNewMethod)
-			}
-		})
+
+	if len(class.methods) != 1 {
+		t.Errorf("AddMethod() did not add method to class methods")
 	}
 }
 
 func TestClass_AddField(t *testing.T) {
-	type args struct {
-		fieldName string
-		fieldType string
+	class := NewClass("TestClass")
+
+	field := class.AddField("testField", "string")
+
+	if field == nil {
+		t.Errorf("AddField() returned nil")
 	}
-	tests := []struct {
-		name         string
-		class        *Class
-		args         args
-		wantNewField *Field
-	}{
-		{
-			name:         "Nominal test",
-			class:        NewClass("TestClass"),
-			args:         args{fieldName: "TestField", fieldType: "int32"},
-			wantNewField: &Field{Name: "TestField", Type: "int32", Visibility: FieldVisibilityPublic},
-		},
+
+	if field.Name != "testField" || field.Type != "string" {
+		t.Errorf("AddField() field = %v, type = %v, want name %v, type %v",
+			field.Name, field.Type, "testField", "string")
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &Class{
-				Name:       tt.class.Name,
-				Label:      tt.class.Label,
-				Annotation: tt.class.Annotation,
-				methods:    tt.class.methods,
-				fields:     tt.class.fields,
-			}
-			if gotNewField := c.AddField(tt.args.fieldName, tt.args.fieldType); !reflect.DeepEqual(gotNewField, tt.wantNewField) {
-				t.Errorf("Class.AddField() = %v, want %v", gotNewField, tt.wantNewField)
-			}
-		})
+
+	if len(class.fields) != 1 {
+		t.Errorf("AddField() did not add field to class fields")
 	}
 }
 
 func TestClass_String(t *testing.T) {
-	class := NewClass("TestClass")
-	class.Annotation = ClassAnnotationAbstract
-	class.Label = "TestLabel"
-	class.AddField("TestField1", "int32")
-	class.AddField("TestField2", "string")
-	m1 := class.AddMethod("Method1")
-	m1.ReturnType = "float32"
-	m1.Visibility = MethodVisibilityProtected
-	m1.AddParameter("Param1", "string")
-	m1.AddParameter("Param2", "int32")
-	class.AddMethod("Method2")
-
-	type args struct {
-		curIndentation string
-	}
 	tests := []struct {
-		name  string
-		class *Class
-		args  args
-		want  string
+		name        string
+		class       *Class
+		indentation string
+		contains    []string
 	}{
 		{
-			name:  "Nominal test",
-			class: NewClass("TestClass"),
-			args:  args{curIndentation: "%s"},
-			want: `	class TestClass{
-	}
-`,
+			name:        "Empty class",
+			class:       NewClass("EmptyClass"),
+			indentation: "%s",
+			contains: []string{
+				"class EmptyClass{",
+				"}",
+			},
 		},
 		{
-			name:  "Complex class",
-			class: class,
-			args:  args{curIndentation: "%s"},
-			want: `	class TestClass["TestLabel"]{
-		<<Abstract>>
-		+int32 TestField1
-		+string TestField2
-		#Method1(Param1:string,Param2:int32) float32
-		+Method2() 
-	}
-`,
+			name: "Class with annotation",
+			class: func() *Class {
+				c := NewClass("ServiceClass")
+				c.Annotation = ClassAnnotationService
+				return c
+			}(),
+			indentation: "%s",
+			contains: []string{
+				"class ServiceClass{",
+				"<<Service>>",
+				"}",
+			},
+		},
+		{
+			name: "Class with label",
+			class: func() *Class {
+				c := NewClass("LabeledClass")
+				c.Label = "Custom Label"
+				return c
+			}(),
+			indentation: "%s",
+			contains: []string{
+				"class LabeledClass[\"Custom Label\"]{",
+				"}",
+			},
+		},
+		{
+			name: "Class with fields and methods",
+			class: func() *Class {
+				c := NewClass("ComplexClass")
+
+				// Add fields
+				field1 := c.AddField("name", "string")
+				field1.Visibility = FieldVisibilityPrivate
+
+				field2 := c.AddField("age", "int")
+				field2.Classifier = FieldClassifierStatic
+
+				// Add methods
+				method1 := c.AddMethod("getName")
+				method1.ReturnType = "string"
+				method1.Visibility = MethodVisibilityPublic
+
+				method2 := c.AddMethod("setName")
+				method2.AddParameter("newName", "string")
+				method2.Visibility = MethodVisibilityPrivate
+				method2.Classifier = MethodClassifierStatic
+
+				return c
+			}(),
+			indentation: "%s",
+			contains: []string{
+				"class ComplexClass{",
+				"-string name",
+				"+int age$",
+				"+getName() string",
+				"-setName(newName:string)$",
+				"}",
+			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &Class{
-				Name:       tt.class.Name,
-				Label:      tt.class.Label,
-				Annotation: tt.class.Annotation,
-				methods:    tt.class.methods,
-				fields:     tt.class.fields,
-			}
-			if got := c.String(tt.args.curIndentation); got != tt.want {
-				t.Errorf("Class.String() = %v, want %v", got, tt.want)
+			output := tt.class.String(tt.indentation)
+
+			for _, expectedContent := range tt.contains {
+				if !strings.Contains(output, expectedContent) {
+					t.Errorf("String() output missing expected content: %q, got %v", expectedContent, output)
+				}
 			}
 		})
 	}

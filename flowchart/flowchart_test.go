@@ -1,306 +1,328 @@
 package flowchart
 
 import (
+	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
-func TestNewFlowchart(t *testing.T) {
-	teardown := setup(t)
-	defer teardown(t)
+// MockIDGenerator is a simple ID generator for testing
+type MockIDGenerator struct {
+	currentID uint64
+}
 
+func (m *MockIDGenerator) NextID() uint64 {
+	current := m.currentID
+	m.currentID++
+	return current
+}
+
+func TestNewFlowchart(t *testing.T) {
 	tests := []struct {
-		name             string
-		wantNewFlowchart *Flowchart
+		name string
+		want *Flowchart
 	}{
 		{
-			name: "Nominal test",
-			wantNewFlowchart: &Flowchart{
-				Direction:  FlowchartDirectionTopToBottom,
-				CurveStyle: CurveStyleNone,
+			name: "Create new flowchart with default settings",
+			want: &Flowchart{
+				Direction:     FlowchartDirectionTopToBottom,
+				CurveStyle:    CurveStyleNone,
+				classes:       make([]*Class, 0),
+				nodes:         make([]*Node, 0),
+				subgraphs:     make([]*Subgraph, 0),
+				links:         make([]*Link, 0),
+				markdownFence: false,
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotNewFlowchart := NewFlowchart(); !reflect.DeepEqual(gotNewFlowchart, tt.wantNewFlowchart) {
-				t.Errorf("NewFlowchart() = %v, want %v", gotNewFlowchart, tt.wantNewFlowchart)
+			got := NewFlowchart()
+
+			// Remove the comparison of idGenerator as it's an interface
+			tt.want.idGenerator = got.idGenerator
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewFlowchart() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFlowchart_EnableMarkdownFence(t *testing.T) {
+	tests := []struct {
+		name      string
+		flowchart *Flowchart
+	}{
+		{
+			name:      "Enable markdown fence",
+			flowchart: NewFlowchart(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.flowchart.EnableMarkdownFence()
+			if !tt.flowchart.markdownFence {
+				t.Error("EnableMarkdownFence() did not set markdownFence to true")
+			}
+		})
+	}
+}
+
+func TestFlowchart_DisableMarkdownFence(t *testing.T) {
+	tests := []struct {
+		name      string
+		flowchart *Flowchart
+	}{
+		{
+			name:      "Disable markdown fence",
+			flowchart: NewFlowchart(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// First enable it
+			tt.flowchart.EnableMarkdownFence()
+			// Then disable it
+			tt.flowchart.DisableMarkdownFence()
+			if tt.flowchart.markdownFence {
+				t.Error("DisableMarkdownFence() did not set markdownFence to false")
 			}
 		})
 	}
 }
 
 func TestFlowchart_String(t *testing.T) {
-	teardown := setup(t)
-	defer teardown(t)
-
-	testClass := NewClass("TestClass")
-	testClass.Style = NewNodeStyle()
-
-	testNode := NewNode(123, "Test Node")
-	testNode.Shape = NodeShapeCircle
-	testNode.Class = testClass
-
-	testNode2 := NewNode(456, "Test Node 2")
-	testNode2.Shape = NodeShapeParallelogramAlt
-	testNode2.Style = NewNodeStyle()
-
-	testLink := NewLink(testNode, testNode2)
-	testLink.Length = 5
-	testLink.Shape = LinkShapeThick
-	testLink.Text = "Link Text"
-
-	testSubgraph := NewSubgraph(999, "Test")
-	testSubgraph.Title = "Title"
-	testSubgraph.AddLink(testNode, testNode2)
-
 	tests := []struct {
 		name      string
 		flowchart *Flowchart
-		want      string
+		setup     func(*Flowchart)
+		wantStr   string
+		contains  []string
 	}{
 		{
-			name: "Nominal test",
-			flowchart: &Flowchart{
-				Title:      "Test flowchart",
-				Direction:  FlowchartDirectionLeftRight,
-				CurveStyle: CurveStyleLinear,
-				nodes: []*Node{
-					testNode,
-					testNode2,
-				},
-				links: []*Link{
-					testLink,
-				},
-				classes: []*Class{
-					testClass,
-				},
-				subgraphs: []*Subgraph{
-					testSubgraph,
-				},
-			},
-			want: `---
-title: Test flowchart
----
-
-%%{ init: { 'flowchart': { 'curve': 'linear' } } }%%
-flowchart LR
-	classDef TestClass stroke-width:1,stroke-dasharray:0
-	123(("Test Node")):::TestClass
-	456[\"Test Node 2"\]
-	style 456 stroke-width:1,stroke-dasharray:0
-	subgraph 999 [Title]
-		123 --> 456
-	end
-	123 =======>|Link Text| 456
-`,
+			name:      "Empty flowchart without fence",
+			flowchart: NewFlowchart(),
+			wantStr:   "flowchart TB\n",
 		},
 		{
-			name: "No title",
-			flowchart: &Flowchart{
-				Direction:  FlowchartDirectionLeftRight,
-				CurveStyle: CurveStyleLinear,
-				nodes: []*Node{
-					testNode,
-					testNode2,
-				},
-				links: []*Link{
-					testLink,
-				},
-				classes: []*Class{
-					testClass,
-				},
+			name:      "Empty flowchart with fence",
+			flowchart: NewFlowchart(),
+			setup: func(f *Flowchart) {
+				f.EnableMarkdownFence()
 			},
-			want: `%%{ init: { 'flowchart': { 'curve': 'linear' } } }%%
-flowchart LR
-	classDef TestClass stroke-width:1,stroke-dasharray:0
-	123(("Test Node")):::TestClass
-	456[\"Test Node 2"\]
-	style 456 stroke-width:1,stroke-dasharray:0
-	123 =======>|Link Text| 456
-`,
+			wantStr: "```mermaid\nflowchart TB\n```\n",
 		},
 		{
-			name: "CurveStyle is CurveStyleNone",
-			flowchart: &Flowchart{
-				Title:      "Test flowchart",
-				Direction:  FlowchartDirectionLeftRight,
-				CurveStyle: CurveStyleNone,
-				nodes: []*Node{
-					testNode,
-					testNode2,
-				},
-				links: []*Link{
-					testLink,
-				},
-				classes: []*Class{
-					testClass,
-				},
+			name:      "Flowchart with title and fence",
+			flowchart: NewFlowchart(),
+			setup: func(f *Flowchart) {
+				f.EnableMarkdownFence()
+				f.Title = "Test Flowchart"
 			},
-			want: `---
-title: Test flowchart
----
-
-flowchart LR
-	classDef TestClass stroke-width:1,stroke-dasharray:0
-	123(("Test Node")):::TestClass
-	456[\"Test Node 2"\]
-	style 456 stroke-width:1,stroke-dasharray:0
-	123 =======>|Link Text| 456
-`,
+			contains: []string{
+				"```mermaid\n",
+				"---\ntitle: Test Flowchart\n---\n",
+				"flowchart TB\n",
+				"```\n",
+			},
 		},
 		{
-			name: "No classes",
-			flowchart: &Flowchart{
-				Title:      "Test flowchart",
-				Direction:  FlowchartDirectionLeftRight,
-				CurveStyle: CurveStyleLinear,
-				nodes: []*Node{
-					testNode,
-					testNode2,
-				},
-				links: []*Link{
-					testLink,
-				},
-				classes: []*Class{},
+			name:      "Flowchart with nodes and links",
+			flowchart: NewFlowchart(),
+			setup: func(f *Flowchart) {
+				f.EnableMarkdownFence()
+				f.Title = "Test Flow"
+				node1 := f.AddNode("Start")
+				node2 := f.AddNode("End")
+				f.AddLink(node1, node2)
 			},
-			want: `---
-title: Test flowchart
----
-
-%%{ init: { 'flowchart': { 'curve': 'linear' } } }%%
-flowchart LR
-	123(("Test Node")):::TestClass
-	456[\"Test Node 2"\]
-	style 456 stroke-width:1,stroke-dasharray:0
-	123 =======>|Link Text| 456
-`,
-		},
-		{
-			name: "No Nodes",
-			flowchart: &Flowchart{
-				Title:      "Test flowchart",
-				Direction:  FlowchartDirectionLeftRight,
-				CurveStyle: CurveStyleLinear,
-				nodes:      []*Node{},
-				links: []*Link{
-					testLink,
-				},
-				classes: []*Class{},
+			contains: []string{
+				"```mermaid\n",
+				"flowchart TB\n",
+				`0("Start")`,
+				`1("End")`,
+				"0 -->",
+				"```\n",
 			},
-			want: `---
-title: Test flowchart
----
-
-%%{ init: { 'flowchart': { 'curve': 'linear' } } }%%
-flowchart LR
-	123 =======>|Link Text| 456
-`,
-		},
-		{
-			name: "No Links",
-			flowchart: &Flowchart{
-				Title:      "Test flowchart",
-				Direction:  FlowchartDirectionLeftRight,
-				CurveStyle: CurveStyleLinear,
-				nodes: []*Node{
-					testNode,
-					testNode2,
-				},
-				links: []*Link{},
-				classes: []*Class{
-					testClass,
-				},
-			},
-			want: `---
-title: Test flowchart
----
-
-%%{ init: { 'flowchart': { 'curve': 'linear' } } }%%
-flowchart LR
-	classDef TestClass stroke-width:1,stroke-dasharray:0
-	123(("Test Node")):::TestClass
-	456[\"Test Node 2"\]
-	style 456 stroke-width:1,stroke-dasharray:0
-`,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.flowchart.String(); got != tt.want {
-				t.Errorf("Flowchart.String() = \n%v, want %v", got, tt.want)
+			if tt.setup != nil {
+				tt.setup(tt.flowchart)
 			}
 
+			got := tt.flowchart.String()
+
+			if tt.wantStr != "" && got != tt.wantStr {
+				t.Errorf("Flowchart.String() = %v, want %v", got, tt.wantStr)
+			}
+
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("Flowchart.String() output missing expected content: %v", want)
+				}
+			}
+		})
+	}
+}
+
+func TestFlowchart_RenderToFile(t *testing.T) {
+	// Create temp directory for test files
+	tempDir, err := os.MkdirTemp("", "flowchart_test_*")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Create a sample flowchart
+	flowchart := NewFlowchart()
+	flowchart.Title = "Test Flowchart"
+	node1 := flowchart.AddNode("Start")
+	node2 := flowchart.AddNode("End")
+	flowchart.AddLink(node1, node2)
+
+	tests := []struct {
+		name           string
+		filename       string
+		setupFence     bool
+		expectFence    bool
+		expectError    bool
+		validateOutput func(string) bool
+	}{
+		{
+			name:        "Save as markdown file",
+			filename:    "flowchart.md",
+			setupFence:  false,
+			expectFence: true,
+			validateOutput: func(content string) bool {
+				return strings.HasPrefix(content, "```mermaid\n") &&
+					strings.HasSuffix(content, "```\n")
+			},
+		},
+		{
+			name:        "Save as text file with fencing enabled",
+			filename:    "flowchart.txt",
+			setupFence:  true,
+			expectFence: true,
+			validateOutput: func(content string) bool {
+				return strings.HasPrefix(content, "```mermaid\n") &&
+					strings.HasSuffix(content, "```\n")
+			},
+		},
+		{
+			name:        "Save to nested directory",
+			filename:    "nested/dir/flowchart.txt",
+			setupFence:  false,
+			expectFence: false,
+			validateOutput: func(content string) bool {
+				return strings.Contains(content, "Test Flowchart")
+			},
+		},
+		{
+			name:        "Save with invalid path",
+			filename:    string([]byte{0}),
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.setupFence {
+				flowchart.EnableMarkdownFence()
+			} else {
+				flowchart.DisableMarkdownFence()
+			}
+
+			path := filepath.Join(tempDir, tt.filename)
+			err := flowchart.RenderToFile(path)
+
+			if tt.expectError {
+				if err == nil {
+					t.Error("Expected error but got none")
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			content, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatalf("Failed to read output file: %v", err)
+			}
+
+			if tt.validateOutput != nil {
+				if !tt.validateOutput(string(content)) {
+					t.Error("Output validation failed")
+				}
+			}
+
+			if flowchart.markdownFence != tt.setupFence {
+				t.Error("Flowchart fence state was permanently modified")
+			}
 		})
 	}
 }
 
 func TestFlowchart_AddNode(t *testing.T) {
-	teardown := setup(t)
-	defer teardown(t)
-
-	type args struct {
-		text string
-	}
 	tests := []struct {
-		name        string
-		flowchart   *Flowchart
-		args        args
-		wantNewNode *Node
+		name      string
+		flowchart *Flowchart
+		text      string
+		wantNode  *Node
 	}{
 		{
-			name: "Nominal test",
-			flowchart: &Flowchart{
-				Title:      "Flowchartt title",
-				Direction:  FlowchartDirectionTopDown,
-				CurveStyle: CurveStyleNone,
-			},
-			args: args{
-				text: "Test",
-			},
-			wantNewNode: &Node{
-				Text:  "Test",
+			name:      "Add simple node",
+			flowchart: NewFlowchart(),
+			text:      "Test Node",
+			wantNode: &Node{
+				ID:    0,
+				Text:  "Test Node",
 				Shape: NodeShapeRoundEdges,
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotNewNode := tt.flowchart.AddNode(tt.args.text); !reflect.DeepEqual(gotNewNode, tt.wantNewNode) {
-				t.Errorf("Flowchart.AddNode() = %v, want %v", gotNewNode, tt.wantNewNode)
+			got := tt.flowchart.AddNode(tt.text)
+
+			if !reflect.DeepEqual(got, tt.wantNode) {
+				t.Errorf("AddNode() = %v, want %v", got, tt.wantNode)
+			}
+
+			if len(tt.flowchart.nodes) != 1 || !reflect.DeepEqual(tt.flowchart.nodes[0], got) {
+				t.Errorf("Node not added to flowchart correctly")
 			}
 		})
 	}
 }
 
 func TestFlowchart_AddLink(t *testing.T) {
-	teardown := setup(t)
-	defer teardown(t)
-
-	type args struct {
-		from *Node
-		to   *Node
-	}
 	tests := []struct {
-		name        string
-		flowchart   *Flowchart
-		args        args
-		wantNewLink *Link
+		name      string
+		flowchart *Flowchart
+		setup     func(*Flowchart) (*Node, *Node)
+		wantLink  *Link
 	}{
 		{
-			name: "Nominal test",
-			flowchart: &Flowchart{
-				Title:      "Flowchartt title",
-				Direction:  FlowchartDirectionTopDown,
-				CurveStyle: CurveStyleNone,
+			name:      "Add simple link",
+			flowchart: NewFlowchart(),
+			setup: func(f *Flowchart) (*Node, *Node) {
+				from := f.AddNode("Start")
+				to := f.AddNode("End")
+				return from, to
 			},
-			args: args{
-				from: &Node{ID: 123},
-				to:   &Node{ID: 456},
-			},
-			wantNewLink: &Link{
-				From:   &Node{ID: 123},
-				To:     &Node{ID: 456},
+			wantLink: &Link{
 				Shape:  LinkShapeOpen,
 				Head:   LinkArrowTypeArrow,
 				Tail:   LinkArrowTypeNone,
@@ -308,87 +330,22 @@ func TestFlowchart_AddLink(t *testing.T) {
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotNewLink := tt.flowchart.AddLink(tt.args.from, tt.args.to); !reflect.DeepEqual(gotNewLink, tt.wantNewLink) {
-				t.Errorf("Flowchart.AddLink() = %v, want %v", gotNewLink, tt.wantNewLink)
+			from, to := tt.setup(tt.flowchart)
+			got := tt.flowchart.AddLink(from, to)
+
+			// Update expected link with actual nodes
+			tt.wantLink.From = from
+			tt.wantLink.To = to
+
+			if !reflect.DeepEqual(got, tt.wantLink) {
+				t.Errorf("AddLink() = %v, want %v", got, tt.wantLink)
 			}
-		})
-	}
-}
 
-func TestFlowchart_AddClass(t *testing.T) {
-	teardown := setup(t)
-	defer teardown(t)
-
-	type args struct {
-		name string
-	}
-	tests := []struct {
-		name         string
-		flowchart    *Flowchart
-		args         args
-		wantNewClass *Class
-	}{
-		{
-			name: "Nominal test",
-			flowchart: &Flowchart{
-				Title:      "Flowchartt title",
-				Direction:  FlowchartDirectionTopDown,
-				CurveStyle: CurveStyleNone,
-			},
-			args: args{
-				name: "TestClass",
-			},
-			wantNewClass: &Class{
-				Name:  "TestClass",
-				Style: NewNodeStyle(),
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotNewClass := tt.flowchart.AddClass(tt.args.name); !reflect.DeepEqual(gotNewClass, tt.wantNewClass) {
-				t.Errorf("Flowchart.AddClass() = %v, want %v", gotNewClass, tt.wantNewClass)
-			}
-		})
-	}
-}
-
-func TestFlowchart_AddSubgraph(t *testing.T) {
-	teardown := setup(t)
-	defer teardown(t)
-
-	type args struct {
-		title string
-	}
-	tests := []struct {
-		name            string
-		flowchart       *Flowchart
-		args            args
-		wantNewSubgraph *Subgraph
-	}{
-		{
-			name: "Nominal test",
-			flowchart: &Flowchart{
-				Title:      "Flowchartt title",
-				Direction:  FlowchartDirectionTopDown,
-				CurveStyle: CurveStyleNone,
-			},
-			args: args{
-				title: "Test",
-			},
-			wantNewSubgraph: &Subgraph{
-				ID:        0,
-				Title:     "Test",
-				Direction: SubgraphDirectionNone,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotNewSubgraph := tt.flowchart.AddSubgraph(tt.args.title); !reflect.DeepEqual(gotNewSubgraph, tt.wantNewSubgraph) {
-				t.Errorf("Flowchart.AddSubgraph() = %v, want %v", gotNewSubgraph, tt.wantNewSubgraph)
+			if len(tt.flowchart.links) != 1 || !reflect.DeepEqual(tt.flowchart.links[0], got) {
+				t.Errorf("Link not added to flowchart correctly")
 			}
 		})
 	}

@@ -6,108 +6,164 @@ import (
 )
 
 func TestNewLink(t *testing.T) {
-	teardown := setup(t)
-	defer teardown(t)
+	from := NewNode(1, "Start")
+	to := NewNode(2, "End")
 
-	type args struct {
-		from *Node
-		to   *Node
-	}
 	tests := []struct {
-		name        string
-		args        args
-		wantNewLink *Link
+		name     string
+		from     *Node
+		to       *Node
+		wantLink *Link
 	}{
 		{
-			name: "Nominal test",
-			args: args{
-				from: &Node{ID: 123},
-				to:   &Node{ID: 456},
+			name: "Create new link between nodes",
+			from: from,
+			to:   to,
+			wantLink: &Link{
+				From:   from,
+				To:     to,
+				Shape:  LinkShapeOpen,
+				Head:   LinkArrowTypeArrow,
+				Tail:   LinkArrowTypeNone,
+				Length: 0,
 			},
-			wantNewLink: &Link{
-				From:  &Node{ID: 123},
-				To:    &Node{ID: 456},
-				Shape: LinkShapeOpen,
-				Head:  LinkArrowTypeArrow,
-				Tail:  LinkArrowTypeNone,
+		},
+		{
+			name: "Create new link with same node",
+			from: from,
+			to:   from,
+			wantLink: &Link{
+				From:   from,
+				To:     from,
+				Shape:  LinkShapeOpen,
+				Head:   LinkArrowTypeArrow,
+				Tail:   LinkArrowTypeNone,
+				Length: 0,
 			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotNewLink := NewLink(tt.args.from, tt.args.to); !reflect.DeepEqual(gotNewLink, tt.wantNewLink) {
-				t.Errorf("NewLink() = %v, want %v", gotNewLink, tt.wantNewLink)
+			got := NewLink(tt.from, tt.to)
+			if !reflect.DeepEqual(got, tt.wantLink) {
+				t.Errorf("NewLink() = %v, want %v", got, tt.wantLink)
 			}
 		})
 	}
 }
 
 func TestLink_String(t *testing.T) {
-	teardown := setup(t)
-	defer teardown(t)
+	from := NewNode(1, "Start")
+	to := NewNode(2, "End")
 
 	tests := []struct {
-		name string
-		link *Link
-		want string
+		name    string
+		link    *Link
+		setup   func(*Link)
+		wantStr string
 	}{
 		{
-			name: "Nominal test",
+			name: "Basic link",
 			link: &Link{
+				From:   from,
+				To:     to,
 				Shape:  LinkShapeOpen,
 				Head:   LinkArrowTypeArrow,
 				Tail:   LinkArrowTypeNone,
-				Text:   "",
-				From:   &Node{ID: 123},
-				To:     &Node{ID: 456},
 				Length: 0,
 			},
-			want: "\t123 --> 456\n",
+			wantStr: "\t1 --> 2\n",
 		},
 		{
 			name: "Link with text",
 			link: &Link{
+				From:   from,
+				To:     to,
 				Shape:  LinkShapeOpen,
 				Head:   LinkArrowTypeArrow,
 				Tail:   LinkArrowTypeNone,
-				Text:   "This is a test",
-				From:   &Node{ID: 123},
-				To:     &Node{ID: 456},
+				Text:   "Connection",
 				Length: 0,
 			},
-			want: "\t123 -->|This is a test| 456\n",
+			wantStr: "\t1 -->|Connection| 2\n",
 		},
 		{
-			name: "Longer link",
+			name: "Link with length",
 			link: &Link{
+				From:   from,
+				To:     to,
 				Shape:  LinkShapeOpen,
 				Head:   LinkArrowTypeArrow,
 				Tail:   LinkArrowTypeNone,
-				Text:   "",
-				From:   &Node{ID: 123},
-				To:     &Node{ID: 456},
-				Length: 10,
+				Length: 2,
 			},
-			want: "\t123 ------------> 456\n",
+			wantStr: "\t1 ----> 2\n",
 		},
 		{
-			name: "Negative length",
+			name: "Link with different shapes",
 			link: &Link{
-				Shape:  LinkShapeOpen,
-				Head:   LinkArrowTypeArrow,
-				Tail:   LinkArrowTypeNone,
-				Text:   "",
-				From:   &Node{ID: 123},
-				To:     &Node{ID: 456},
-				Length: -10,
+				From: from,
+				To:   to,
+				Head: LinkArrowTypeArrow,
+				Tail: LinkArrowTypeNone,
 			},
-			want: "\t123 --> 456\n",
+			setup: func(l *Link) {
+				shapes := []linkShape{
+					LinkShapeOpen,
+					LinkShapeDotted,
+					LinkShapeThick,
+					LinkShapeInvisible,
+				}
+				for _, shape := range shapes {
+					l.Shape = shape
+					got := l.String()
+					if got == "" {
+						t.Errorf("Link.String() with shape %v returned empty string", shape)
+					}
+				}
+			},
+		},
+		{
+			name: "Link with different arrow types",
+			link: &Link{
+				From:  from,
+				To:    to,
+				Shape: LinkShapeOpen,
+			},
+			setup: func(l *Link) {
+				arrowTypes := []linkArrowType{
+					LinkArrowTypeNone,
+					LinkArrowTypeArrow,
+					LinkArrowTypeLeftArrow,
+					LinkArrowTypeBullet,
+					LinkArrowTypeCross,
+				}
+				for _, head := range arrowTypes {
+					for _, tail := range arrowTypes {
+						l.Head = head
+						l.Tail = tail
+						got := l.String()
+						if got == "" {
+							t.Errorf("Link.String() with head %v and tail %v returned empty string", head, tail)
+						}
+					}
+				}
+			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.link.String(); got != tt.want {
-				t.Errorf("Link.String() = %v, want %v", got, tt.want)
+			if tt.setup != nil {
+				tt.setup(tt.link)
+			}
+
+			if tt.wantStr != "" {
+				got := tt.link.String()
+				if got != tt.wantStr {
+					t.Errorf("Link.String() = %v, want %v", got, tt.wantStr)
+				}
 			}
 		})
 	}

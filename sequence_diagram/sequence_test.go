@@ -1,0 +1,707 @@
+package sequence_diagram
+
+import (
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+)
+
+func TestNewDiagram(t *testing.T) {
+	tests := []struct {
+		name string
+		want *Diagram
+	}{
+		{
+			name: "Create new diagram with default settings",
+			want: &Diagram{
+				Actors:        make([]*Actor, 0),
+				Messages:      make([]*Message, 0),
+				autonumber:    false,
+				markdownFence: false,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := NewDiagram()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewDiagram() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDiagram_EnableMarkdownFence(t *testing.T) {
+	tests := []struct {
+		name    string
+		diagram *Diagram
+	}{
+		{
+			name:    "Enable markdown fence",
+			diagram: NewDiagram(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.diagram.EnableMarkdownFence()
+			if !tt.diagram.markdownFence {
+				t.Error("EnableMarkdownFence() did not set markdownFence to true")
+			}
+		})
+	}
+}
+
+func TestDiagram_DisableMarkdownFence(t *testing.T) {
+	tests := []struct {
+		name    string
+		diagram *Diagram
+	}{
+		{
+			name:    "Disable markdown fence",
+			diagram: NewDiagram(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// First enable it
+			tt.diagram.EnableMarkdownFence()
+			// Then disable it
+			tt.diagram.DisableMarkdownFence()
+			if tt.diagram.markdownFence {
+				t.Error("DisableMarkdownFence() did not set markdownFence to false")
+			}
+		})
+	}
+}
+
+func TestDiagram_String(t *testing.T) {
+	actor1 := NewActor("user", "User", ActorParticipant)
+	actor2 := NewActor("system", "System", ActorActor)
+
+	tests := []struct {
+		name     string
+		diagram  *Diagram
+		setup    func(*Diagram)
+		wantStr  string
+		contains []string
+	}{
+		{
+			name:    "Empty diagram without fence",
+			diagram: NewDiagram(),
+			wantStr: "sequenceDiagram\n",
+		},
+		{
+			name:    "Empty diagram with fence",
+			diagram: NewDiagram(),
+			setup: func(d *Diagram) {
+				d.EnableMarkdownFence()
+			},
+			wantStr: "```mermaid\nsequenceDiagram\n```\n",
+		},
+		{
+			name: "Diagram with title and fence",
+			setup: func(d *Diagram) {
+				d.EnableMarkdownFence()
+				d.Title = "Test Sequence"
+			},
+			diagram: NewDiagram(),
+			contains: []string{
+				"```mermaid\n",
+				"---\ntitle: Test Sequence\n---\n",
+				"sequenceDiagram\n",
+				"```\n",
+			},
+		},
+		{
+			name:    "Diagram with actors and messages with fence",
+			diagram: NewDiagram(),
+			setup: func(d *Diagram) {
+				d.EnableMarkdownFence()
+				d.Title = "Interaction Flow"
+				d.AddActor("user", "User", ActorParticipant)
+				d.AddActor("system", "System", ActorActor)
+				d.AddMessage(actor1, actor2, MessageSolid, "Request")
+				d.AddMessage(actor2, actor1, MessageResponse, "Response")
+			},
+			contains: []string{
+				"```mermaid\n",
+				"participant user as User",
+				"actor system as System",
+				"user-->system: Request",
+				"system->>user: Response",
+				"```\n",
+			},
+		},
+		{
+			name:    "Diagram with autonumbering and fence",
+			diagram: NewDiagram(),
+			setup: func(d *Diagram) {
+				d.EnableMarkdownFence()
+				d.EnableAutoNumber()
+				d.AddActor("user", "User", ActorParticipant)
+				d.AddActor("system", "System", ActorActor)
+				d.AddMessage(actor1, actor2, MessageSolid, "Request")
+			},
+			contains: []string{
+				"```mermaid\n",
+				"autonumber",
+				"participant user as User",
+				"actor system as System",
+				"user-->system: Request",
+				"```\n",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.setup != nil {
+				tt.setup(tt.diagram)
+			}
+
+			got := tt.diagram.String()
+
+			if tt.wantStr != "" && got != tt.wantStr {
+				t.Errorf("Diagram.String() = %v, want %v", got, tt.wantStr)
+			}
+
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("Diagram.String() output missing expected content: %v", want)
+				}
+			}
+
+			// Verify fence markers appear together or not at all
+			hasFenceStart := strings.Contains(got, "```mermaid\n")
+			hasFenceEnd := strings.Contains(got, "```\n")
+			if hasFenceStart != hasFenceEnd {
+				t.Error("Markdown fence markers are not properly paired")
+			}
+
+			// Verify fence markers match markdownFence setting
+			if tt.diagram.markdownFence != hasFenceStart {
+				t.Error("Markdown fence presence doesn't match markdownFence setting")
+			}
+		})
+	}
+}
+
+func TestDiagram_RenderToFile(t *testing.T) {
+	// Create temp directory for test files
+	tempDir, err := os.MkdirTemp("", "sequence_test_*")
+	if err != nil {
+		t.Fatalf("Failed to create temp directory: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Create a sample diagram
+	diagram := NewDiagram()
+	diagram.Title = "Test Diagram"
+	actor1 := diagram.AddActor("user", "User", ActorParticipant)
+	actor2 := diagram.AddActor("system", "System", ActorActor)
+	diagram.AddMessage(actor1, actor2, MessageSolid, "Test Message")
+
+	tests := []struct {
+		name           string
+		filename       string
+		setupFence     bool
+		expectFence    bool
+		expectError    bool
+		validateOutput func(string) bool
+	}{
+		{
+			name:        "Save as markdown file",
+			filename:    "diagram.md",
+			setupFence:  false, // Even with fencing disabled, .md should enable it
+			expectFence: true,
+			validateOutput: func(content string) bool {
+				return strings.HasPrefix(content, "```mermaid\n") &&
+					strings.HasSuffix(content, "```\n")
+			},
+		},
+		{
+			name:        "Save as text file with fencing enabled",
+			filename:    "diagram.txt",
+			setupFence:  true,
+			expectFence: true,
+			validateOutput: func(content string) bool {
+				return strings.HasPrefix(content, "```mermaid\n") &&
+					strings.HasSuffix(content, "```\n")
+			},
+		},
+		{
+			name:        "Save as text file without fencing",
+			filename:    "diagram.txt",
+			setupFence:  false,
+			expectFence: false,
+			validateOutput: func(content string) bool {
+				return !strings.Contains(content, "```mermaid")
+			},
+		},
+		{
+			name:        "Save to nested directory",
+			filename:    "nested/dir/diagram.txt",
+			setupFence:  false,
+			expectFence: false,
+			validateOutput: func(content string) bool {
+				return strings.Contains(content, "Test Diagram")
+			},
+		},
+		{
+			name:        "Save with invalid path",
+			filename:    string([]byte{0}), // Invalid filename
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Set up diagram fencing
+			if tt.setupFence {
+				diagram.EnableMarkdownFence()
+			} else {
+				diagram.DisableMarkdownFence()
+			}
+
+			// Create full path
+			path := filepath.Join(tempDir, tt.filename)
+
+			// Attempt to render
+			err := diagram.RenderToFile(path)
+
+			// Check error expectation
+			if tt.expectError {
+				if err == nil {
+					t.Error("Expected error but got none")
+				}
+				return
+			}
+
+			// If we don't expect an error but got one
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			// Read the file content
+			content, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatalf("Failed to read output file: %v", err)
+			}
+
+			// Validate content
+			if tt.validateOutput != nil {
+				if !tt.validateOutput(string(content)) {
+					t.Error("Output validation failed")
+				}
+			}
+
+			// Verify fence state wasn't changed permanently
+			if diagram.markdownFence != tt.setupFence {
+				t.Error("Diagram fence state was permanently modified")
+			}
+		})
+	}
+}
+
+func TestDiagram_CreateAndDestroyActor(t *testing.T) {
+	creator := NewActor("system", "System", ActorParticipant)
+
+	tests := []struct {
+		name      string
+		diagram   *Diagram
+		creator   *Actor
+		id        string
+		actorName string
+		actorType ActorType
+	}{
+		{
+			name:      "Create and destroy actor",
+			diagram:   NewDiagram(),
+			creator:   creator,
+			id:        "temp",
+			actorName: "Temporary Actor",
+			actorType: ActorParticipant,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Add creator to diagram
+			tt.diagram.AddActor(tt.creator.ID, tt.creator.Name, tt.creator.Type)
+
+			// Test CreateActor
+			got := tt.diagram.CreateActor(tt.creator, tt.id, tt.actorName, tt.actorType)
+
+			if got.ID != tt.id || got.Name != tt.actorName || got.Type != tt.actorType {
+				t.Errorf("CreateActor() = %v, want actor with id=%v, name=%v, type=%v",
+					got, tt.id, tt.actorName, tt.actorType)
+			}
+
+			// Verify creation message was added
+			if len(tt.diagram.Messages) != 1 || tt.diagram.Messages[0].Type != messageCreate {
+				t.Errorf("Creation message not added correctly")
+			}
+
+			// Test DestroyActor
+			tt.diagram.DestroyActor(got)
+
+			// Verify destruction message was added
+			if len(tt.diagram.Messages) != 2 || tt.diagram.Messages[1].Type != messageDestroy {
+				t.Errorf("Destruction message not added correctly")
+			}
+		})
+	}
+}
+
+func TestDiagram_AddNote(t *testing.T) {
+	actor1 := NewActor("user", "User", ActorParticipant)
+	actor2 := NewActor("system", "System", ActorParticipant)
+
+	tests := []struct {
+		name     string
+		diagram  *Diagram
+		position NotePosition
+		text     string
+		actors   []*Actor
+		want     *Note
+	}{
+		{
+			name:     "Add left note",
+			diagram:  NewDiagram(),
+			position: NoteLeft,
+			text:     "Left note",
+			actors:   []*Actor{actor1},
+			want: &Note{
+				Position: NoteLeft,
+				Text:     "Left note",
+				Actors:   []*Actor{actor1},
+			},
+		},
+		{
+			name:     "Add over note for multiple actors",
+			diagram:  NewDiagram(),
+			position: NoteOver,
+			text:     "Over note",
+			actors:   []*Actor{actor1, actor2},
+			want: &Note{
+				Position: NoteOver,
+				Text:     "Over note",
+				Actors:   []*Actor{actor1, actor2},
+			},
+		},
+		{
+			name:     "Add note with no actors",
+			diagram:  NewDiagram(),
+			position: NoteLeft,
+			text:     "Invalid note",
+			actors:   []*Actor{},
+			want:     nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Add actors to diagram
+			for _, actor := range tt.actors {
+				tt.diagram.AddActor(actor.ID, actor.Name, actor.Type)
+			}
+
+			got := tt.diagram.AddNote(tt.position, tt.text, tt.actors...)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AddNote() = %v, want %v", got, tt.want)
+			}
+
+			// If note was added successfully, verify it was converted to a message
+			if got != nil {
+				if len(tt.diagram.Messages) != 1 {
+					t.Errorf("Note was not converted to message")
+				}
+				noteMsg := tt.diagram.Messages[0]
+				if noteMsg.Note != got {
+					t.Errorf("Message does not contain correct note reference")
+				}
+			}
+		})
+	}
+}
+
+func TestDiagram_AddMessage(t *testing.T) {
+	actor1 := NewActor("user", "User", ActorParticipant)
+	actor2 := NewActor("system", "System", ActorParticipant)
+
+	tests := []struct {
+		name    string
+		diagram *Diagram
+		from    *Actor
+		to      *Actor
+		msgType MessageType
+		text    string
+		want    *Message
+	}{
+		{
+			name:    "Add solid message",
+			diagram: NewDiagram(),
+			from:    actor1,
+			to:      actor2,
+			msgType: MessageSolid,
+			text:    "Request",
+			want: &Message{
+				From:   actor1,
+				To:     actor2,
+				Type:   MessageSolid,
+				Text:   "Request",
+				Nested: make([]*Message, 0),
+			},
+		},
+		{
+			name:    "Add async message",
+			diagram: NewDiagram(),
+			from:    actor1,
+			to:      actor2,
+			msgType: MessageAsync,
+			text:    "Background task",
+			want: &Message{
+				From:   actor1,
+				To:     actor2,
+				Type:   MessageAsync,
+				Text:   "Background task",
+				Nested: make([]*Message, 0),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Add actors to diagram
+			tt.diagram.AddActor(tt.from.ID, tt.from.Name, tt.from.Type)
+			tt.diagram.AddActor(tt.to.ID, tt.to.Name, tt.to.Type)
+
+			got := tt.diagram.AddMessage(tt.from, tt.to, tt.msgType, tt.text)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AddMessage() = %v, want %v", got, tt.want)
+			}
+
+			if len(tt.diagram.Messages) != 1 || !reflect.DeepEqual(tt.diagram.Messages[0], got) {
+				t.Errorf("Message not added to diagram correctly")
+			}
+		})
+	}
+}
+
+func TestDiagram_renderMessage(t *testing.T) {
+	actor1 := NewActor("user", "User", ActorParticipant)
+	actor2 := NewActor("system", "System", ActorParticipant)
+
+	tests := []struct {
+		name     string
+		message  *Message
+		indent   string
+		wantText string
+	}{
+		{
+			name: "Creation message with text",
+			message: &Message{
+				From: actor1,
+				To:   actor2,
+				Type: messageCreate,
+				Text: "creates",
+			},
+			indent:   "    ",
+			wantText: "    user-->system: creates\n",
+		},
+		{
+			name: "Creation message without text",
+			message: &Message{
+				From: actor1,
+				To:   actor2,
+				Type: messageCreate,
+				Text: "",
+			},
+			indent:   "    ",
+			wantText: "", // Should not generate any output for creation without text
+		},
+		{
+			name: "Destruction message",
+			message: &Message{
+				From: nil, // Destruction doesn't need a from actor
+				To:   actor2,
+				Type: messageDestroy,
+			},
+			indent:   "    ",
+			wantText: "    destroy system\n",
+		},
+		{
+			name: "Regular message",
+			message: &Message{
+				From: actor1,
+				To:   actor2,
+				Type: MessageSolid,
+				Text: "regular message",
+			},
+			indent:   "    ",
+			wantText: "    user-->system: regular message\n",
+		},
+		{
+			name: "Message with nested messages",
+			message: &Message{
+				From: actor1,
+				To:   actor2,
+				Type: MessageSolid,
+				Text: "parent",
+				Nested: []*Message{
+					{
+						From: actor2,
+						To:   actor1,
+						Type: MessageResponse,
+						Text: "nested",
+					},
+				},
+			},
+			indent:   "    ",
+			wantText: "    user-->system: parent\n        system->>user: nested\n",
+		},
+		{
+			name: "Message with note",
+			message: &Message{
+				From: actor1,
+				To:   actor1,                // Note messages typically use same actor for From/To
+				Type: MessageType(NoteLeft), // Store note position as message type
+				Text: "This is a note",
+				Note: &Note{
+					Position: NoteLeft,
+					Text:     "This is a note",
+					Actors:   []*Actor{actor1},
+				},
+			},
+			indent:   "    ",
+			wantText: "    Note left of user: This is a note\n",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := NewDiagram()
+			var sb strings.Builder
+			d.renderMessage(&sb, tt.message, tt.indent)
+			if got := sb.String(); got != tt.wantText {
+				t.Errorf("renderMessage()\ngot  = %q\nwant = %q", got, tt.wantText)
+			}
+		})
+	}
+}
+
+func TestDiagram_renderNote(t *testing.T) {
+	actor1 := NewActor("user", "User", ActorParticipant)
+	actor2 := NewActor("system", "System", ActorParticipant)
+
+	tests := []struct {
+		name     string
+		note     *Note
+		indent   string
+		wantText string
+	}{
+		{
+			name: "Render left note for single actor",
+			note: &Note{
+				Position: NoteLeft,
+				Text:     "This is a left note",
+				Actors:   []*Actor{actor1},
+			},
+			indent:   "    ",
+			wantText: "    Note left of user: This is a left note\n",
+		},
+		{
+			name: "Render right note for single actor",
+			note: &Note{
+				Position: NoteRight,
+				Text:     "This is a right note",
+				Actors:   []*Actor{actor1},
+			},
+			indent:   "    ",
+			wantText: "    Note right of user: This is a right note\n",
+		},
+		{
+			name: "Render over note for multiple actors",
+			note: &Note{
+				Position: NoteOver,
+				Text:     "This is an over note",
+				Actors:   []*Actor{actor1, actor2},
+			},
+			indent:   "    ",
+			wantText: "    Note over user,system: This is an over note\n",
+		},
+		{
+			name: "Invalid note with no actors",
+			note: &Note{
+				Position: NoteLeft,
+				Text:     "This note has no actors",
+				Actors:   []*Actor{},
+			},
+			indent:   "    ",
+			wantText: "", // Should generate no output
+		},
+		{
+			name: "Invalid note with multiple actors but not over position",
+			note: &Note{
+				Position: NoteLeft,
+				Text:     "This note is invalid",
+				Actors:   []*Actor{actor1, actor2},
+			},
+			indent:   "    ",
+			wantText: "", // Should generate no output for invalid configuration
+		},
+		{
+			name: "Note with different indentation",
+			note: &Note{
+				Position: NoteLeft,
+				Text:     "Indented note",
+				Actors:   []*Actor{actor1},
+			},
+			indent:   "\t",
+			wantText: "\tNote left of user: Indented note\n",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := NewDiagram()
+			var sb strings.Builder
+			d.renderNote(&sb, tt.note, tt.indent)
+			if got := sb.String(); got != tt.wantText {
+				t.Errorf("renderNote() generated text = %q, want %q", got, tt.wantText)
+			}
+		})
+	}
+}
+
+func TestDiagram_EnableAutoNumber(t *testing.T) {
+	tests := []struct {
+		name    string
+		diagram *Diagram
+	}{
+		{
+			name:    "Enable autonumbering",
+			diagram: NewDiagram(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.diagram.EnableAutoNumber()
+			if !tt.diagram.autonumber {
+				t.Errorf("EnableAutoNumber() did not set autonumber to true")
+			}
+
+			// Verify it appears in the output
+			output := tt.diagram.String()
+			if !strings.Contains(output, "autonumber") {
+				t.Errorf("Diagram string does not contain autonumber directive")
+			}
+		})
+	}
+}

@@ -1,4 +1,4 @@
-package sequence_diagram
+package sequencediagram
 
 // ActorType represents the visual representation of an actor in a sequence diagram.
 type ActorType string

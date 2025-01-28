@@ -1,4 +1,4 @@
-package sequence_diagram
+package sequencediagram
 
 // NotePosition represents the positioning of a note in a sequence diagram.
 type NotePosition string

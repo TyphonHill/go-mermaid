@@ -154,3 +154,30 @@ func TestNode_String(t *testing.T) {
 		})
 	}
 }
+
+func TestNode_SetText(t *testing.T) {
+	node := NewNode(1, "Initial")
+	result := node.SetText("Updated Text")
+
+	if node.Text != "Updated Text" {
+		t.Errorf("SetText() = %v, want %v", node.Text, "Updated Text")
+	}
+
+	if result != node {
+		t.Error("SetText() should return node for chaining")
+	}
+}
+
+func TestNode_SetClass(t *testing.T) {
+	node := NewNode(1, "Test")
+	class := NewClass("TestClass")
+	result := node.SetClass(class)
+
+	if node.Class != class {
+		t.Errorf("SetClass() = %v, want %v", node.Class, class)
+	}
+
+	if result != node {
+		t.Error("SetClass() should return node for chaining")
+	}
+}

@@ -31,6 +31,7 @@ const (
 	baseNodeStyleString string = "\tstyle %d %s\n"
 )
 
+// Node represents a node in a flowchart
 type Node struct {
 	ID    uint64
 	Shape nodeShape
@@ -48,6 +49,18 @@ func NewNode(id uint64, text string) (newNode *Node) {
 	}
 
 	return
+}
+
+// SetClass sets the node class and returns the node for chaining
+func (n *Node) SetClass(class *Class) *Node {
+	n.Class = class
+	return n
+}
+
+// SetText sets the node text and returns the node for chaining
+func (n *Node) SetText(text string) *Node {
+	n.Text = text
+	return n
 }
 
 // String generates a Mermaid string representation of the node, including its shape, class, and style.

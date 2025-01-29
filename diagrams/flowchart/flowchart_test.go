@@ -350,3 +350,230 @@ func TestFlowchart_AddLink(t *testing.T) {
 		})
 	}
 }
+
+func TestFlowchart_AddSubgraph(t *testing.T) {
+	flowchart := NewFlowchart()
+
+	subgraph := flowchart.AddSubgraph("Test Subgraph")
+	if subgraph == nil {
+		t.Error("AddSubgraph() returned nil")
+	}
+
+	if len(flowchart.subgraphs) != 1 {
+		t.Errorf("AddSubgraph() resulted in %d subgraphs, want 1", len(flowchart.subgraphs))
+	}
+
+	if subgraph.Title != "Test Subgraph" {
+		t.Errorf("AddSubgraph() created subgraph with title %q, want %q", subgraph.Title, "Test Subgraph")
+	}
+
+	// Test ID generation
+	subgraph2 := flowchart.AddSubgraph("Second Subgraph")
+	if subgraph2.ID <= subgraph.ID {
+		t.Errorf("Second subgraph ID %d should be greater than first subgraph ID %d", subgraph2.ID, subgraph.ID)
+	}
+}
+
+func TestFlowchart_AddClass(t *testing.T) {
+	flowchart := NewFlowchart()
+
+	class := flowchart.AddClass("TestClass")
+	if class == nil {
+		t.Error("AddClass() returned nil")
+	}
+
+	if len(flowchart.classes) != 1 {
+		t.Errorf("AddClass() resulted in %d classes, want 1", len(flowchart.classes))
+	}
+
+	if class.Name != "TestClass" {
+		t.Errorf("AddClass() created class with name %q, want %q", class.Name, "TestClass")
+	}
+
+	// Test multiple classes
+	class2 := flowchart.AddClass("SecondClass")
+	if class2.Name != "SecondClass" {
+		t.Errorf("AddClass() created second class with name %q, want %q", class2.Name, "SecondClass")
+	}
+
+	if len(flowchart.classes) != 2 {
+		t.Errorf("After adding second class, got %d classes, want 2", len(flowchart.classes))
+	}
+}
+
+func TestFlowchart_SetTitle(t *testing.T) {
+	flowchart := NewFlowchart()
+	result := flowchart.SetTitle("Test Title")
+
+	if flowchart.Title != "Test Title" {
+		t.Errorf("SetTitle() = %v, want %v", flowchart.Title, "Test Title")
+	}
+
+	if result != flowchart {
+		t.Error("SetTitle() should return flowchart for chaining")
+	}
+}
+
+func TestFlowchart_SetDirection(t *testing.T) {
+	tests := []struct {
+		name      string
+		direction flowchartDirection
+	}{
+		{"Top to Bottom", FlowchartDirectionTopToBottom},
+		{"Left to Right", FlowchartDirectionLeftRight},
+		{"Right to Left", FlowchartDirectionRightLeft},
+		{"Bottom Up", FlowchartDirectionBottomUp},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			flowchart := NewFlowchart()
+			result := flowchart.SetDirection(tt.direction)
+
+			if flowchart.Direction != tt.direction {
+				t.Errorf("SetDirection() = %v, want %v", flowchart.Direction, tt.direction)
+			}
+
+			if result != flowchart {
+				t.Error("SetDirection() should return flowchart for chaining")
+			}
+		})
+	}
+}
+
+func TestFlowchart_SetCurveStyle(t *testing.T) {
+	tests := []struct {
+		name  string
+		style curveStyle
+	}{
+		{"Basis", CurveStyleBasis},
+		{"Linear", CurveStyleLinear},
+		{"Natural", CurveStyleNatural},
+		{"Step", CurveStyleStep},
+		{"None", CurveStyleNone},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			flowchart := NewFlowchart()
+			result := flowchart.SetCurveStyle(tt.style)
+
+			if flowchart.CurveStyle != tt.style {
+				t.Errorf("SetCurveStyle() = %v, want %v", flowchart.CurveStyle, tt.style)
+			}
+
+			if result != flowchart {
+				t.Error("SetCurveStyle() should return flowchart for chaining")
+			}
+		})
+	}
+}
+
+func TestLink_SetText(t *testing.T) {
+	link := NewLink(nil, nil)
+	result := link.SetText("Test Text")
+
+	if link.Text != "Test Text" {
+		t.Errorf("SetText() = %v, want %v", link.Text, "Test Text")
+	}
+
+	if result != link {
+		t.Error("SetText() should return link for chaining")
+	}
+}
+
+func TestLink_SetShape(t *testing.T) {
+	tests := []struct {
+		name  string
+		shape linkShape
+	}{
+		{"Open", LinkShapeOpen},
+		{"Dotted", LinkShapeDotted},
+		{"Thick", LinkShapeThick},
+		{"Invisible", LinkShapeInvisible},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			link := NewLink(nil, nil)
+			result := link.SetShape(tt.shape)
+
+			if link.Shape != tt.shape {
+				t.Errorf("SetShape() = %v, want %v", link.Shape, tt.shape)
+			}
+
+			if result != link {
+				t.Error("SetShape() should return link for chaining")
+			}
+		})
+	}
+}
+
+func TestLink_SetLength(t *testing.T) {
+	link := NewLink(nil, nil)
+	result := link.SetLength(5)
+
+	if link.Length != 5 {
+		t.Errorf("SetLength() = %v, want %v", link.Length, 5)
+	}
+
+	if result != link {
+		t.Error("SetLength() should return link for chaining")
+	}
+}
+
+func TestLink_SetHead(t *testing.T) {
+	tests := []struct {
+		name      string
+		arrowType linkArrowType
+	}{
+		{"None", LinkArrowTypeNone},
+		{"Arrow", LinkArrowTypeArrow},
+		{"Left Arrow", LinkArrowTypeLeftArrow},
+		{"Bullet", LinkArrowTypeBullet},
+		{"Cross", LinkArrowTypeCross},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			link := NewLink(nil, nil)
+			result := link.SetHead(tt.arrowType)
+
+			if link.Head != tt.arrowType {
+				t.Errorf("SetHead() = %v, want %v", link.Head, tt.arrowType)
+			}
+
+			if result != link {
+				t.Error("SetHead() should return link for chaining")
+			}
+		})
+	}
+}
+
+func TestLink_SetTail(t *testing.T) {
+	tests := []struct {
+		name      string
+		arrowType linkArrowType
+	}{
+		{"None", LinkArrowTypeNone},
+		{"Arrow", LinkArrowTypeArrow},
+		{"Left Arrow", LinkArrowTypeLeftArrow},
+		{"Bullet", LinkArrowTypeBullet},
+		{"Cross", LinkArrowTypeCross},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			link := NewLink(nil, nil)
+			result := link.SetTail(tt.arrowType)
+
+			if link.Tail != tt.arrowType {
+				t.Errorf("SetTail() = %v, want %v", link.Tail, tt.arrowType)
+			}
+
+			if result != link {
+				t.Error("SetTail() should return link for chaining")
+			}
+		})
+	}
+}

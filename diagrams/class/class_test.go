@@ -166,3 +166,43 @@ func TestClass_String(t *testing.T) {
 		})
 	}
 }
+
+func TestClass_SetLabel(t *testing.T) {
+	class := NewClass("TestClass")
+	result := class.SetLabel("Custom Label")
+
+	if class.Label != "Custom Label" {
+		t.Errorf("SetLabel() = %v, want %v", class.Label, "Custom Label")
+	}
+
+	if result != class {
+		t.Error("SetLabel() should return class for chaining")
+	}
+}
+
+func TestClass_SetAnnotation(t *testing.T) {
+	tests := []struct {
+		name       string
+		annotation classAnnotation
+	}{
+		{"Interface", ClassAnnotationInterface},
+		{"Abstract", ClassAnnotationAbstract},
+		{"Service", ClassAnnotationService},
+		{"Enumeration", ClassAnnotationEnumeration},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			class := NewClass("TestClass")
+			result := class.SetAnnotation(tt.annotation)
+
+			if class.Annotation != tt.annotation {
+				t.Errorf("SetAnnotation() = %v, want %v", class.Annotation, tt.annotation)
+			}
+
+			if result != class {
+				t.Error("SetAnnotation() should return class for chaining")
+			}
+		})
+	}
+}

@@ -100,3 +100,94 @@ func TestMessage_AddNestedMessage(t *testing.T) {
 		})
 	}
 }
+
+func TestMessage_SetText(t *testing.T) {
+	actor1 := NewActor("A1", "Actor1", ActorParticipant)
+	actor2 := NewActor("A2", "Actor2", ActorParticipant)
+	msg := NewMessage(actor1, actor2, MessageSolid, "Initial")
+
+	result := msg.SetText("Updated Text")
+
+	if msg.Text != "Updated Text" {
+		t.Errorf("SetText() = %v, want %v", msg.Text, "Updated Text")
+	}
+
+	if result != msg {
+		t.Error("SetText() should return message for chaining")
+	}
+}
+
+func TestMessage_SetType(t *testing.T) {
+	actor1 := NewActor("A1", "Actor1", ActorParticipant)
+	actor2 := NewActor("A2", "Actor2", ActorParticipant)
+	msg := NewMessage(actor1, actor2, MessageSolid, "Test")
+
+	tests := []struct {
+		name     string
+		msgType  MessageType
+		expected MessageType
+	}{
+		{"Solid", MessageSolid, MessageSolid},
+		{"Dashed", MessageDashed, MessageDashed},
+		{"Async", MessageAsync, MessageAsync},
+		{"Dotted", MessageDotted, MessageDotted},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := msg.SetType(tt.msgType)
+
+			if msg.Type != tt.expected {
+				t.Errorf("SetType() = %v, want %v", msg.Type, tt.expected)
+			}
+
+			if result != msg {
+				t.Error("SetType() should return message for chaining")
+			}
+		})
+	}
+}
+
+func TestMessage_SetType_ActivateDeactivate(t *testing.T) {
+	actor1 := NewActor("A1", "Actor1", ActorParticipant)
+	actor2 := NewActor("A2", "Actor2", ActorParticipant)
+	msg := NewMessage(actor1, actor2, MessageSolid, "Test")
+
+	tests := []struct {
+		name     string
+		msgType  MessageType
+		expected MessageType
+		want     string
+	}{
+		{
+			name:     "Activate",
+			msgType:  MessageActivate,
+			expected: MessageActivate,
+			want:     "\tA1-->A2: Test\n\tactivate A2\n",
+		},
+		{
+			name:     "Deactivate",
+			msgType:  MessageDeactivate,
+			expected: MessageDeactivate,
+			want:     "\tA1-->A2: Test\n\tdeactivate A2\n",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := msg.SetType(tt.msgType)
+
+			if msg.Type != tt.expected {
+				t.Errorf("SetType() = %v, want %v", msg.Type, tt.expected)
+			}
+
+			if result != msg {
+				t.Error("SetType() should return message for chaining")
+			}
+
+			if output := msg.String(""); output != tt.want {
+				t.Errorf("String() for %v = %q, want %q", tt.msgType, output, tt.want)
+			}
+		})
+	}
+}

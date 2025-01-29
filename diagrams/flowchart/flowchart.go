@@ -71,13 +71,32 @@ type DefaultIDGenerator struct {
 }
 
 // EnableMarkdownFence enables markdown code fencing for the flowchart output.
-func (f *Flowchart) EnableMarkdownFence() {
+func (f *Flowchart) EnableMarkdownFence() *Flowchart {
 	f.markdownFence = true
+	return f
 }
 
 // DisableMarkdownFence disables markdown code fencing for the flowchart output.
 func (f *Flowchart) DisableMarkdownFence() {
 	f.markdownFence = false
+}
+
+// SetTitle sets the flowchart title and returns the flowchart for chaining
+func (f *Flowchart) SetTitle(title string) *Flowchart {
+	f.Title = title
+	return f
+}
+
+// SetDirection sets the flowchart direction and returns the flowchart for chaining
+func (f *Flowchart) SetDirection(direction flowchartDirection) *Flowchart {
+	f.Direction = direction
+	return f
+}
+
+// SetCurveStyle sets the flowchart curve style and returns the flowchart for chaining
+func (f *Flowchart) SetCurveStyle(style curveStyle) *Flowchart {
+	f.CurveStyle = style
+	return f
 }
 
 // RenderToFile saves the flowchart diagram to a file at the specified path.

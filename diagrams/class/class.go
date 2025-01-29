@@ -43,24 +43,30 @@ func NewClass(name string) (newClass *Class) {
 	return
 }
 
-// AddMethod creates and adds a new method to the class.
-// It returns the newly created Method, allowing for further configuration.
-func (c *Class) AddMethod(name string) (newMethod *Method) {
-	newMethod = NewMethod(name)
-
-	c.methods = append(c.methods, newMethod)
-
-	return
+// SetLabel sets the class label and returns the class for chaining
+func (c *Class) SetLabel(label string) *Class {
+	c.Label = label
+	return c
 }
 
-// AddField creates and adds a new field to the class.
-// It returns the newly created Field, allowing for further configuration.
-func (c *Class) AddField(fieldName string, fieldType string) (newField *Field) {
-	newField = NewField(fieldName, fieldType)
+// SetAnnotation sets the class annotation and returns the class for chaining
+func (c *Class) SetAnnotation(annotation classAnnotation) *Class {
+	c.Annotation = annotation
+	return c
+}
 
-	c.fields = append(c.fields, newField)
+// AddMethod creates and adds a new method to the class
+func (c *Class) AddMethod(name string) *Method {
+	method := NewMethod(name)
+	c.methods = append(c.methods, method)
+	return method
+}
 
-	return
+// AddField creates and adds a new field to the class
+func (c *Class) AddField(fieldName string, fieldType string) *Field {
+	field := NewField(fieldName, fieldType)
+	c.fields = append(c.fields, field)
+	return field
 }
 
 // String generates the Mermaid syntax representation of the class.

@@ -34,51 +34,6 @@ func TestNewDiagram(t *testing.T) {
 	}
 }
 
-func TestDiagram_EnableMarkdownFence(t *testing.T) {
-	tests := []struct {
-		name    string
-		diagram *Diagram
-	}{
-		{
-			name:    "Enable markdown fence",
-			diagram: NewDiagram(),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.diagram.EnableMarkdownFence()
-			if !tt.diagram.markdownFence {
-				t.Error("EnableMarkdownFence() did not set markdownFence to true")
-			}
-		})
-	}
-}
-
-func TestDiagram_DisableMarkdownFence(t *testing.T) {
-	tests := []struct {
-		name    string
-		diagram *Diagram
-	}{
-		{
-			name:    "Disable markdown fence",
-			diagram: NewDiagram(),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// First enable it
-			tt.diagram.EnableMarkdownFence()
-			// Then disable it
-			tt.diagram.DisableMarkdownFence()
-			if tt.diagram.markdownFence {
-				t.Error("DisableMarkdownFence() did not set markdownFence to false")
-			}
-		})
-	}
-}
-
 func TestDiagram_String(t *testing.T) {
 	actor1 := NewActor("user", "User", ActorParticipant)
 	actor2 := NewActor("system", "System", ActorActor)

@@ -10,12 +10,11 @@ import (
 
 func main() {
 	diagram := stateDiagram.NewDiagram()
-	diagram.EnableMarkdownFence()
-
-	diagram.Title = "Simple State Machine"
+	diagram.EnableMarkdownFence().Title = "Simple State Machine"
 
 	// Add states
-	idle := diagram.AddState("idle", "Idle State", stateDiagram.StateNormal)
+	idle := diagram.AddState("idle", "Idle State", stateDiagram.StateNormal).
+		AddNote("System waiting for new orders", stateDiagram.NoteLeft)
 	processing := diagram.AddState("processing", "Processing", stateDiagram.StateNormal)
 	error := diagram.AddState("error", "Error", stateDiagram.StateNormal)
 

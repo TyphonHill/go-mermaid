@@ -358,3 +358,43 @@ func TestClassDiagram_String(t *testing.T) {
 		})
 	}
 }
+
+func TestClassDiagram_SetTitle(t *testing.T) {
+	diagram := NewClassDiagram()
+	result := diagram.SetTitle("Test Title")
+
+	if diagram.Title != "Test Title" {
+		t.Errorf("SetTitle() = %v, want %v", diagram.Title, "Test Title")
+	}
+
+	if result != diagram {
+		t.Error("SetTitle() should return diagram for chaining")
+	}
+}
+
+func TestClassDiagram_SetDirection(t *testing.T) {
+	tests := []struct {
+		name      string
+		direction classDiagramDirection
+	}{
+		{"Top to Bottom", ClassDiagramDirectionTopToBottom},
+		{"Bottom Up", ClassDiagramDirectionBottomUp},
+		{"Right Left", ClassDiagramDirectionRightLeft},
+		{"Left Right", ClassDiagramDirectionLeftRight},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diagram := NewClassDiagram()
+			result := diagram.SetDirection(tt.direction)
+
+			if diagram.Direction != tt.direction {
+				t.Errorf("SetDirection() = %v, want %v", diagram.Direction, tt.direction)
+			}
+
+			if result != diagram {
+				t.Error("SetDirection() should return diagram for chaining")
+			}
+		})
+	}
+}

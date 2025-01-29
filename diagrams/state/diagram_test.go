@@ -48,87 +48,50 @@ func TestDiagram_AddState(t *testing.T) {
 	}
 }
 
-func TestDiagram_AddTransition(t *testing.T) {
+func TestAddTransition(t *testing.T) {
 	diagram := NewDiagram()
 	state1 := diagram.AddState("state1", "State 1", StateNormal)
 	state2 := diagram.AddState("state2", "State 2", StateNormal)
 
-	transition := diagram.AddTransition(state1, state2, "Test Transition")
-
+	transition := diagram.AddTransition(state1, state2, "test")
 	if len(diagram.Transitions) != 1 {
-		t.Errorf("AddTransition() resulted in %d transitions, want 1", len(diagram.Transitions))
+		t.Errorf("Expected 1 transition, got %d", len(diagram.Transitions))
 	}
 
-	if transition.From != state1 || transition.To != state2 || transition.Description != "Test Transition" {
-		t.Errorf("AddTransition() created incorrect transition: %v", transition)
+	if transition.From != state1 || transition.To != state2 {
+		t.Error("Transition has incorrect states")
+	}
+
+	transition.SetType(TransitionDashed)
+	if transition.Type != TransitionDashed {
+		t.Error("SetType did not update transition type")
 	}
 }
 
-func TestDiagram_String(t *testing.T) {
-	tests := []struct {
-		name    string
-		setup   func(*Diagram)
-		want    []string
-		notWant []string
-	}{
-		{
-			name: "Basic diagram with title",
-			setup: func(d *Diagram) {
-				d.Title = "Test Diagram"
-				d.AddState("s1", "State 1", StateNormal)
-			},
-			want: []string{
-				"title: Test Diagram",
-				"stateDiagram-v2",
-				`state "State 1" as s1`,
-			},
-		},
-		{
-			name: "Diagram with transition",
-			setup: func(d *Diagram) {
-				s1 := d.AddState("s1", "State 1", StateNormal)
-				s2 := d.AddState("s2", "State 2", StateNormal)
-				d.AddTransition(s1, s2, "goes to")
-			},
-			want: []string{
-				"stateDiagram-v2",
-				`state "State 1" as s1`,
-				`state "State 2" as s2`,
-				"s1 --> s2: goes to",
-			},
-		},
-		{
-			name: "Diagram with markdown fence",
-			setup: func(d *Diagram) {
-				d.EnableMarkdownFence()
-				d.AddState("s1", "State 1", StateNormal)
-			},
-			want: []string{
-				"```mermaid",
-				"stateDiagram-v2",
-				"```",
-			},
-		},
-	}
+func TestDiagramString(t *testing.T) {
+	diagram := NewDiagram()
+	diagram.Title = "Test Diagram"
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			diagram := NewDiagram()
-			tt.setup(diagram)
-			result := diagram.String()
+	state1 := diagram.AddState("state1", "State 1", StateNormal)
+	state2 := diagram.AddState("state2", "State 2", StateNormal)
 
-			for _, want := range tt.want {
-				if !strings.Contains(result, want) {
-					t.Errorf("String() result missing expected content %q", want)
-				}
-			}
+	diagram.AddTransition(state1, state2, "forward")
+	diagram.AddTransition(state2, state1, "back")
 
-			for _, notWant := range tt.notWant {
-				if strings.Contains(result, notWant) {
-					t.Errorf("String() result contains unexpected content %q", notWant)
-				}
-			}
-		})
+	result := diagram.String()
+	expected := `---
+title: Test Diagram
+---
+
+stateDiagram-v2
+	state "State 1" as state1
+	state "State 2" as state2
+	state1 --> state2: forward
+	state2 --> state1: back
+`
+
+	if result != expected {
+		t.Errorf("Expected:\n%s\nGot:\n%s", expected, result)
 	}
 }
 

@@ -58,7 +58,7 @@ func main() {
 
 	// Add completion and error transitions
 	diagram.AddTransition(join, idle, "Order Complete")
-	diagram.AddTransition(error, idle, "Reset Order")
+	diagram.AddTransition(error, idle, "Reset Order").SetType(stateDiagram.TransitionDashed)
 
 	// Add transition to end state
 	diagram.AddTransition(error, nil, "Cancel Order")

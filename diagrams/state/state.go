@@ -74,11 +74,12 @@ func (s *State) AddNestedState(id, description string, stateType StateType) *Sta
 }
 
 // AddNote adds a note to the state
-func (s *State) AddNote(text string, position NotePosition) {
+func (s *State) AddNote(text string, position NotePosition) *State {
 	s.Note = &Note{
 		Text:     text,
 		Position: position,
 	}
+	return s
 }
 
 // String generates a Mermaid-formatted string representation of the state with custom indentation.

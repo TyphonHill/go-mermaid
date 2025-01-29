@@ -32,8 +32,7 @@ const (
 	baseLinkTextString string = "|%s|"
 )
 
-// Nodes can be connected with links/edges. It is possible to have different types of links or attach a text string to a link.
-// Reference: https://mermaid.js.org/syntax/flowchart.html#links-between-nodes
+// Link represents a connection between nodes in a flowchart
 type Link struct {
 	Shape  linkShape
 	Head   linkArrowType
@@ -56,6 +55,36 @@ func NewLink(from *Node, to *Node) (newLink *Link) {
 	}
 
 	return
+}
+
+// SetText sets the link text and returns the link for chaining
+func (l *Link) SetText(text string) *Link {
+	l.Text = text
+	return l
+}
+
+// SetShape sets the link shape and returns the link for chaining
+func (l *Link) SetShape(shape linkShape) *Link {
+	l.Shape = shape
+	return l
+}
+
+// SetLength sets the link length and returns the link for chaining
+func (l *Link) SetLength(length int) *Link {
+	l.Length = length
+	return l
+}
+
+// SetHead sets the head arrow type and returns the link for chaining
+func (l *Link) SetHead(arrowType linkArrowType) *Link {
+	l.Head = arrowType
+	return l
+}
+
+// SetTail sets the tail arrow type and returns the link for chaining
+func (l *Link) SetTail(arrowType linkArrowType) *Link {
+	l.Tail = arrowType
+	return l
 }
 
 // String generates a Mermaid string representation of the link,

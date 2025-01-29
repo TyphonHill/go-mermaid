@@ -37,7 +37,7 @@ const (
 	baseDeactivate    string = "deactivate %s\n"
 )
 
-// Message represents a communication between actors in a sequence diagram.
+// Message represents a message between actors in a sequence diagram.
 type Message struct {
 	From   *Actor
 	To     *Actor
@@ -58,11 +58,23 @@ func NewMessage(from, to *Actor, msgType MessageType, text string) *Message {
 	}
 }
 
-// AddNestedMessage adds a nested message to the current message.
+// AddNestedMessage creates and adds a new nested message.
 func (m *Message) AddNestedMessage(from, to *Actor, msgType MessageType, text string) *Message {
 	nested := NewMessage(from, to, msgType, text)
 	m.Nested = append(m.Nested, nested)
 	return nested
+}
+
+// SetType sets the message type and returns the message for chaining.
+func (m *Message) SetType(msgType MessageType) *Message {
+	m.Type = msgType
+	return m
+}
+
+// SetText sets the message text and returns the message for chaining.
+func (m *Message) SetText(text string) *Message {
+	m.Text = text
+	return m
 }
 
 // String generates a Mermaid-formatted string representation of the message with custom indentation.
@@ -98,7 +110,7 @@ func (m *Message) String(curIndentation string) string {
 				fmt.Sprintf(baseMessage, "", m.From.ID, MessageSolid, m.To.ID, m.Text)))
 		}
 		sb.WriteString(fmt.Sprintf("%s\t%s", curIndentation,
-			fmt.Sprintf(baseDeactivate, m.From.ID))) // Use From instead of To
+			fmt.Sprintf(baseDeactivate, m.To.ID))) // Use To instead of From
 	default:
 		arrow := string(m.Type)
 		if m.Text != "" {

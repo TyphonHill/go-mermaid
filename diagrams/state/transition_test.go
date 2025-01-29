@@ -117,3 +117,46 @@ func TestTransition_SetType(t *testing.T) {
 		})
 	}
 }
+
+func TestTransition_String_NilStates(t *testing.T) {
+	tests := []struct {
+		name     string
+		setup    func() *Transition
+		expected string
+	}{
+		{
+			name: "Nil From state",
+			setup: func() *Transition {
+				to := NewState("end", "End State", StateNormal)
+				return NewTransition(nil, to, "test")
+			},
+			expected: "\t[*] --> end: test\n",
+		},
+		{
+			name: "Nil To state",
+			setup: func() *Transition {
+				from := NewState("start", "Start State", StateNormal)
+				return NewTransition(from, nil, "test")
+			},
+			expected: "\tstart --> [*]: test\n",
+		},
+		{
+			name: "Both states nil",
+			setup: func() *Transition {
+				return NewTransition(nil, nil, "test")
+			},
+			expected: "\t[*] --> [*]: test\n",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			transition := tt.setup()
+			result := transition.String("")
+
+			if result != tt.expected {
+				t.Errorf("String() = %q, want %q", result, tt.expected)
+			}
+		})
+	}
+}

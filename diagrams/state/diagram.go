@@ -24,8 +24,9 @@ func NewDiagram() *Diagram {
 }
 
 // EnableMarkdownFence enables markdown fencing for the diagram output.
-func (d *Diagram) EnableMarkdownFence() {
+func (d *Diagram) EnableMarkdownFence() *Diagram {
 	d.markdownFence = true
+	return d
 }
 
 // DisableMarkdownFence disables markdown fencing for the diagram output.

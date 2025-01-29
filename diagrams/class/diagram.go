@@ -36,16 +36,28 @@ type ClassDiagram struct {
 	markdownFence bool
 }
 
-// EnableMarkdownFence enables markdown code fencing for the diagram output,
-// which adds ```mermaid markers when converting the diagram to a string.
-func (cd *ClassDiagram) EnableMarkdownFence() {
-	cd.markdownFence = true
+// SetDirection sets the diagram direction and returns the diagram for chaining
+func (cd *ClassDiagram) SetDirection(direction classDiagramDirection) *ClassDiagram {
+	cd.Direction = direction
+	return cd
 }
 
-// DisableMarkdownFence disables markdown code fencing for the diagram output,
-// removing the ```mermaid markers when converting the diagram to a string.
-func (cd *ClassDiagram) DisableMarkdownFence() {
+// SetTitle sets the diagram title and returns the diagram for chaining
+func (cd *ClassDiagram) SetTitle(title string) *ClassDiagram {
+	cd.Title = title
+	return cd
+}
+
+// EnableMarkdownFence enables markdown code fencing and returns the diagram for chaining
+func (cd *ClassDiagram) EnableMarkdownFence() *ClassDiagram {
+	cd.markdownFence = true
+	return cd
+}
+
+// DisableMarkdownFence disables markdown code fencing and returns the diagram for chaining
+func (cd *ClassDiagram) DisableMarkdownFence() *ClassDiagram {
 	cd.markdownFence = false
+	return cd
 }
 
 // NewClassDiagram creates and returns a new ClassDiagram with default settings.

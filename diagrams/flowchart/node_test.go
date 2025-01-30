@@ -181,3 +181,19 @@ func TestNode_SetClass(t *testing.T) {
 		t.Error("SetClass() should return node for chaining")
 	}
 }
+
+func TestNode_SetStyle(t *testing.T) {
+	node := NewNode(1, "Test Node")
+	style := NewNodeStyle()
+	style.Fill = "#f9f9f9"
+	style.Stroke = "#333"
+
+	result := node.SetStyle(style)
+
+	if result != node {
+		t.Error("SetStyle() should return node for chaining")
+	}
+	if node.Style != style {
+		t.Errorf("SetStyle() = %v, want %v", node.Style, style)
+	}
+}

@@ -63,6 +63,12 @@ func (n *Node) SetText(text string) *Node {
 	return n
 }
 
+// SetStyle sets the style for the node and returns the node for chaining
+func (n *Node) SetStyle(style *NodeStyle) *Node {
+	n.Style = style
+	return n
+}
+
 // String generates a Mermaid string representation of the node, including its shape, class, and style.
 func (n *Node) String() string {
 	var sb strings.Builder

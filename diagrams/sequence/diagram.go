@@ -2,18 +2,17 @@ package sequence
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils"
 )
 
 // Diagram represents a sequence diagram with actors, messages, and rendering options.
 type Diagram struct {
-	Title         string
-	Actors        []*Actor
-	Messages      []*Message
-	autonumber    bool
-	markdownFence bool
+	utils.BaseDiagram
+	Actors     []*Actor
+	Messages   []*Message
+	autonumber bool
 }
 
 // NewDiagram creates a new sequence diagram with default settings.
@@ -23,16 +22,6 @@ func NewDiagram() *Diagram {
 		Messages:   make([]*Message, 0),
 		autonumber: false,
 	}
-}
-
-// EnableMarkdownFence enables markdown fencing for the diagram output.
-func (d *Diagram) EnableMarkdownFence() {
-	d.markdownFence = true
-}
-
-// DisableMarkdownFence disables markdown fencing for the diagram output.
-func (d *Diagram) DisableMarkdownFence() {
-	d.markdownFence = false
 }
 
 // EnableAutoNumber enables automatic numbering of messages in the sequence diagram.
@@ -81,10 +70,6 @@ func (d *Diagram) AddMessage(from, to *Actor, msgType MessageType, text string) 
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	if d.markdownFence {
-		sb.WriteString("```mermaid\n")
-	}
-
 	if d.Title != "" {
 		sb.WriteString(fmt.Sprintf("---\ntitle: %s\n---\n\n", d.Title))
 	}
@@ -106,33 +91,12 @@ func (d *Diagram) String() string {
 		sb.WriteString(message.String(""))
 	}
 
-	if d.markdownFence {
-		sb.WriteString("```\n")
-	}
-
-	return sb.String()
+	return d.WrapWithFence(sb.String())
 }
 
-// RenderToFile saves the diagram to a file, automatically enabling markdown fencing for .md files.
+// RenderToFile saves the diagram to a file at the specified path.
 func (d *Diagram) RenderToFile(path string) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
-	}
-
-	originalFenceState := d.markdownFence
-	if strings.ToLower(filepath.Ext(path)) == ".md" {
-		d.EnableMarkdownFence()
-	}
-
-	content := d.String()
-	d.markdownFence = originalFenceState
-
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write file: %w", err)
-	}
-
-	return nil
+	return utils.RenderToFile(path, d.String(), d.IsMarkdownFenceEnabled())
 }
 
 // AddNote adds a note to the diagram positioned relative to one or more actors.

@@ -2,17 +2,16 @@ package state
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils"
 )
 
 // Diagram represents a state diagram with states, transitions, and rendering options.
 type Diagram struct {
-	Title         string
-	States        []*State
-	Transitions   []*Transition
-	markdownFence bool
+	utils.BaseDiagram
+	States      []*State
+	Transitions []*Transition
 }
 
 // NewDiagram creates a new state diagram with default settings.
@@ -21,17 +20,6 @@ func NewDiagram() *Diagram {
 		States:      make([]*State, 0),
 		Transitions: make([]*Transition, 0),
 	}
-}
-
-// EnableMarkdownFence enables markdown fencing for the diagram output.
-func (d *Diagram) EnableMarkdownFence() *Diagram {
-	d.markdownFence = true
-	return d
-}
-
-// DisableMarkdownFence disables markdown fencing for the diagram output.
-func (d *Diagram) DisableMarkdownFence() {
-	d.markdownFence = false
 }
 
 // AddState creates and adds a new state to the diagram.
@@ -52,10 +40,6 @@ func (d *Diagram) AddTransition(from, to *State, description string) *Transition
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	if d.markdownFence {
-		sb.WriteString("```mermaid\n")
-	}
-
 	if d.Title != "" {
 		sb.WriteString(fmt.Sprintf("---\ntitle: %s\n---\n\n", d.Title))
 	}
@@ -72,31 +56,10 @@ func (d *Diagram) String() string {
 		sb.WriteString(transition.String(""))
 	}
 
-	if d.markdownFence {
-		sb.WriteString("```\n")
-	}
-
-	return sb.String()
+	return d.WrapWithFence(sb.String())
 }
 
-// RenderToFile saves the diagram to a file, automatically enabling markdown fencing for .md files.
+// RenderToFile saves the diagram to a file at the specified path.
 func (d *Diagram) RenderToFile(path string) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
-	}
-
-	originalFenceState := d.markdownFence
-	if strings.ToLower(filepath.Ext(path)) == ".md" {
-		d.EnableMarkdownFence()
-	}
-
-	content := d.String()
-	d.markdownFence = originalFenceState
-
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write file: %w", err)
-	}
-
-	return nil
+	return utils.RenderToFile(path, d.String(), d.IsMarkdownFenceEnabled())
 }

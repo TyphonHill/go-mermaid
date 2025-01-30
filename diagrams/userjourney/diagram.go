@@ -2,16 +2,15 @@ package userjourney
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils"
 )
 
 // Diagram represents a Mermaid User Journey diagram
 type Diagram struct {
-	Title         string
-	Sections      []*Section
-	markdownFence bool
+	utils.BaseDiagram
+	Sections []*Section
 }
 
 // NewDiagram creates a new User Journey diagram
@@ -27,17 +26,6 @@ func (d *Diagram) SetTitle(title string) *Diagram {
 	return d
 }
 
-// EnableMarkdownFence enables markdown fence in output
-func (d *Diagram) EnableMarkdownFence() *Diagram {
-	d.markdownFence = true
-	return d
-}
-
-// DisableMarkdownFence disables markdown fence in output
-func (d *Diagram) DisableMarkdownFence() {
-	d.markdownFence = false
-}
-
 // AddSection adds a new section to the diagram
 func (d *Diagram) AddSection(title string) *Section {
 	section := NewSection(title)
@@ -49,10 +37,6 @@ func (d *Diagram) AddSection(title string) *Section {
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	if d.markdownFence {
-		sb.WriteString("```mermaid\n")
-	}
-
 	sb.WriteString("journey\n")
 
 	if d.Title != "" {
@@ -63,31 +47,10 @@ func (d *Diagram) String() string {
 		sb.WriteString(section.String())
 	}
 
-	if d.markdownFence {
-		sb.WriteString("```\n")
-	}
-
-	return sb.String()
+	return d.WrapWithFence(sb.String())
 }
 
 // RenderToFile renders the diagram to a file
 func (d *Diagram) RenderToFile(path string) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
-	}
-
-	originalFenceState := d.markdownFence
-	if strings.ToLower(filepath.Ext(path)) == ".md" {
-		d.EnableMarkdownFence()
-	}
-
-	content := d.String()
-	d.markdownFence = originalFenceState
-
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write file: %w", err)
-	}
-
-	return nil
+	return utils.RenderToFile(path, d.String(), d.IsMarkdownFenceEnabled())
 }

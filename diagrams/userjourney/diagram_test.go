@@ -16,32 +16,8 @@ func TestNewDiagram(t *testing.T) {
 	if diagram.Title != "" {
 		t.Error("NewDiagram() should not set a title")
 	}
-	if diagram.markdownFence {
+	if diagram.IsMarkdownFenceEnabled() {
 		t.Error("NewDiagram() should not enable markdown fence by default")
-	}
-}
-
-func TestDiagram_EnableMarkdownFence(t *testing.T) {
-	diagram := NewDiagram()
-
-	result := diagram.EnableMarkdownFence()
-
-	if result != diagram {
-		t.Error("EnableMarkdownFence() should return the diagram for chaining")
-	}
-	if !diagram.markdownFence {
-		t.Error("EnableMarkdownFence() should enable markdown fence")
-	}
-}
-
-func TestDiagram_DisableMarkdownFence(t *testing.T) {
-	diagram := NewDiagram()
-	diagram.EnableMarkdownFence()
-
-	diagram.DisableMarkdownFence()
-
-	if diagram.markdownFence {
-		t.Error("DisableMarkdownFence() should disable markdown fence")
 	}
 }
 

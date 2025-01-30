@@ -197,3 +197,41 @@ func TestNode_SetStyle(t *testing.T) {
 		t.Errorf("SetStyle() = %v, want %v", node.Style, style)
 	}
 }
+
+func TestNode_SetShape(t *testing.T) {
+	tests := []struct {
+		name      string
+		shape     nodeShape
+		wantShape nodeShape
+	}{
+		{
+			name:      "Set to stadium shape",
+			shape:     NodeShapeStadium,
+			wantShape: NodeShapeStadium,
+		},
+		{
+			name:      "Set to circle shape",
+			shape:     NodeShapeCircle,
+			wantShape: NodeShapeCircle,
+		},
+		{
+			name:      "Set to hexagon shape",
+			shape:     NodeShapeHexagon,
+			wantShape: NodeShapeHexagon,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			node := NewNode(1, "Test")
+			result := node.SetShape(tt.shape)
+
+			if result != node {
+				t.Error("SetShape() should return node for chaining")
+			}
+			if node.Shape != tt.wantShape {
+				t.Errorf("SetShape() = %v, want %v", node.Shape, tt.wantShape)
+			}
+		})
+	}
+}

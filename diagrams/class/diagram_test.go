@@ -60,8 +60,8 @@ func TestClassDiagram_EnableMarkdownFence(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.diagram.EnableMarkdownFence()
-			if !tt.diagram.markdownFence {
-				t.Error("EnableMarkdownFence() did not set markdownFence to true")
+			if !tt.diagram.IsMarkdownFenceEnabled() {
+				t.Error("EnableMarkdownFence() did not enable markdown fence")
 			}
 		})
 	}
@@ -86,8 +86,8 @@ func TestClassDiagram_DisableMarkdownFence(t *testing.T) {
 			tt.diagram.EnableMarkdownFence()
 			// Then disable it
 			tt.diagram.DisableMarkdownFence()
-			if tt.diagram.markdownFence {
-				t.Error("DisableMarkdownFence() did not set markdownFence to false")
+			if tt.diagram.IsMarkdownFenceEnabled() {
+				t.Error("DisableMarkdownFence() did not disable markdown fence")
 			}
 		})
 	}
@@ -209,7 +209,7 @@ func TestClassDiagram_RenderToFile(t *testing.T) {
 			}
 
 			// Verify fence state wasn't changed permanently
-			if diagram.markdownFence != tt.setupFence {
+			if diagram.IsMarkdownFenceEnabled() != tt.setupFence {
 				t.Error("Diagram fence state was permanently modified")
 			}
 		})
@@ -356,19 +356,6 @@ func TestClassDiagram_String(t *testing.T) {
 				t.Error("Markdown fence markers are not properly paired")
 			}
 		})
-	}
-}
-
-func TestClassDiagram_SetTitle(t *testing.T) {
-	diagram := NewClassDiagram()
-	result := diagram.SetTitle("Test Title")
-
-	if diagram.Title != "Test Title" {
-		t.Errorf("SetTitle() = %v, want %v", diagram.Title, "Test Title")
-	}
-
-	if result != diagram {
-		t.Error("SetTitle() should return diagram for chaining")
 	}
 }
 

@@ -16,8 +16,8 @@ func TestNewDiagram(t *testing.T) {
 	if diagram.Transitions == nil {
 		t.Error("NewDiagram() Transitions is nil, want empty slice")
 	}
-	if diagram.markdownFence {
-		t.Error("NewDiagram() markdownFence = true, want false")
+	if diagram.IsMarkdownFenceEnabled() {
+		t.Error("NewDiagram() markdown fence enabled by default, want disabled")
 	}
 }
 
@@ -25,12 +25,12 @@ func TestDiagram_EnableDisableMarkdownFence(t *testing.T) {
 	diagram := NewDiagram()
 
 	diagram.EnableMarkdownFence()
-	if !diagram.markdownFence {
+	if !diagram.IsMarkdownFenceEnabled() {
 		t.Error("EnableMarkdownFence() did not enable markdown fence")
 	}
 
 	diagram.DisableMarkdownFence()
-	if diagram.markdownFence {
+	if diagram.IsMarkdownFenceEnabled() {
 		t.Error("DisableMarkdownFence() did not disable markdown fence")
 	}
 }
@@ -205,7 +205,7 @@ func TestDiagram_RenderToFile(t *testing.T) {
 			}
 
 			// Verify fence state wasn't changed permanently
-			if diagram.markdownFence != tt.setupFence {
+			if diagram.IsMarkdownFenceEnabled() != tt.setupFence {
 				t.Error("Diagram fence state was permanently modified")
 			}
 		})

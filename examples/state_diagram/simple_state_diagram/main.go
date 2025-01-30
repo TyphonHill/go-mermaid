@@ -10,7 +10,9 @@ import (
 
 func main() {
 	diagram := stateDiagram.NewDiagram()
-	diagram.EnableMarkdownFence().Title = "Simple State Machine"
+	diagram.EnableMarkdownFence()
+
+	diagram.SetTitle("Simple State Machine")
 
 	// Add states
 	idle := diagram.AddState("idle", "Idle State", stateDiagram.StateNormal).

@@ -27,13 +27,12 @@ func TestNewFlowchart(t *testing.T) {
 		{
 			name: "Create new flowchart with default settings",
 			want: &Flowchart{
-				Direction:     FlowchartDirectionTopToBottom,
-				CurveStyle:    CurveStyleNone,
-				classes:       make([]*Class, 0),
-				nodes:         make([]*Node, 0),
-				subgraphs:     make([]*Subgraph, 0),
-				links:         make([]*Link, 0),
-				markdownFence: false,
+				Direction:  FlowchartDirectionTopToBottom,
+				CurveStyle: CurveStyleNone,
+				classes:    make([]*Class, 0),
+				nodes:      make([]*Node, 0),
+				subgraphs:  make([]*Subgraph, 0),
+				links:      make([]*Link, 0),
 			},
 		},
 	}
@@ -66,8 +65,8 @@ func TestFlowchart_EnableMarkdownFence(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.flowchart.EnableMarkdownFence()
-			if !tt.flowchart.markdownFence {
-				t.Error("EnableMarkdownFence() did not set markdownFence to true")
+			if !tt.flowchart.IsMarkdownFenceEnabled() {
+				t.Error("EnableMarkdownFence() did not enable markdown fence")
 			}
 		})
 	}
@@ -90,8 +89,8 @@ func TestFlowchart_DisableMarkdownFence(t *testing.T) {
 			tt.flowchart.EnableMarkdownFence()
 			// Then disable it
 			tt.flowchart.DisableMarkdownFence()
-			if tt.flowchart.markdownFence {
-				t.Error("DisableMarkdownFence() did not set markdownFence to false")
+			if tt.flowchart.IsMarkdownFenceEnabled() {
+				t.Error("DisableMarkdownFence() did not disable markdown fence")
 			}
 		})
 	}
@@ -151,6 +150,47 @@ func TestFlowchart_String(t *testing.T) {
 				"```\n",
 			},
 		},
+		{
+			name:      "Flowchart with curve style",
+			flowchart: NewFlowchart(),
+			setup: func(f *Flowchart) {
+				f.SetCurveStyle(CurveStyleBasis)
+			},
+			contains: []string{
+				"%%{ init: { 'flowchart': { 'curve': 'basis' } } }%%\n",
+				"flowchart TB\n",
+			},
+		},
+		{
+			name:      "Flowchart with class",
+			flowchart: NewFlowchart(),
+			setup: func(f *Flowchart) {
+				class := f.AddClass("testClass")
+				class.Style.Fill = "#f9f9f9"
+			},
+			contains: []string{
+				"flowchart TB\n",
+				"classDef testClass fill:#f9f9f9",
+			},
+		},
+		{
+			name:      "Flowchart with subgraph",
+			flowchart: NewFlowchart(),
+			setup: func(f *Flowchart) {
+				subgraph := f.AddSubgraph("Test Subgraph")
+				node1 := f.AddNode("Node1")
+				node2 := f.AddNode("Node2")
+				subgraph.AddLink(node1, node2)
+			},
+			contains: []string{
+				"flowchart TB\n",
+				"subgraph 0 [Test Subgraph]",
+				"1(\"Node1\")",
+				"2(\"Node2\")",
+				"1 --> 2",
+				"end",
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -167,7 +207,7 @@ func TestFlowchart_String(t *testing.T) {
 
 			for _, want := range tt.contains {
 				if !strings.Contains(got, want) {
-					t.Errorf("Flowchart.String() output missing expected content: %v", want)
+					t.Errorf("Flowchart.String() output missing expected content: %v, got %v", want, got)
 				}
 			}
 		})
@@ -266,7 +306,7 @@ func TestFlowchart_RenderToFile(t *testing.T) {
 				}
 			}
 
-			if flowchart.markdownFence != tt.setupFence {
+			if flowchart.IsMarkdownFenceEnabled() != tt.setupFence {
 				t.Error("Flowchart fence state was permanently modified")
 			}
 		})
@@ -398,19 +438,6 @@ func TestFlowchart_AddClass(t *testing.T) {
 
 	if len(flowchart.classes) != 2 {
 		t.Errorf("After adding second class, got %d classes, want 2", len(flowchart.classes))
-	}
-}
-
-func TestFlowchart_SetTitle(t *testing.T) {
-	flowchart := NewFlowchart()
-	result := flowchart.SetTitle("Test Title")
-
-	if flowchart.Title != "Test Title" {
-		t.Errorf("SetTitle() = %v, want %v", flowchart.Title, "Test Title")
-	}
-
-	if result != flowchart {
-		t.Error("SetTitle() should return flowchart for chaining")
 	}
 }
 

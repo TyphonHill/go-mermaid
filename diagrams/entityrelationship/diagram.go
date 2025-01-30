@@ -2,17 +2,16 @@ package entityrelationship
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils"
 )
 
 // Diagram represents an entity relationship diagram
 type Diagram struct {
-	Title         string
+	utils.BaseDiagram
 	Entities      []*Entity
 	Relationships []*Relationship
-	markdownFence bool
 }
 
 // NewDiagram creates a new ERD diagram
@@ -21,23 +20,6 @@ func NewDiagram() *Diagram {
 		Entities:      make([]*Entity, 0),
 		Relationships: make([]*Relationship, 0),
 	}
-}
-
-// EnableMarkdownFence enables markdown code fencing and returns the diagram for chaining
-func (d *Diagram) EnableMarkdownFence() *Diagram {
-	d.markdownFence = true
-	return d
-}
-
-// DisableMarkdownFence disables markdown code fencing
-func (d *Diagram) DisableMarkdownFence() {
-	d.markdownFence = false
-}
-
-// SetTitle sets the diagram title and returns the diagram for chaining
-func (d *Diagram) SetTitle(title string) *Diagram {
-	d.Title = title
-	return d
 }
 
 // AddEntity creates and adds a new entity to the diagram
@@ -58,10 +40,6 @@ func (d *Diagram) AddRelationship(from, to *Entity) *Relationship {
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	if d.markdownFence {
-		sb.WriteString("```mermaid\n")
-	}
-
 	if d.Title != "" {
 		sb.WriteString(fmt.Sprintf("---\ntitle: %s\n---\n\n", d.Title))
 	}
@@ -73,7 +51,7 @@ func (d *Diagram) String() string {
 		sb.WriteString(entity.String())
 	}
 
-	// Add relationships with a newline between entities and relationships
+	// Add relationships
 	if len(d.Relationships) > 0 {
 		sb.WriteString("\n")
 		for _, rel := range d.Relationships {
@@ -81,31 +59,10 @@ func (d *Diagram) String() string {
 		}
 	}
 
-	if d.markdownFence {
-		sb.WriteString("```\n")
-	}
-
-	return sb.String()
+	return d.WrapWithFence(sb.String())
 }
 
-// RenderToFile saves the diagram to a file
+// RenderToFile saves the diagram to a file at the specified path.
 func (d *Diagram) RenderToFile(path string) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
-	}
-
-	originalFenceState := d.markdownFence
-	if strings.ToLower(filepath.Ext(path)) == ".md" {
-		d.EnableMarkdownFence()
-	}
-
-	content := d.String()
-	d.markdownFence = originalFenceState
-
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write file: %w", err)
-	}
-
-	return nil
+	return utils.RenderToFile(path, d.String(), d.IsMarkdownFenceEnabled())
 }

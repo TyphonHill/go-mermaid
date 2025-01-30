@@ -16,10 +16,9 @@ func TestNewDiagram(t *testing.T) {
 		{
 			name: "Create new diagram with default settings",
 			want: &Diagram{
-				Actors:        make([]*Actor, 0),
-				Messages:      make([]*Message, 0),
-				autonumber:    false,
-				markdownFence: false,
+				Actors:     make([]*Actor, 0),
+				Messages:   make([]*Message, 0),
+				autonumber: false,
 			},
 		},
 	}
@@ -139,7 +138,7 @@ func TestDiagram_String(t *testing.T) {
 			}
 
 			// Verify fence markers match markdownFence setting
-			if tt.diagram.markdownFence != hasFenceStart {
+			if tt.diagram.IsMarkdownFenceEnabled() != hasFenceStart {
 				t.Error("Markdown fence presence doesn't match markdownFence setting")
 			}
 		})
@@ -256,7 +255,7 @@ func TestDiagram_RenderToFile(t *testing.T) {
 			}
 
 			// Verify fence state wasn't changed permanently
-			if diagram.markdownFence != tt.setupFence {
+			if diagram.IsMarkdownFenceEnabled() != tt.setupFence {
 				t.Error("Diagram fence state was permanently modified")
 			}
 		})

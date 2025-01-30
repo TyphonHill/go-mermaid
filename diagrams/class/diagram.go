@@ -2,9 +2,9 @@ package class
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils"
 )
 
 type classDiagramDirection string
@@ -27,36 +27,17 @@ const (
 // ClassDiagram represents a Mermaid class diagram with various diagram components
 // such as classes, namespaces, relations, and notes.
 type ClassDiagram struct {
-	Title         string
-	Direction     classDiagramDirection
-	namespaces    []*Namespace
-	notes         []*Note
-	classes       []*Class
-	relations     []*Relation
-	markdownFence bool
+	utils.BaseDiagram
+	Direction  classDiagramDirection
+	namespaces []*Namespace
+	notes      []*Note
+	classes    []*Class
+	relations  []*Relation
 }
 
 // SetDirection sets the diagram direction and returns the diagram for chaining
 func (cd *ClassDiagram) SetDirection(direction classDiagramDirection) *ClassDiagram {
 	cd.Direction = direction
-	return cd
-}
-
-// SetTitle sets the diagram title and returns the diagram for chaining
-func (cd *ClassDiagram) SetTitle(title string) *ClassDiagram {
-	cd.Title = title
-	return cd
-}
-
-// EnableMarkdownFence enables markdown code fencing and returns the diagram for chaining
-func (cd *ClassDiagram) EnableMarkdownFence() *ClassDiagram {
-	cd.markdownFence = true
-	return cd
-}
-
-// DisableMarkdownFence disables markdown code fencing and returns the diagram for chaining
-func (cd *ClassDiagram) DisableMarkdownFence() *ClassDiagram {
-	cd.markdownFence = false
 	return cd
 }
 
@@ -66,7 +47,6 @@ func NewClassDiagram() (newClassDiagram *ClassDiagram) {
 	newClassDiagram = &ClassDiagram{
 		Direction: ClassDiagramDirectionTopToBottom,
 	}
-
 	return
 }
 
@@ -74,10 +54,6 @@ func NewClassDiagram() (newClassDiagram *ClassDiagram) {
 // It includes title, direction, notes, namespaces, classes, and relations.
 func (cd *ClassDiagram) String() string {
 	var sb strings.Builder
-
-	if cd.markdownFence {
-		sb.WriteString("```mermaid\n")
-	}
 
 	if len(cd.Title) > 0 {
 		sb.WriteString(fmt.Sprintf(string(baseClassDiagramTitleString), cd.Title))
@@ -103,36 +79,12 @@ func (cd *ClassDiagram) String() string {
 		sb.WriteString(relation.String())
 	}
 
-	if cd.markdownFence {
-		sb.WriteString("```\n")
-	}
-
-	return sb.String()
+	return cd.WrapWithFence(sb.String())
 }
 
 // RenderToFile saves the diagram to a file at the specified path.
-// If the file extension is .md, markdown fencing is automatically enabled.
-// It creates the directory if it does not exist and writes the diagram content.
 func (cd *ClassDiagram) RenderToFile(path string) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
-	}
-
-	originalFenceState := cd.markdownFence
-	if strings.ToLower(filepath.Ext(path)) == ".md" {
-		cd.EnableMarkdownFence()
-	}
-
-	content := cd.String()
-
-	cd.markdownFence = originalFenceState
-
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write file: %w", err)
-	}
-
-	return nil
+	return utils.RenderToFile(path, cd.String(), cd.IsMarkdownFenceEnabled())
 }
 
 // AddNamespace creates and adds a new namespace to the class diagram.

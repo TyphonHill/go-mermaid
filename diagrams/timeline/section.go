@@ -35,7 +35,9 @@ func (s *Section) AddSubEvent(text string) *Event {
 func (s *Section) String() string {
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf("\tsection %s\n", s.Title))
+	if s.Title != "" {
+		sb.WriteString(fmt.Sprintf("\tsection %s\n", s.Title))
+	}
 
 	for _, event := range s.Events {
 		sb.WriteString(event.String())

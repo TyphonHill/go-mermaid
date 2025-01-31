@@ -27,8 +27,8 @@ type Entity struct {
 type Attribute struct {
 	Name     string
 	Type     DataType
-	PK       bool // Primary Key
-	FK       bool // Foreign Key
+	PK       bool
+	FK       bool
 	Required bool
 }
 
@@ -78,14 +78,12 @@ func (e *Entity) SetAlias(alias string) *Entity {
 func (e *Entity) String() string {
 	var sb strings.Builder
 
-	// Start entity definition with optional alias
 	if e.Alias != "" {
 		sb.WriteString(fmt.Sprintf("\t%s [%s] {\n", e.Name, e.Alias))
 	} else {
 		sb.WriteString(fmt.Sprintf("\t%s {\n", e.Name))
 	}
 
-	// Add attributes
 	for _, attr := range e.Attributes {
 		keys := ""
 		if attr.PK && attr.FK {

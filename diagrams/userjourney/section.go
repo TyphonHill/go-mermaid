@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+// Base string formats for user journey sections and tasks
+const (
+	baseSectionTitle   string = "\tsection %s\n"
+	baseTaskWithPartic string = "\t\t%s: %d: %s\n"
+	baseTaskNoPartic   string = "\t\t%s: %d\n"
+)
+
 // Section represents a section in the user journey
 type Section struct {
 	Title string
@@ -48,15 +55,15 @@ func (s *Section) AddTask(title string, score int, participants ...string) *Task
 func (s *Section) String() string {
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf("\tsection %s\n", s.Title))
+	sb.WriteString(fmt.Sprintf(baseSectionTitle, s.Title))
 	for _, task := range s.Tasks {
 		if len(task.Participants) > 0 {
-			sb.WriteString(fmt.Sprintf("\t\t%s: %d: %s\n",
+			sb.WriteString(fmt.Sprintf(baseTaskWithPartic,
 				task.Title,
 				task.Score,
 				strings.Join(task.Participants, ",")))
 		} else {
-			sb.WriteString(fmt.Sprintf("\t\t%s: %d\n", task.Title, task.Score))
+			sb.WriteString(fmt.Sprintf(baseTaskNoPartic, task.Title, task.Score))
 		}
 	}
 

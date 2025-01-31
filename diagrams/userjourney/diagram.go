@@ -1,3 +1,4 @@
+// Package userjourney provides functionality for creating Mermaid user journey diagrams
 package userjourney
 
 import (
@@ -5,6 +6,12 @@ import (
 	"strings"
 
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
+)
+
+// Base string formats for user journey diagrams
+const (
+	baseDiagramType  string = "journey\n"
+	baseDiagramTitle string = "\ttitle %s\n"
 )
 
 // Diagram represents a Mermaid User Journey diagram
@@ -37,10 +44,10 @@ func (d *Diagram) AddSection(title string) *Section {
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	sb.WriteString("journey\n")
+	sb.WriteString(baseDiagramType)
 
 	if d.Title != "" {
-		sb.WriteString(fmt.Sprintf("\ttitle %s\n", d.Title))
+		sb.WriteString(fmt.Sprintf(baseDiagramTitle, d.Title))
 	}
 
 	for _, section := range d.Sections {

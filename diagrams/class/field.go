@@ -30,8 +30,7 @@ const (
 	baseFieldParamString string = "%s:%s,"
 )
 
-// Field represents a field (attribute) in a class diagram.
-// It contains information about the field's name, type, visibility, and classifier.
+// Field represents a class field with visibility and type information
 type Field struct {
 	Name       string
 	Type       string
@@ -39,24 +38,26 @@ type Field struct {
 	Classifier fieldClassifier
 }
 
-// NewField creates a new Field with the given name and type.
-// It initializes the field with default public visibility.
-func NewField(fieldName string, fieldType string) (newField *Field) {
-	newField = &Field{
-		Name:       fieldName,
+// NewField creates a field with the given name and type
+func NewField(name string, fieldType string) *Field {
+	return &Field{
+		Name:       name,
 		Type:       fieldType,
 		Visibility: FieldVisibilityPublic,
 	}
-
-	return
 }
 
-// String generates the Mermaid syntax representation of the field.
-// It includes the field's visibility, type, name, and classifier.
-func (m *Field) String() string {
+// SetVisibility sets the field's visibility
+func (f *Field) SetVisibility(visibility fieldVisibility) *Field {
+	f.Visibility = visibility
+	return f
+}
+
+// String returns the Mermaid syntax representation of this field
+func (f *Field) String() string {
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf(string(baseFieldBaseString), m.Visibility, m.Type, m.Name, m.Classifier))
+	sb.WriteString(fmt.Sprintf(string(baseFieldBaseString), f.Visibility, f.Type, f.Name, f.Classifier))
 
 	return sb.String()
 }

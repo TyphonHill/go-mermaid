@@ -1,3 +1,4 @@
+// Package state provides functionality for creating Mermaid state diagrams
 package state
 
 import (
@@ -46,12 +47,10 @@ func (d *Diagram) String() string {
 
 	sb.WriteString("stateDiagram-v2\n")
 
-	// Render states
 	for _, state := range d.States {
 		sb.WriteString(state.String(""))
 	}
 
-	// Render transitions
 	for _, transition := range d.Transitions {
 		sb.WriteString(transition.String(""))
 	}

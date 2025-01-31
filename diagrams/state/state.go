@@ -103,7 +103,6 @@ func (s *State) String(curIndentation string) string {
 		}
 	}
 
-	// Render nested states if any
 	if len(s.Nested) > 0 {
 		sb.WriteString(fmt.Sprintf("%s%s", curIndentation, fmt.Sprintf(baseCompositeStart, s.ID)))
 		nextIndentation := fmt.Sprintf("%s    ", curIndentation)
@@ -113,7 +112,6 @@ func (s *State) String(curIndentation string) string {
 		sb.WriteString(fmt.Sprintf("%s%s", curIndentation, baseCompositeEnd))
 	}
 
-	// Render note if present
 	if s.Note != nil {
 		sb.WriteString(fmt.Sprintf("%s%s", curIndentation,
 			fmt.Sprintf(baseNote, s.Note.Position, s.ID, s.Note.Text)))

@@ -1,3 +1,4 @@
+// Package timeline provides functionality for creating Mermaid timeline diagrams
 package timeline
 
 import (

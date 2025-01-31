@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-// methodVisibility represents the access modifier for a method in a class diagram.
+// methodVisibility represents the access modifier for a method
 type methodVisibility string
 
-// methodClassifier represents additional modifiers for a method, such as abstract or static.
+// methodClassifier represents additional modifiers for a method
 type methodClassifier string
 
-// Method visibility constants define the access levels for class methods.
+// Method visibility constants
 const (
 	MethodVisibilityPublic    methodVisibility = "+"
 	MethodVisibilityPrivate   methodVisibility = "-"
@@ -19,27 +19,25 @@ const (
 	MethodVisibilityInternal  methodVisibility = "~"
 )
 
-// Method classifier constants define additional method characteristics.
+// Method classifier constants
 const (
 	MethodClassifierAbstract methodClassifier = "*"
 	MethodClassifierStatic   methodClassifier = "$"
 )
 
-// Formatting constants for method string representation.
+// Mermaid method syntax templates
 const (
 	baseMethodBaseString  string = "\t%s%s(%s)%s %s"
 	baseMethodParamString string = "%s:%s,"
 )
 
-// Parameter represents a single parameter in a method signature.
+// Parameter represents a method parameter
 type Parameter struct {
 	Name string
 	Type string
 }
 
-// Method represents a method in a class diagram.
-// It contains information about the method's name, parameters, return type,
-// visibility, and classifier.
+// Method represents a class method
 type Method struct {
 	Name       string
 	Parameters []Parameter
@@ -48,24 +46,39 @@ type Method struct {
 	Classifier methodClassifier
 }
 
-// NewMethod creates a new Method with the given name.
-// It initializes the method with default public visibility.
+// NewMethod creates a method with the given name
 func NewMethod(name string) (newMethod *Method) {
 	newMethod = &Method{
 		Name:       name,
 		Visibility: MethodVisibilityPublic,
 	}
-
 	return
 }
 
-// AddParameter adds a new parameter to the method's parameter list.
+// SetVisibility sets the method's visibility
+func (m *Method) SetVisibility(visibility methodVisibility) *Method {
+	m.Visibility = visibility
+	return m
+}
+
+// SetReturnType sets the method's return type
+func (m *Method) SetReturnType(returnType string) *Method {
+	m.ReturnType = returnType
+	return m
+}
+
+// SetClassifier sets the method's classifier
+func (m *Method) SetClassifier(classifier methodClassifier) *Method {
+	m.Classifier = classifier
+	return m
+}
+
+// AddParameter adds a parameter to this method
 func (m *Method) AddParameter(paramName string, paramType string) {
 	m.Parameters = append(m.Parameters, Parameter{Name: paramName, Type: paramType})
 }
 
-// String generates the Mermaid syntax representation of the method.
-// It includes the method's visibility, name, parameters, classifier, and return type.
+// String returns the Mermaid syntax representation of this method
 func (m *Method) String() string {
 	var sb strings.Builder
 

@@ -5,15 +5,15 @@ import "fmt"
 // Cardinality represents the relationship cardinality
 type Cardinality string
 
+// Common relationship patterns
 const (
-	// Common relationship patterns
 	OneToZeroOrMore Cardinality = "||--o{" // One to many (optional)
 	OneToOneOrMore  Cardinality = "||--|{" // One to many (required)
 	OneToExactlyOne Cardinality = "||--||" // One to one
 	ZeroOrOneToMany Cardinality = "|o--o{" // Optional one to many
 	ManyToMany      Cardinality = "}o--o{" // Many to many
 
-	// Base cardinality symbols (for custom combinations)
+	// Base cardinality symbols
 	ZeroOrOne  Cardinality = "|o"
 	ExactlyOne Cardinality = "||"
 	ZeroOrMore Cardinality = "o{"
@@ -37,13 +37,13 @@ func NewRelationship(from, to *Entity) *Relationship {
 	}
 }
 
-// SetLabel sets the relationship label and returns the relationship for chaining
+// SetLabel sets the relationship label
 func (r *Relationship) SetLabel(label string) *Relationship {
 	r.Label = label
 	return r
 }
 
-// SetCardinality sets the relationship cardinality and returns the relationship for chaining
+// SetCardinality sets the relationship cardinality
 func (r *Relationship) SetCardinality(cardinality Cardinality) *Relationship {
 	r.Cardinality = cardinality
 	return r

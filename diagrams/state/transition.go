@@ -15,9 +15,9 @@ const (
 
 // Base string formats for transition diagram elements
 const (
-	baseTransition         string = "%s --> %s"
-	baseTransitionWithDesc string = ": %s"
-	baseNewline            string = "\n"
+	baseTransition         string = "%s\t%s --> %s\n"
+	baseTransitionWithDesc string = "%s\t%s --> %s: %s\n"
+	terminalState          string = "[*]"
 )
 
 // Transition represents a transition between states in a state diagram.
@@ -48,21 +48,20 @@ func (t *Transition) SetType(transitionType TransitionType) *Transition {
 func (t *Transition) String(indentation string) string {
 	var fromID, toID string
 
-	// Handle nil states
 	if t.From == nil {
-		fromID = "[*]"
+		fromID = terminalState
 	} else {
 		fromID = t.From.ID
 	}
 
 	if t.To == nil {
-		toID = "[*]"
+		toID = terminalState
 	} else {
 		toID = t.To.ID
 	}
 
 	if t.Description == "" {
-		return fmt.Sprintf("%s\t%s --> %s\n", indentation, fromID, toID)
+		return fmt.Sprintf(baseTransition, indentation, fromID, toID)
 	}
-	return fmt.Sprintf("%s\t%s --> %s: %s\n", indentation, fromID, toID, t.Description)
+	return fmt.Sprintf(baseTransitionWithDesc, indentation, fromID, toID, t.Description)
 }

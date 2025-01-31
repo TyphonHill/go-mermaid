@@ -5,10 +5,25 @@ import (
 	"strings"
 )
 
+// Mermaid block syntax templates
+const (
+	tplSpace        = "\tspace\n"
+	tplBlockStart   = "\tblock:%s:%d\n"
+	tplBlockSimple  = "\tblock:%s\n"
+	tplColumns      = "\t\tcolumns %d\n"
+	tplChildBlock   = "\t\t%s%s\n"
+	tplChildSimple  = "\t\t%s\n"
+	tplBlockEnd     = "\tend\n"
+	tplBlockWidth   = "\t%s%s:%d\n"
+	tplBlockNoWidth = "\t%s%s\n"
+	tplBlockID      = "\t%s\n"
+	tplStyle        = "\tstyle %s %s\n"
+)
+
+// BlockShape defines the visual appearance of a block
 type blockShape string
 
-// List of possible Block shapes.
-// Reference: https://mermaid.js.org/syntax/flowchart.html#node-shapes
+// Available block shapes for use in diagrams
 const (
 	BlockShapeDefault       blockShape = `["%s"]`
 	BlockShapeRoundEdges    blockShape = `("%s")`
@@ -25,61 +40,58 @@ const (
 	BlockShapeDoubleCircle  blockShape = `((("%s")))`
 )
 
-// Block represents a block in the diagram
+// Block represents a node in a block diagram
 type Block struct {
-	ID       string
-	Text     string
-	Style    string
-	Shape    blockShape
-	Children []*Block
-	IsSpace  bool
-	Width    int // Number of columns the block spans
-	diagram  *Diagram
-	// New fields for block arrows
+	ID        string
+	Text      string
+	Style     string
+	Shape     blockShape
+	Children  []*Block
+	IsSpace   bool
+	Width     int
+	diagram   *Diagram
 	isArrow   bool
 	direction []BlockArrowDirection
-	// New field for block columns
-	columns int
+	columns   int
 }
 
-// NewBlock creates a new block
+// NewBlock creates a block with the given ID and text
 func NewBlock(id, text string) *Block {
 	return &Block{
 		ID:       id,
 		Text:     text,
-		Style:    "",
 		Shape:    BlockShapeDefault,
 		Children: make([]*Block, 0),
-		Width:    1, // Default to 1 column
+		Width:    1,
 	}
 }
 
-// SetWidth sets the number of columns the block spans
+// SetWidth sets the number of columns this block spans
 func (b *Block) SetWidth(width int) *Block {
 	b.Width = width
 	return b
 }
 
-// SetStyle sets the block's CSS style properties
+// SetStyle sets CSS style properties for this block
 func (b *Block) SetStyle(style string) *Block {
 	b.Style = style
 	return b
 }
 
-// SetShape sets the block's shape
+// SetShape sets the visual shape of this block
 func (b *Block) SetShape(shape blockShape) *Block {
 	b.Shape = shape
 	return b
 }
 
-// AddBlock creates and adds a nested block
+// AddBlock creates a nested block with the given text
 func (b *Block) AddBlock(text string) *Block {
 	block := NewBlock(idGenerator.NextID(), text)
 	b.Children = append(b.Children, block)
 	return block
 }
 
-// SetArrow sets the block as an arrow with the given directions
+// SetArrow configures this block as an arrow with the given directions
 func (b *Block) SetArrow(directions ...BlockArrowDirection) *Block {
 	b.isArrow = true
 	b.direction = directions
@@ -104,65 +116,64 @@ func (b *Block) RemoveColumn() *Block {
 	return b
 }
 
-// String generates the Mermaid syntax for the block
+// String returns the Mermaid syntax representation of this block
 func (b *Block) String() string {
 	var sb strings.Builder
 
 	if b.IsSpace {
-		sb.WriteString("\tspace\n")
+		sb.WriteString(tplSpace)
 		return sb.String()
 	}
 
 	if len(b.Children) > 0 {
 		// Parent block with children
 		if b.Width > 0 {
-			sb.WriteString(fmt.Sprintf("\tblock:%s:%d\n", b.ID, b.Width))
+			sb.WriteString(fmt.Sprintf(tplBlockStart, b.ID, b.Width))
 		} else {
-			sb.WriteString(fmt.Sprintf("\tblock:%s\n", b.ID))
+			sb.WriteString(fmt.Sprintf(tplBlockSimple, b.ID))
 		}
-		// Add columns if defined for this block
 		if b.columns > 0 {
-			sb.WriteString(fmt.Sprintf("\t\tcolumns %d\n", b.columns))
+			sb.WriteString(fmt.Sprintf(tplColumns, b.columns))
 		}
 		for _, child := range b.Children {
 			if child.Text != "" {
 				if child.isArrow {
-					sb.WriteString(fmt.Sprintf("\t\t%s%s\n", child.ID, BlockArrowShape(child.Text, child.direction...)))
+					sb.WriteString(fmt.Sprintf(tplChildBlock, child.ID, BlockArrowShape(child.Text, child.direction...)))
 				} else {
-					sb.WriteString(fmt.Sprintf("\t\t%s%s\n", child.ID, fmt.Sprintf(string(child.Shape), child.Text)))
+					sb.WriteString(fmt.Sprintf(tplChildBlock, child.ID, fmt.Sprintf(string(child.Shape), child.Text)))
 				}
 			} else {
-				sb.WriteString(fmt.Sprintf("\t\t%s\n", child.ID))
+				sb.WriteString(fmt.Sprintf(tplChildSimple, child.ID))
 			}
 		}
-		sb.WriteString("\tend\n")
+		sb.WriteString(tplBlockEnd)
 	} else {
 		// Single block
 		if b.Text != "" {
 			if b.isArrow {
 				if b.Width > 1 {
-					sb.WriteString(fmt.Sprintf("\t%s%s:%d\n", b.ID, BlockArrowShape(b.Text, b.direction...), b.Width))
+					sb.WriteString(fmt.Sprintf(tplBlockWidth, b.ID, BlockArrowShape(b.Text, b.direction...), b.Width))
 				} else {
-					sb.WriteString(fmt.Sprintf("\t%s%s\n", b.ID, BlockArrowShape(b.Text, b.direction...)))
+					sb.WriteString(fmt.Sprintf(tplBlockNoWidth, b.ID, BlockArrowShape(b.Text, b.direction...)))
 				}
 			} else {
 				if b.Width > 1 {
-					sb.WriteString(fmt.Sprintf("\t%s%s:%d\n", b.ID, fmt.Sprintf(string(b.Shape), b.Text), b.Width))
+					sb.WriteString(fmt.Sprintf(tplBlockWidth, b.ID, fmt.Sprintf(string(b.Shape), b.Text), b.Width))
 				} else {
-					sb.WriteString(fmt.Sprintf("\t%s%s\n", b.ID, fmt.Sprintf(string(b.Shape), b.Text)))
+					sb.WriteString(fmt.Sprintf(tplBlockNoWidth, b.ID, fmt.Sprintf(string(b.Shape), b.Text)))
 				}
 			}
 		} else {
 			if b.Width > 1 {
-				sb.WriteString(fmt.Sprintf("\t%s:%d\n", b.ID, b.Width))
+				sb.WriteString(fmt.Sprintf(tplBlockWidth, b.ID, "", b.Width))
 			} else {
-				sb.WriteString(fmt.Sprintf("\t%s\n", b.ID))
+				sb.WriteString(fmt.Sprintf(tplBlockID, b.ID))
 			}
 		}
 	}
 
 	if b.Style != "" {
-		sb.WriteString(fmt.Sprintf("\tstyle %s %s\n", b.ID, b.Style))
+		sb.WriteString(fmt.Sprintf(tplStyle, b.ID, b.Style))
 	}
 
 	return sb.String()

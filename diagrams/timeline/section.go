@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+// Base string formats for timeline sections
+const (
+	baseSectionTitle string = "\tsection %s\n"
+)
+
 // Section represents a section in the timeline diagram
 type Section struct {
 	Title  string
@@ -36,7 +41,7 @@ func (s *Section) String() string {
 	var sb strings.Builder
 
 	if s.Title != "" {
-		sb.WriteString(fmt.Sprintf("\tsection %s\n", s.Title))
+		sb.WriteString(fmt.Sprintf(baseSectionTitle, s.Title))
 	}
 
 	for _, event := range s.Events {

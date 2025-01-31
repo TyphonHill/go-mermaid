@@ -1,3 +1,4 @@
+// Package sequence provides functionality for creating Mermaid sequence diagrams
 package sequence
 
 import (
@@ -80,13 +81,11 @@ func (d *Diagram) String() string {
 		sb.WriteString("autonumber\n")
 	}
 
-	// Render actors
 	for _, actor := range d.Actors {
 		sb.WriteString(fmt.Sprintf("\t%s %s as %s\n",
 			actor.Type, actor.ID, actor.Name))
 	}
 
-	// Render messages (which will include notes)
 	for _, message := range d.Messages {
 		sb.WriteString(message.String(""))
 	}

@@ -5,9 +5,10 @@ import (
 	"strings"
 )
 
-// BlockArrowDirection represents the direction of a block arrow
+// BlockArrowDirection specifies the direction of a block arrow
 type BlockArrowDirection string
 
+// Available arrow directions for block arrows
 const (
 	BlockArrowDirectionRight BlockArrowDirection = "right"
 	BlockArrowDirectionLeft  BlockArrowDirection = "left"

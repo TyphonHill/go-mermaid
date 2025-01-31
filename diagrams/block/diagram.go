@@ -1,3 +1,4 @@
+// Package block provides functionality for creating Mermaid block diagrams
 package block
 
 import (
@@ -9,6 +10,12 @@ import (
 
 // Global ID generator for the package
 var idGenerator = utils.NewIDGenerator()
+
+// Mermaid diagram syntax templates
+const (
+	tplDiagramStart = "block-beta\n"
+	tplDiagramCols  = "\tcolumns %d\n"
+)
 
 // Diagram represents a Mermaid block diagram
 type Diagram struct {
@@ -33,13 +40,13 @@ func (d *Diagram) SetColumns(count int) *Diagram {
 	return d
 }
 
-// AddColumn increases the number of columns in the diagram by one
+// AddColumn increases the number of columns by one
 func (d *Diagram) AddColumn() *Diagram {
 	d.Columns += 1
 	return d
 }
 
-// RemoveColumn decreases the number of columns in the diagram by one
+// RemoveColumn decreases the number of columns by one
 func (d *Diagram) RemoveColumn() *Diagram {
 	d.Columns -= 1
 	return d
@@ -58,7 +65,7 @@ func (d *Diagram) AddSpace() {
 	d.Blocks = append(d.Blocks, &Block{IsSpace: true})
 }
 
-// AddSpaceWithWidth adds a space block with specified column width
+// AddSpaceWithWidth adds a space block with specified width
 func (d *Diagram) AddSpaceWithWidth(width int) {
 	d.Blocks = append(d.Blocks, &Block{IsSpace: true, Width: width})
 }
@@ -70,26 +77,20 @@ func (d *Diagram) AddLink(from, to *Block) *Link {
 	return link
 }
 
-// String generates the Mermaid syntax for the block diagram
+// String returns the Mermaid syntax representation of this diagram
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	sb.WriteString("block-beta\n")
+	sb.WriteString(tplDiagramStart)
 
-	// Add columns if defined
 	if d.Columns > 0 {
-		sb.WriteString(fmt.Sprintf("\tcolumns %d\n", d.Columns))
+		sb.WriteString(fmt.Sprintf(tplDiagramCols, d.Columns))
 	}
 
-	// Add blocks
 	for _, block := range d.Blocks {
 		sb.WriteString(block.String())
-		if !block.IsSpace && block.Style != "" {
-			sb.WriteString(fmt.Sprintf("\tstyle %s %s\n", block.ID, block.Style))
-		}
 	}
 
-	// Add links
 	for _, link := range d.Links {
 		sb.WriteString(link.String())
 	}

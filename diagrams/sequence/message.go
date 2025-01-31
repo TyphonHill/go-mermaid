@@ -81,7 +81,6 @@ func (m *Message) SetText(text string) *Message {
 func (m *Message) String(curIndentation string) string {
 	var sb strings.Builder
 
-	// Handle notes first
 	if m.Note != nil {
 		return m.Note.String(curIndentation)
 	}
@@ -96,7 +95,6 @@ func (m *Message) String(curIndentation string) string {
 		sb.WriteString(fmt.Sprintf("%s\t%s", curIndentation,
 			fmt.Sprintf(baseDestroy, m.To.ID)))
 	case MessageActivate:
-		// Write the message and activation
 		if m.Text != "" {
 			sb.WriteString(fmt.Sprintf("%s\t%s", curIndentation,
 				fmt.Sprintf(baseMessage, "", m.From.ID, "-->", m.To.ID, m.Text)))
@@ -104,7 +102,6 @@ func (m *Message) String(curIndentation string) string {
 		sb.WriteString(fmt.Sprintf("%s\t%s", curIndentation,
 			fmt.Sprintf(baseActivate, m.To.ID)))
 	case MessageDeactivate:
-		// Only deactivate the sender (From), not the receiver (To)
 		if m.Text != "" {
 			sb.WriteString(fmt.Sprintf("%s\t%s", curIndentation,
 				fmt.Sprintf(baseMessage, "", m.From.ID, MessageSolid, m.To.ID, m.Text)))
@@ -122,7 +119,6 @@ func (m *Message) String(curIndentation string) string {
 		}
 	}
 
-	// Handle nested messages
 	if len(m.Nested) > 0 {
 		nextIndentation := fmt.Sprintf("%s\t", curIndentation)
 		for _, nested := range m.Nested {

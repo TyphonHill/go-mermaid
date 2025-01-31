@@ -1,3 +1,4 @@
+// Package class provides functionality for creating Mermaid class diagrams
 package class
 
 import (
@@ -68,7 +69,7 @@ func (cd *ClassDiagram) String() string {
 	}
 
 	for _, namespace := range cd.namespaces {
-		sb.WriteString(namespace.String())
+		sb.WriteString(namespace.String(""))
 	}
 
 	for _, class := range cd.classes {
@@ -109,13 +110,12 @@ func (cd *ClassDiagram) AddNote(text string, class *Class) {
 // If namespace is nil, the class is added directly to the diagram.
 // Returns the newly created Class.
 func (cd *ClassDiagram) AddClass(name string, namespace *Namespace) (newClass *Class) {
+	newClass = NewClass(name)
 	if namespace == nil {
-		newClass = NewClass(name)
 		cd.classes = append(cd.classes, newClass)
 	} else {
-		newClass = namespace.AddClass(name)
+		namespace.AddClass(newClass)
 	}
-
 	return
 }
 

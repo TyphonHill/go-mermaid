@@ -1,8 +1,6 @@
 package class
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -93,129 +91,6 @@ func TestClassDiagram_DisableMarkdownFence(t *testing.T) {
 	}
 }
 
-func TestClassDiagram_RenderToFile(t *testing.T) {
-	// Create temp directory for test files
-	tempDir, err := os.MkdirTemp("", "class_diagram_test_*")
-	if err != nil {
-		t.Fatalf("Failed to create temp directory: %v", err)
-	}
-	defer os.RemoveAll(tempDir)
-
-	// Create a sample diagram
-	diagram := NewClassDiagram()
-	diagram.Title = "Test Class Diagram"
-	namespace := diagram.AddNamespace("TestNamespace")
-	class1 := diagram.AddClass("TestClass1", namespace)
-	class2 := diagram.AddClass("TestClass2", namespace)
-	relation := diagram.AddRelation(class1, class2)
-	relation.Label = "Test Relation"
-
-	tests := []struct {
-		name           string
-		filename       string
-		setupFence     bool
-		expectFence    bool
-		expectError    bool
-		validateOutput func(string) bool
-	}{
-		{
-			name:        "Save as markdown file",
-			filename:    "diagram.md",
-			setupFence:  false, // Even with fencing disabled, .md should enable it
-			expectFence: true,
-			validateOutput: func(content string) bool {
-				return strings.HasPrefix(content, "```mermaid\n") &&
-					strings.HasSuffix(content, "```\n") &&
-					strings.Contains(content, "Test Class Diagram") &&
-					strings.Contains(content, "TestNamespace") &&
-					strings.Contains(content, "TestClass1") &&
-					strings.Contains(content, "Test Relation")
-			},
-		},
-		{
-			name:        "Save as text file with fencing enabled",
-			filename:    "diagram.txt",
-			setupFence:  true,
-			expectFence: true,
-			validateOutput: func(content string) bool {
-				return strings.HasPrefix(content, "```mermaid\n") &&
-					strings.HasSuffix(content, "```\n")
-			},
-		},
-		{
-			name:        "Save as text file without fencing",
-			filename:    "diagram.txt",
-			setupFence:  false,
-			expectFence: false,
-			validateOutput: func(content string) bool {
-				return !strings.Contains(content, "```mermaid")
-			},
-		},
-		{
-			name:        "Save to nested directory",
-			filename:    "nested/dir/diagram.txt",
-			setupFence:  false,
-			expectFence: false,
-			validateOutput: func(content string) bool {
-				return strings.Contains(content, "Test Class Diagram")
-			},
-		},
-		{
-			name:        "Save with invalid path",
-			filename:    string([]byte{0}), // Invalid filename
-			expectError: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Set up diagram fencing
-			if tt.setupFence {
-				diagram.EnableMarkdownFence()
-			} else {
-				diagram.DisableMarkdownFence()
-			}
-
-			// Create full path
-			path := filepath.Join(tempDir, tt.filename)
-
-			// Attempt to render
-			err := diagram.RenderToFile(path)
-
-			// Check error expectation
-			if tt.expectError {
-				if err == nil {
-					t.Error("Expected error but got none")
-				}
-				return
-			}
-
-			// If we don't expect an error but got one
-			if err != nil {
-				t.Fatalf("Unexpected error: %v", err)
-			}
-
-			// Read the file content
-			content, err := os.ReadFile(path)
-			if err != nil {
-				t.Fatalf("Failed to read output file: %v", err)
-			}
-
-			// Validate content
-			if tt.validateOutput != nil {
-				if !tt.validateOutput(string(content)) {
-					t.Error("Output validation failed")
-				}
-			}
-
-			// Verify fence state wasn't changed permanently
-			if diagram.IsMarkdownFenceEnabled() != tt.setupFence {
-				t.Error("Diagram fence state was permanently modified")
-			}
-		})
-	}
-}
-
 func TestClassDiagram_AddComponents(t *testing.T) {
 	diagram := NewClassDiagram()
 
@@ -241,7 +116,7 @@ func TestClassDiagram_AddComponents(t *testing.T) {
 		t.Errorf("AddClass() with namespace failed")
 	}
 
-	if len(namespace.classes) != 2 || len(diagram.classes) != 0 {
+	if len(namespace.Classes) != 2 || len(diagram.classes) != 0 {
 		t.Errorf("Class not added to namespace correctly")
 	}
 

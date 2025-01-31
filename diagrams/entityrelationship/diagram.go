@@ -1,3 +1,4 @@
+// Package entityrelationship provides functionality for creating Mermaid ER diagrams
 package entityrelationship
 
 import (

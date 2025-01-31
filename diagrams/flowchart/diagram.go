@@ -1,3 +1,4 @@
+// Package flowchart provides functionality for creating Mermaid flowcharts
 package flowchart
 
 import (

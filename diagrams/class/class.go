@@ -1,3 +1,4 @@
+// Package class provides functionality for creating Mermaid class diagrams
 package class
 
 import (
@@ -7,6 +8,7 @@ import (
 
 type classAnnotation string
 
+// Available class annotations
 const (
 	ClassAnnotationNone        classAnnotation = ""
 	ClassAnnotationInterface   classAnnotation = "<<Interface>>"
@@ -15,6 +17,7 @@ const (
 	ClassAnnotationEnumeration classAnnotation = "<<Enumeration>>"
 )
 
+// Mermaid class syntax templates
 const (
 	baseClassStartString      string = "\tclass %s%s{\n"
 	baseClassEndString        string = "\t}\n"
@@ -23,8 +26,7 @@ const (
 	baseClassMemberString     string = "\t%s\n"
 )
 
-// Class represents a class in the Mermaid class diagram,
-// containing information about its name, label, annotation, methods, and fields.
+// Class represents a class in a Mermaid class diagram
 type Class struct {
 	Name       string
 	Label      string
@@ -33,45 +35,41 @@ type Class struct {
 	fields     []*Field
 }
 
-// NewClass creates a new Class with the given name.
-// It initializes the class with default values and returns a pointer to the new Class.
+// NewClass creates a new Class with the given name
 func NewClass(name string) (newClass *Class) {
 	newClass = &Class{
 		Name: name,
 	}
-
 	return
 }
 
-// SetLabel sets the class label and returns the class for chaining
+// SetLabel sets the class label
 func (c *Class) SetLabel(label string) *Class {
 	c.Label = label
 	return c
 }
 
-// SetAnnotation sets the class annotation and returns the class for chaining
+// SetAnnotation sets the class annotation
 func (c *Class) SetAnnotation(annotation classAnnotation) *Class {
 	c.Annotation = annotation
 	return c
 }
 
-// AddMethod creates and adds a new method to the class
+// AddMethod creates and adds a new method
 func (c *Class) AddMethod(name string) *Method {
 	method := NewMethod(name)
 	c.methods = append(c.methods, method)
 	return method
 }
 
-// AddField creates and adds a new field to the class
+// AddField creates and adds a new field
 func (c *Class) AddField(fieldName string, fieldType string) *Field {
 	field := NewField(fieldName, fieldType)
 	c.fields = append(c.fields, field)
 	return field
 }
 
-// String generates the Mermaid syntax representation of the class.
-// The curIndentation parameter allows for nested formatting of the class diagram.
-// It includes the class name, label, annotation, fields, and methods.
+// String returns the Mermaid syntax representation of this class
 func (c *Class) String(curIndentation string) string {
 	var sb strings.Builder
 

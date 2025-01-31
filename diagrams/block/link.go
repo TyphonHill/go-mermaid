@@ -2,14 +2,20 @@ package block
 
 import "fmt"
 
-// Link represents a connection between blocks
+// Mermaid link syntax templates
+const (
+	tplLinkWithText = "\t%s -- \"%s\" --> %s\n"
+	tplLink         = "\t%s --> %s\n"
+)
+
+// Link represents a connection between two blocks
 type Link struct {
 	From *Block
 	To   *Block
 	Text string
 }
 
-// NewLink creates a new link between blocks
+// NewLink creates a link between two blocks
 func NewLink(from, to *Block) *Link {
 	return &Link{
 		From: from,
@@ -17,16 +23,16 @@ func NewLink(from, to *Block) *Link {
 	}
 }
 
-// SetText sets the link's text
+// SetText sets the text label for this link
 func (l *Link) SetText(text string) *Link {
 	l.Text = text
 	return l
 }
 
-// String generates the Mermaid syntax for the link
+// String returns the Mermaid syntax representation of this link
 func (l *Link) String() string {
 	if l.Text != "" {
-		return fmt.Sprintf("\t%s -- \"%s\" --> %s\n", l.From.ID, l.Text, l.To.ID)
+		return fmt.Sprintf(tplLinkWithText, l.From.ID, l.Text, l.To.ID)
 	}
-	return fmt.Sprintf("\t%s --> %s\n", l.From.ID, l.To.ID)
+	return fmt.Sprintf(tplLink, l.From.ID, l.To.ID)
 }

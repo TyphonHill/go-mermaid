@@ -23,3 +23,9 @@ func (g *DefaultIDGenerator) NextID() string {
 	g.nextID++
 	return fmt.Sprintf("%d", id)
 }
+
+// Reset resets the ID generator to its initial state
+func (g *DefaultIDGenerator) Reset() *DefaultIDGenerator {
+	g.nextID = 0
+	return g
+}

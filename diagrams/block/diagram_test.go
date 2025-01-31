@@ -4,17 +4,14 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-
-	"github.com/TyphonHill/go-mermaid/diagrams/utils"
 )
 
 func TestNewDiagram(t *testing.T) {
 	got := NewDiagram()
 	want := &Diagram{
-		Blocks:      make([]*Block, 0),
-		Links:       make([]*Link, 0),
-		Columns:     0,
-		idGenerator: utils.NewIDGenerator(),
+		Blocks:  make([]*Block, 0),
+		Links:   make([]*Link, 0),
+		Columns: 0,
 	}
 
 	if !reflect.DeepEqual(got, want) {

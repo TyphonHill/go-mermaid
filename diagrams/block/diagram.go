@@ -7,22 +7,23 @@ import (
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
 )
 
+// Global ID generator for the package
+var idGenerator = utils.NewIDGenerator()
+
 // Diagram represents a Mermaid block diagram
 type Diagram struct {
 	utils.BaseDiagram
-	Blocks      []*Block
-	Links       []*Link
-	Columns     int
-	idGenerator utils.IDGenerator
+	Blocks  []*Block
+	Links   []*Link
+	Columns int
 }
 
 // NewDiagram creates a new block diagram
 func NewDiagram() *Diagram {
 	return &Diagram{
-		Blocks:      make([]*Block, 0),
-		Links:       make([]*Link, 0),
-		Columns:     0,
-		idGenerator: utils.NewIDGenerator(),
+		Blocks:  make([]*Block, 0),
+		Links:   make([]*Link, 0),
+		Columns: 0,
 	}
 }
 
@@ -46,7 +47,7 @@ func (d *Diagram) RemoveColumn() *Diagram {
 
 // AddBlock creates and adds a new block to the diagram
 func (d *Diagram) AddBlock(text string) *Block {
-	block := NewBlock(d.idGenerator.NextID(), text)
+	block := NewBlock(idGenerator.NextID(), text)
 	block.diagram = d
 	d.Blocks = append(d.Blocks, block)
 	return block

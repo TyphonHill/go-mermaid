@@ -38,6 +38,8 @@ type Block struct {
 	// New fields for block arrows
 	isArrow   bool
 	direction []BlockArrowDirection
+	// New field for block columns
+	columns int
 }
 
 // NewBlock creates a new block
@@ -72,9 +74,7 @@ func (b *Block) SetShape(shape blockShape) *Block {
 
 // AddBlock creates and adds a nested block
 func (b *Block) AddBlock(text string) *Block {
-	// Get the diagram reference to generate ID
-	diagram := b.diagram
-	block := NewBlock(diagram.idGenerator.NextID(), text)
+	block := NewBlock(idGenerator.NextID(), text)
 	b.Children = append(b.Children, block)
 	return block
 }
@@ -83,6 +83,24 @@ func (b *Block) AddBlock(text string) *Block {
 func (b *Block) SetArrow(directions ...BlockArrowDirection) *Block {
 	b.isArrow = true
 	b.direction = directions
+	return b
+}
+
+// SetColumns sets the number of columns for this block's children
+func (b *Block) SetColumns(count int) *Block {
+	b.columns = count
+	return b
+}
+
+// AddColumn increases the number of columns for this block's children by one
+func (b *Block) AddColumn() *Block {
+	b.columns += 1
+	return b
+}
+
+// RemoveColumn decreases the number of columns for this block's children by one
+func (b *Block) RemoveColumn() *Block {
+	b.columns -= 1
 	return b
 }
 
@@ -97,7 +115,15 @@ func (b *Block) String() string {
 
 	if len(b.Children) > 0 {
 		// Parent block with children
-		sb.WriteString(fmt.Sprintf("\tblock:%s\n", b.ID))
+		if b.Width > 0 {
+			sb.WriteString(fmt.Sprintf("\tblock:%s:%d\n", b.ID, b.Width))
+		} else {
+			sb.WriteString(fmt.Sprintf("\tblock:%s\n", b.ID))
+		}
+		// Add columns if defined for this block
+		if b.columns > 0 {
+			sb.WriteString(fmt.Sprintf("\t\tcolumns %d\n", b.columns))
+		}
 		for _, child := range b.Children {
 			if child.Text != "" {
 				if child.isArrow {
@@ -135,7 +161,6 @@ func (b *Block) String() string {
 		}
 	}
 
-	// Add style if present
 	if b.Style != "" {
 		sb.WriteString(fmt.Sprintf("\tstyle %s %s\n", b.ID, b.Style))
 	}

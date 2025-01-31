@@ -3,8 +3,6 @@ package block
 import (
 	"reflect"
 	"testing"
-
-	"github.com/TyphonHill/go-mermaid/diagrams/utils"
 )
 
 func TestNewBlock(t *testing.T) {
@@ -44,6 +42,8 @@ func TestNewBlock(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			idGenerator = idGenerator.Reset()
+
 			got := NewBlock(tt.id, tt.text)
 			if !reflect.DeepEqual(got, tt.wantBlock) {
 				t.Errorf("NewBlock() = %v, want %v", got, tt.wantBlock)
@@ -116,16 +116,18 @@ func TestBlock_String(t *testing.T) {
 			name:  "Parent block with children",
 			block: NewBlock("4", "Parent"),
 			setup: func(b *Block) {
-				b.diagram = &Diagram{idGenerator: utils.NewIDGenerator()}
+				b.diagram = &Diagram{}
 				b.AddBlock("Child 1")
 				b.AddBlock("Child 2")
 			},
-			wantStr: "\tblock:4\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+			wantStr: "\tblock:4:1\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			idGenerator = idGenerator.Reset()
+
 			if tt.setup != nil {
 				tt.setup(tt.block)
 			}
@@ -185,6 +187,8 @@ func TestBlock_SetShape(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			idGenerator = idGenerator.Reset()
+
 			block := NewBlock("0", tt.text)
 			block.SetShape(tt.shape)
 			got := block.String()
@@ -256,6 +260,8 @@ func TestBlock_SetArrow(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			idGenerator = idGenerator.Reset()
+
 			block := NewBlock("0", tt.text)
 			if tt.width > 0 {
 				block.SetWidth(tt.width)
@@ -264,6 +270,151 @@ func TestBlock_SetArrow(t *testing.T) {
 			got := block.String()
 			if got != tt.wantStr {
 				t.Errorf("Block.String() with arrow = %v, want %v", got, tt.wantStr)
+			}
+		})
+	}
+}
+
+func TestBlock_SetColumns(t *testing.T) {
+	tests := []struct {
+		name    string
+		block   *Block
+		setup   func(*Block)
+		wantStr string
+	}{
+		{
+			name:  "Block with columns",
+			block: NewBlock("0", "Parent"),
+			setup: func(b *Block) {
+				b.diagram = &Diagram{}
+				b.SetColumns(2)
+				b.AddBlock("Child 1")
+				b.AddBlock("Child 2")
+			},
+			wantStr: "\tblock:0:1\n\t\tcolumns 2\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+		},
+		{
+			name:  "Block with columns and width",
+			block: NewBlock("0", "Parent"),
+			setup: func(b *Block) {
+				b.diagram = &Diagram{}
+				b.SetColumns(2)
+				b.SetWidth(3)
+				b.AddBlock("Child 1")
+				b.AddBlock("Child 2")
+			},
+			wantStr: "\tblock:0:3\n\t\tcolumns 2\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			idGenerator = idGenerator.Reset()
+
+			if tt.setup != nil {
+				tt.setup(tt.block)
+			}
+
+			got := tt.block.String()
+			if got != tt.wantStr {
+				t.Errorf("Block.String() = %v, want %v", got, tt.wantStr)
+			}
+		})
+	}
+}
+
+func TestBlock_AddColumn(t *testing.T) {
+	tests := []struct {
+		name    string
+		block   *Block
+		setup   func(*Block)
+		wantStr string
+	}{
+		{
+			name:  "Add column to empty block",
+			block: NewBlock("0", "Parent"),
+			setup: func(b *Block) {
+				b.diagram = &Diagram{}
+				b.AddColumn()
+				b.AddBlock("Child 1")
+				b.AddBlock("Child 2")
+			},
+			wantStr: "\tblock:0:1\n\t\tcolumns 1\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+		},
+		{
+			name:  "Add column to block with existing columns",
+			block: NewBlock("0", "Parent"),
+			setup: func(b *Block) {
+				b.diagram = &Diagram{}
+				b.SetColumns(2)
+				b.AddColumn()
+				b.AddBlock("Child 1")
+				b.AddBlock("Child 2")
+			},
+			wantStr: "\tblock:0:1\n\t\tcolumns 3\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			idGenerator = idGenerator.Reset()
+
+			if tt.setup != nil {
+				tt.setup(tt.block)
+			}
+
+			got := tt.block.String()
+			if got != tt.wantStr {
+				t.Errorf("Block.String() = %v, want %v", got, tt.wantStr)
+			}
+		})
+	}
+}
+
+func TestBlock_RemoveColumn(t *testing.T) {
+	tests := []struct {
+		name    string
+		block   *Block
+		setup   func(*Block)
+		wantStr string
+	}{
+		{
+			name:  "Remove column from block with multiple columns",
+			block: NewBlock("0", "Parent"),
+			setup: func(b *Block) {
+				b.diagram = &Diagram{}
+				b.SetColumns(3)
+				b.RemoveColumn()
+				b.AddBlock("Child 1")
+				b.AddBlock("Child 2")
+			},
+			wantStr: "\tblock:0:1\n\t\tcolumns 2\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+		},
+		{
+			name:  "Remove column from block with one column",
+			block: NewBlock("0", "Parent"),
+			setup: func(b *Block) {
+				b.diagram = &Diagram{}
+				b.SetColumns(1)
+				b.RemoveColumn()
+				b.AddBlock("Child 1")
+				b.AddBlock("Child 2")
+			},
+			wantStr: "\tblock:0:1\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			idGenerator = idGenerator.Reset()
+
+			if tt.setup != nil {
+				tt.setup(tt.block)
+			}
+
+			got := tt.block.String()
+			if got != tt.wantStr {
+				t.Errorf("Block.String() = %v, want %v", got, tt.wantStr)
 			}
 		})
 	}

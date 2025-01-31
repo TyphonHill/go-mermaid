@@ -4,14 +4,14 @@ block-beta
 	0("Dashboard"):4
 	style 0 fill:#6BE,stroke:#333,stroke-width:2px
 	style 0 fill:#6BE,stroke:#333,stroke-width:2px
-	block:1
+	block:1:1
 		2[("Database")]
 		3{{"API"}}
 		4[/"Files"/]
 	end
 	style 1 fill:#EBF,stroke:#333
 	style 1 fill:#EBF,stroke:#333
-	block:5
+	block:5:1
 		6[["ETL Pipeline"]]
 		7<["Transform"]>(right)
 		8{"ML Model"}

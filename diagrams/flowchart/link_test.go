@@ -6,8 +6,8 @@ import (
 )
 
 func TestNewLink(t *testing.T) {
-	from := NewNode(1, "Start")
-	to := NewNode(2, "End")
+	from := NewNode("1", "Start")
+	to := NewNode("2", "End")
 
 	tests := []struct {
 		name     string
@@ -54,8 +54,8 @@ func TestNewLink(t *testing.T) {
 }
 
 func TestLink_String(t *testing.T) {
-	from := NewNode(1, "Start")
-	to := NewNode(2, "End")
+	from := NewNode("1", "Start")
+	to := NewNode("2", "End")
 
 	tests := []struct {
 		name    string

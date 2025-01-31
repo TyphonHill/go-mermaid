@@ -28,7 +28,7 @@ const (
 )
 
 const (
-	baseLinkString     string = "\t%d %s%s%s%s %d\n"
+	baseLinkString     string = "\t%s %s%s%s%s %s\n"
 	baseLinkTextString string = "|%s|"
 )
 

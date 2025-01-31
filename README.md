@@ -66,6 +66,8 @@ Implement support for other Mermaid diagram types:
 - [x] [State Diagram](https://mermaid.js.org/syntax/stateDiagram.html)
 - [x] [Entity Relationship Diagrams](https://mermaid.js.org/syntax/entityRelationshipDiagram.html)
 - [x] [User Journey Diagram](https://mermaid.js.org/syntax/userJourney.html)
+- [x] [Timeline Diagram](https://mermaid.js.org/syntax/timeline.html)
+- [x] [Block Diagram](https://mermaid.js.org/syntax/block.html)
 - [ ] [Gantt Diagram](https://mermaid.js.org/syntax/gantt.html)
 - [ ] [Pie Chart](https://mermaid.js.org/syntax/pie.html)
 - [ ] [Quadrant Chart](https://mermaid.js.org/syntax/quadrantChart.html)

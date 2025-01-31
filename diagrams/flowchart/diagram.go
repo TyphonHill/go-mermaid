@@ -56,17 +56,7 @@ type Flowchart struct {
 	nodes       []*Node
 	subgraphs   []*Subgraph
 	links       []*Link
-	idGenerator IDGenerator
-}
-
-// IDGenerator is an interface for generating unique IDs
-type IDGenerator interface {
-	NextID() uint64
-}
-
-// DefaultIDGenerator is a simple ID generator
-type DefaultIDGenerator struct {
-	counter uint64
+	idGenerator utils.IDGenerator
 }
 
 // SetDirection sets the flowchart direction and returns the flowchart for chaining
@@ -155,23 +145,15 @@ func (f *Flowchart) String() string {
 	return f.WrapWithFence(sb.String())
 }
 
-// NewFlowchart creates and initializes a new Flowchart with default settings.
-func NewFlowchart() (newFlowchart *Flowchart) {
-	newFlowchart = &Flowchart{
+// NewFlowchart creates a new flowchart diagram
+func NewFlowchart() *Flowchart {
+	return &Flowchart{
 		Direction:   FlowchartDirectionTopToBottom,
 		CurveStyle:  CurveStyleNone,
 		classes:     make([]*Class, 0),
 		nodes:       make([]*Node, 0),
 		subgraphs:   make([]*Subgraph, 0),
 		links:       make([]*Link, 0),
-		idGenerator: &DefaultIDGenerator{},
+		idGenerator: utils.NewIDGenerator(),
 	}
-	return
-}
-
-// NextID returns the next unique ID for the DefaultIDGenerator.
-func (g *DefaultIDGenerator) NextID() uint64 {
-	current := g.counter
-	g.counter++
-	return current
 }

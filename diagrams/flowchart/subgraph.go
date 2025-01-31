@@ -3,10 +3,12 @@ package flowchart
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils"
 )
 
 const (
-	baseSubgraphString          string = "\tsubgraph %d [%s]\n"
+	baseSubgraphString          string = "\tsubgraph %s [%s]\n"
 	baseSubgraphDirectionString string = "\t\tdirection %s\n"
 	baseSubgraphEndString       string = "\tend\n"
 	baseSubgraphLinkString      string = "\t%s"
@@ -26,17 +28,17 @@ const (
 type subgraphDirection string
 
 type Subgraph struct {
-	ID          uint64
+	ID          string
 	Title       string
 	Direction   subgraphDirection
 	subgraphs   []*Subgraph
 	links       []*Link
-	idGenerator IDGenerator
+	idGenerator utils.IDGenerator
 }
 
 // NewSubgraph creates a new Subgraph with the given ID and title,
 // setting the default direction to none.
-func NewSubgraph(id uint64, title string) (newSubgraph *Subgraph) {
+func NewSubgraph(id string, title string) (newSubgraph *Subgraph) {
 	newSubgraph = &Subgraph{
 		ID:        id,
 		Title:     title,
@@ -49,7 +51,7 @@ func NewSubgraph(id uint64, title string) (newSubgraph *Subgraph) {
 // AddSubgraph adds a new Subgraph to the current Subgraph and returns the created subgraph.
 func (s *Subgraph) AddSubgraph(title string) (newSubgraph *Subgraph) {
 	if s.idGenerator == nil {
-		s.idGenerator = &DefaultIDGenerator{}
+		s.idGenerator = utils.NewIDGenerator()
 	}
 
 	newSubgraph = NewSubgraph(s.idGenerator.NextID(), title)

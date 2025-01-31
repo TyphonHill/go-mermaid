@@ -26,14 +26,14 @@ const (
 )
 
 const (
-	baseNodeShapeString string = "\t%d%s"
+	baseNodeShapeString string = "\t%s%s"
 	baseNodeClassString string = ":::%s"
-	baseNodeStyleString string = "\tstyle %d %s\n"
+	baseNodeStyleString string = "\tstyle %s %s\n"
 )
 
 // Node represents a node in a flowchart
 type Node struct {
-	ID    uint64
+	ID    string
 	Shape nodeShape
 	Text  string
 	Style *NodeStyle
@@ -41,7 +41,7 @@ type Node struct {
 }
 
 // NewNode creates a new Node with the given ID and text, setting default shape to round edges.
-func NewNode(id uint64, text string) (newNode *Node) {
+func NewNode(id string, text string) (newNode *Node) {
 	newNode = &Node{
 		ID:    id,
 		Text:  text,

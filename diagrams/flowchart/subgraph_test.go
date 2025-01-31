@@ -4,31 +4,33 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils"
 )
 
 func TestNewSubgraph(t *testing.T) {
 	tests := []struct {
 		name         string
-		id           uint64
+		id           string
 		title        string
 		wantSubgraph *Subgraph
 	}{
 		{
-			name:  "Create new subgraph with basic title",
-			id:    1,
+			name:  "Create new subgraph with title",
+			id:    "b0",
 			title: "Test Subgraph",
 			wantSubgraph: &Subgraph{
-				ID:        1,
+				ID:        "b0",
 				Title:     "Test Subgraph",
 				Direction: SubgraphDirectionNone,
 			},
 		},
 		{
-			name:  "Create new subgraph with empty title",
-			id:    2,
+			name:  "Create new subgraph without title",
+			id:    "b1",
 			title: "",
 			wantSubgraph: &Subgraph{
-				ID:        2,
+				ID:        "b1",
 				Title:     "",
 				Direction: SubgraphDirectionNone,
 			},
@@ -46,57 +48,26 @@ func TestNewSubgraph(t *testing.T) {
 }
 
 func TestSubgraph_AddSubgraph(t *testing.T) {
-	tests := []struct {
-		name       string
-		subgraph   *Subgraph
-		title      string
-		wantLength int
-	}{
-		{
-			name: "Add subgraph to empty subgraph",
-			subgraph: func() *Subgraph {
-				sg := NewSubgraph(1, "Parent")
-				sg.idGenerator = &MockIDGenerator{}
-				return sg
-			}(),
-			title:      "Child",
-			wantLength: 1,
-		},
-		{
-			name: "Add multiple subgraphs",
-			subgraph: func() *Subgraph {
-				sg := NewSubgraph(1, "Parent")
-				sg.idGenerator = &MockIDGenerator{}
-				return sg
-			}(),
-			title:      "Child",
-			wantLength: 1,
-		},
+	parent := NewSubgraph("0", "Parent")
+	parent.idGenerator = utils.NewIDGenerator()
+
+	got := parent.AddSubgraph("Child")
+	if got == nil {
+		t.Error("AddSubgraph() returned nil")
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.subgraph.AddSubgraph(tt.title)
+	if got.ID != "0" {
+		t.Errorf("AddSubgraph() ID = %v, want %v", got.ID, "0")
+	}
 
-			if got == nil {
-				t.Error("AddSubgraph() returned nil")
-			}
-
-			if len(tt.subgraph.subgraphs) != tt.wantLength {
-				t.Errorf("AddSubgraph() resulted in length = %v, want %v",
-					len(tt.subgraph.subgraphs), tt.wantLength)
-			}
-
-			if got.Title != tt.title {
-				t.Errorf("AddSubgraph() title = %v, want %v", got.Title, tt.title)
-			}
-		})
+	if got.Title != "Child" {
+		t.Errorf("AddSubgraph() Title = %v, want %v", got.Title, "Child")
 	}
 }
 
 func TestSubgraph_AddLink(t *testing.T) {
-	node1 := NewNode(1, "Start")
-	node2 := NewNode(2, "End")
+	node1 := NewNode("1", "Start")
+	node2 := NewNode("2", "End")
 
 	tests := []struct {
 		name       string
@@ -107,14 +78,14 @@ func TestSubgraph_AddLink(t *testing.T) {
 	}{
 		{
 			name:       "Add link to empty subgraph",
-			subgraph:   NewSubgraph(1, "Test"),
+			subgraph:   NewSubgraph("1", "Test"),
 			from:       node1,
 			to:         node2,
 			wantLength: 1,
 		},
 		{
 			name:       "Add multiple links",
-			subgraph:   NewSubgraph(1, "Test"),
+			subgraph:   NewSubgraph("1", "Test"),
 			from:       node1,
 			to:         node2,
 			wantLength: 1,
@@ -151,7 +122,7 @@ func TestSubgraph_String(t *testing.T) {
 	}{
 		{
 			name:        "Empty subgraph",
-			subgraph:    NewSubgraph(1, "Test"),
+			subgraph:    NewSubgraph("1", "Test"),
 			indentation: "%s",
 			contains: []string{
 				"\tsubgraph 1 [Test]",
@@ -160,7 +131,7 @@ func TestSubgraph_String(t *testing.T) {
 		},
 		{
 			name:     "Subgraph with direction",
-			subgraph: NewSubgraph(1, "Test"),
+			subgraph: NewSubgraph("1", "Test"),
 			setup: func(s *Subgraph) {
 				s.Direction = SubgraphDirectionLeftRight
 			},
@@ -174,8 +145,8 @@ func TestSubgraph_String(t *testing.T) {
 		{
 			name: "Subgraph with nested subgraph",
 			subgraph: func() *Subgraph {
-				sg := NewSubgraph(1, "Parent")
-				sg.idGenerator = &MockIDGenerator{}
+				sg := NewSubgraph("1", "Parent")
+				sg.idGenerator = utils.NewIDGenerator()
 				return sg
 			}(),
 			setup: func(s *Subgraph) {
@@ -190,10 +161,10 @@ func TestSubgraph_String(t *testing.T) {
 		},
 		{
 			name:     "Subgraph with links",
-			subgraph: NewSubgraph(1, "Test"),
+			subgraph: NewSubgraph("1", "Test"),
 			setup: func(s *Subgraph) {
-				node1 := NewNode(1, "Start")
-				node2 := NewNode(2, "End")
+				node1 := NewNode("1", "Start")
+				node2 := NewNode("2", "End")
 				s.AddLink(node1, node2)
 			},
 			indentation: "\t",

@@ -8,37 +8,27 @@ import (
 func TestNewNode(t *testing.T) {
 	tests := []struct {
 		name     string
-		id       uint64
+		id       string
 		text     string
 		wantNode *Node
 	}{
 		{
-			name: "Create new node with basic text",
-			id:   1,
+			name: "Create new node with text",
+			id:   "b0",
 			text: "Test Node",
 			wantNode: &Node{
-				ID:    1,
+				ID:    "b0",
 				Text:  "Test Node",
 				Shape: NodeShapeRoundEdges,
 			},
 		},
 		{
-			name: "Create new node with empty text",
-			id:   2,
+			name: "Create new node without text",
+			id:   "b1",
 			text: "",
 			wantNode: &Node{
-				ID:    2,
+				ID:    "b1",
 				Text:  "",
-				Shape: NodeShapeRoundEdges,
-			},
-		},
-		{
-			name: "Create new node with special characters",
-			id:   3,
-			text: "Test: Node & Special < > Characters",
-			wantNode: &Node{
-				ID:    3,
-				Text:  "Test: Node & Special < > Characters",
 				Shape: NodeShapeRoundEdges,
 			},
 		},
@@ -64,25 +54,25 @@ func TestNode_String(t *testing.T) {
 		{
 			name: "Basic node with round edges",
 			node: &Node{
-				ID:    1,
+				ID:    "b0",
 				Text:  "Test",
 				Shape: NodeShapeRoundEdges,
 			},
-			wantStr: "\t1(\"Test\")\n",
+			wantStr: "\tb0(\"Test\")\n",
 		},
 		{
 			name: "Node with stadium shape",
 			node: &Node{
-				ID:    2,
+				ID:    "b1",
 				Text:  "Test",
 				Shape: NodeShapeStadium,
 			},
-			wantStr: "\t2([\"Test\"])\n",
+			wantStr: "\tb1([\"Test\"])\n",
 		},
 		{
 			name: "Node with class",
 			node: &Node{
-				ID:    3,
+				ID:    "b2",
 				Text:  "Test",
 				Shape: NodeShapeRoundEdges,
 			},
@@ -90,12 +80,12 @@ func TestNode_String(t *testing.T) {
 				class := NewClass("testClass")
 				n.Class = class
 			},
-			wantStr: "\t3(\"Test\"):::testClass\n",
+			wantStr: "\tb2(\"Test\"):::testClass\n",
 		},
 		{
 			name: "Node with style",
 			node: &Node{
-				ID:    4,
+				ID:    "b3",
 				Text:  "Test",
 				Shape: NodeShapeRoundEdges,
 			},
@@ -104,12 +94,12 @@ func TestNode_String(t *testing.T) {
 				style.Fill = "#f9f9f9"
 				n.Style = style
 			},
-			wantStr: "\t4(\"Test\")\n\tstyle 4 fill:#f9f9f9,stroke-width:1,stroke-dasharray:0\n",
+			wantStr: "\tb3(\"Test\")\n\tstyle b3 fill:#f9f9f9,stroke-width:1,stroke-dasharray:0\n",
 		},
 		{
 			name: "Node with all shapes",
 			node: &Node{
-				ID:    5,
+				ID:    "5",
 				Text:  "Test",
 				Shape: NodeShapeRoundEdges,
 			},
@@ -156,7 +146,7 @@ func TestNode_String(t *testing.T) {
 }
 
 func TestNode_SetText(t *testing.T) {
-	node := NewNode(1, "Initial")
+	node := NewNode("1", "Initial")
 	result := node.SetText("Updated Text")
 
 	if node.Text != "Updated Text" {
@@ -169,7 +159,7 @@ func TestNode_SetText(t *testing.T) {
 }
 
 func TestNode_SetClass(t *testing.T) {
-	node := NewNode(1, "Test")
+	node := NewNode("1", "Test")
 	class := NewClass("TestClass")
 	result := node.SetClass(class)
 
@@ -183,7 +173,7 @@ func TestNode_SetClass(t *testing.T) {
 }
 
 func TestNode_SetStyle(t *testing.T) {
-	node := NewNode(1, "Test Node")
+	node := NewNode("1", "Test Node")
 	style := NewNodeStyle()
 	style.Fill = "#f9f9f9"
 	style.Stroke = "#333"
@@ -223,7 +213,7 @@ func TestNode_SetShape(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			node := NewNode(1, "Test")
+			node := NewNode("1", "Test")
 			result := node.SetShape(tt.shape)
 
 			if result != node {

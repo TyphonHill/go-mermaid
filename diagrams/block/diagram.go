@@ -32,6 +32,18 @@ func (d *Diagram) SetColumns(count int) *Diagram {
 	return d
 }
 
+// AddColumn increases the number of columns in the diagram by one
+func (d *Diagram) AddColumn() *Diagram {
+	d.Columns += 1
+	return d
+}
+
+// RemoveColumn decreases the number of columns in the diagram by one
+func (d *Diagram) RemoveColumn() *Diagram {
+	d.Columns -= 1
+	return d
+}
+
 // AddBlock creates and adds a new block to the diagram
 func (d *Diagram) AddBlock(text string) *Block {
 	block := NewBlock(d.idGenerator.NextID(), text)

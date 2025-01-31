@@ -128,3 +128,34 @@ func TestDiagram_String(t *testing.T) {
 		})
 	}
 }
+
+func TestDiagram_AddColumn(t *testing.T) {
+	diagram := NewDiagram()
+	initial := diagram.Columns
+
+	result := diagram.AddColumn()
+
+	if diagram.Columns != initial+1 {
+		t.Errorf("AddColumn() = %v, want %v", diagram.Columns, initial+1)
+	}
+
+	if result != diagram {
+		t.Error("AddColumn() should return diagram for chaining")
+	}
+}
+
+func TestDiagram_RemoveColumn(t *testing.T) {
+	diagram := NewDiagram()
+	diagram.SetColumns(3)
+	initial := diagram.Columns
+
+	result := diagram.RemoveColumn()
+
+	if diagram.Columns != initial-1 {
+		t.Errorf("RemoveColumn() = %v, want %v", diagram.Columns, initial-1)
+	}
+
+	if result != diagram {
+		t.Error("RemoveColumn() should return diagram for chaining")
+	}
+}

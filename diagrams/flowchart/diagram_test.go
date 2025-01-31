@@ -325,7 +325,7 @@ func TestFlowchart_AddNode(t *testing.T) {
 			flowchart: NewFlowchart(),
 			text:      "Test Node",
 			wantNode: &Node{
-				ID:    0,
+				ID:    "0",
 				Text:  "Test Node",
 				Shape: NodeShapeRoundEdges,
 			},
@@ -410,7 +410,7 @@ func TestFlowchart_AddSubgraph(t *testing.T) {
 	// Test ID generation
 	subgraph2 := flowchart.AddSubgraph("Second Subgraph")
 	if subgraph2.ID <= subgraph.ID {
-		t.Errorf("Second subgraph ID %d should be greater than first subgraph ID %d", subgraph2.ID, subgraph.ID)
+		t.Errorf("Second subgraph ID %s should be greater than first subgraph ID %s", subgraph2.ID, subgraph.ID)
 	}
 }
 

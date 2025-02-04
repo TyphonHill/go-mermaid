@@ -1,36 +1,27 @@
 ```mermaid
 ---
-title: Order Processing System
+title: Software Development Process
 ---
 
 flowchart TB
-	0("Start")
-	1("Shopping Cart")
-	2("Checkout")
-	3("Validate Payment")
-	4("Process Payment")
-	5("Payment Failed")
-	6("Check Inventory")
-	7("Create Order")
-	8("Notify Warehouse")
-	9("Out of Stock")
-	10("End")
-	subgraph 11 [User Flow]
-		0 --> 1
-		1 --> 2
-	end
-	subgraph 12 [Payment Processing]
-		2 --> 3
-		3 -->|Valid| 4
-		3 -->|Invalid| 5
-		5 -->|Retry| 2
-	end
-	subgraph 13 [Order Fulfillment]
-		4 --> 6
-		6 -->|In Stock| 7
-		6 -->|No Stock| 9
-		7 --> 8
-		8 --> 10
-		9 -->|Update Cart| 1
-	end
+0@{ shape: stadium, label: "Start Project"}
+1@{ shape: doc, label: "Gather Requirements"}
+2@{ shape: rect, label: "System Design"}
+3@{ shape: cyl, label: "Database Design"}
+4@{ shape: rect, label: "Implementation"}
+5@{ shape: hex, label: "Testing"}
+6@{ shape: diam, label: "Bugs Found?"}
+7@{ shape: win-pane, label: "Deployment"}
+8@{ shape: curv-trap, label: "Monitoring"}
+9@{ shape: stadium, label: "End"}
+	0 --> 1
+	1 --> 2
+	2 --> 3
+	3 --> 4
+	4 --> 5
+	5 --> 6
+	6 --> 4
+	6 --> 7
+	7 --> 8
+	8 --> 9
 ```

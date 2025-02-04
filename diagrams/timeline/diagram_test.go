@@ -64,9 +64,9 @@ func TestDiagram_String(t *testing.T) {
 				"timeline",
 				"title Project Timeline",
 				"section Planning",
-				"2024-01 : Project kickoff",
+				"2024-01 \t\t: Project kickoff",
 				"section Development",
-				"2024-02 : Implementation",
+				"2024-02 \t\t: Implementation",
 			},
 		},
 	}

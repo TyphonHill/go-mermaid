@@ -54,11 +54,9 @@ func TestDiagram_String(t *testing.T) {
 
 				planning := d.AddSection("Planning")
 				planning.AddEvent("2024-01", "Project kickoff")
-				planning.AddSubEvent("Requirements gathering")
 
 				dev := d.AddSection("Development")
 				dev.AddEvent("2024-02", "Implementation")
-				dev.AddSubEvent("Testing")
 
 				return d
 			},
@@ -67,10 +65,8 @@ func TestDiagram_String(t *testing.T) {
 				"title Project Timeline",
 				"section Planning",
 				"2024-01 : Project kickoff",
-				": Requirements gathering",
 				"section Development",
 				"2024-02 : Implementation",
-				": Testing",
 			},
 		},
 	}

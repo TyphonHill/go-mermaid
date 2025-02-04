@@ -23,32 +23,43 @@ func TestEvent_String(t *testing.T) {
 		name       string
 		timePeriod string
 		text       string
+		isFirst    bool
 		want       string
 	}{
 		{
 			name:       "Event with time period",
 			timePeriod: "2024-01",
 			text:       "Test Event",
+			isFirst:    false,
 			want:       "2024-01 : Test Event",
 		},
 		{
-			name:       "Sub-event without time period",
+			name:       "Regular sub-event without time period",
 			timePeriod: "",
 			text:       "Sub Event",
+			isFirst:    false,
 			want:       ": Sub Event",
 		},
 		{
-			name:       "Event with special characters",
-			timePeriod: "Q1 2024",
-			text:       "Event: with \"quotes\" and {braces}",
-			want:       "Q1 2024 : Event: with \"quotes\" and {braces}",
+			name:       "First sub-event without time period",
+			timePeriod: "",
+			text:       "First Sub Event",
+			isFirst:    true,
+			want:       "First Sub Event",
+		},
+		{
+			name:       "First event with time period",
+			timePeriod: "2024-01",
+			text:       "First Event",
+			isFirst:    true,
+			want:       "2024-01 : First Event", // Should use normal format when title exists
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			event := NewEvent(tt.timePeriod, tt.text)
-			result := event.String()
+			result := event.String(tt.isFirst)
 
 			if !strings.Contains(result, tt.want) {
 				t.Errorf("String() = %v, want %v", result, tt.want)

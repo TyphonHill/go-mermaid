@@ -18,41 +18,49 @@ func TestNewSection(t *testing.T) {
 }
 
 func TestSection_AddEvent(t *testing.T) {
-	section := NewSection("Test")
-	timePeriod := "2024-01"
-	eventText := "Test Event"
-
-	section.AddEvent(timePeriod, eventText)
-
-	if len(section.Events) != 1 {
-		t.Error("AddEvent() should add event to section")
+	tests := []struct {
+		name       string
+		title      string
+		text       string
+		isFirst    bool
+		wantString string
+	}{
+		{
+			name:       "First event with title",
+			title:      "2024-01",
+			text:       "Test Event",
+			isFirst:    true,
+			wantString: "2024-01 : Test Event",
+		},
+		{
+			name:       "First event without title",
+			title:      "",
+			text:       "Test Event",
+			isFirst:    true,
+			wantString: "Test Event", // No colon for first event without title
+		},
+		{
+			name:       "Second event without title",
+			title:      "",
+			text:       "Test Event",
+			isFirst:    false,
+			wantString: ": Test Event", // Has colon for non-first events
+		},
 	}
 
-	event := section.Events[0]
-	if event.Title != timePeriod {
-		t.Errorf("Event.Title = %v, want %v", event.Title, timePeriod)
-	}
-	if event.Text != eventText {
-		t.Errorf("Event.Text = %v, want %v", event.Text, eventText)
-	}
-}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			section := NewSection("Test")
+			if !tt.isFirst {
+				section.AddEvent("2024-01", "Previous Event") // Add a first event
+			}
+			section.AddEvent(tt.title, tt.text)
 
-func TestSection_AddSubEvent(t *testing.T) {
-	section := NewSection("Test")
-	eventText := "Sub Event"
-
-	section.AddSubEvent(eventText)
-
-	if len(section.Events) != 1 {
-		t.Error("AddSubEvent() should add event to section")
-	}
-
-	event := section.Events[0]
-	if event.Title != "" {
-		t.Errorf("Event.Title = %v, want empty string", event.Title)
-	}
-	if event.Text != eventText {
-		t.Errorf("Event.Text = %v, want %v", event.Text, eventText)
+			result := section.String()
+			if !strings.Contains(result, tt.wantString) {
+				t.Errorf("AddEvent() result = %v, want string containing %v", result, tt.wantString)
+			}
+		})
 	}
 }
 
@@ -67,13 +75,11 @@ func TestSection_String(t *testing.T) {
 			setup: func() *Section {
 				s := NewSection("Test Section")
 				s.AddEvent("2024-01", "First Event")
-				s.AddSubEvent("Sub Event")
 				return s
 			},
 			contains: []string{
 				"section Test Section",
 				"2024-01 : First Event",
-				": Sub Event",
 			},
 		},
 	}

@@ -26,13 +26,8 @@ func NewSection(title string) *Section {
 
 // AddEvent adds a new event to the section
 func (s *Section) AddEvent(title string, text string) *Section {
-	s.Events = append(s.Events, NewEvent(title, text))
-	return s
-}
-
-// AddSubEvent adds a new sub-event (without time period) to the section
-func (s *Section) AddSubEvent(text string) *Section {
-	s.AddEvent("", text)
+	event := NewEvent(title, text)
+	s.Events = append(s.Events, event)
 	return s
 }
 
@@ -44,8 +39,8 @@ func (s *Section) String() string {
 		sb.WriteString(fmt.Sprintf(baseSectionTitle, s.Title))
 	}
 
-	for _, event := range s.Events {
-		sb.WriteString(event.String())
+	for idx, event := range s.Events {
+		sb.WriteString(event.String(idx == 0))
 	}
 
 	return sb.String()

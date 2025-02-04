@@ -59,7 +59,7 @@ const (
 )
 
 const (
-	baseNodeShapeString string = "%s@{ shape: %s, label: \"%s\"}"
+	baseNodeShapeString string = "\t%s@{ shape: %s, label: \"%s\"}"
 	baseNodeClassString string = ":::%s"
 	baseNodeStyleString string = "\tstyle %s %s\n"
 )

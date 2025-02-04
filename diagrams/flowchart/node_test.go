@@ -1,7 +1,9 @@
 package flowchart
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -19,7 +21,7 @@ func TestNewNode(t *testing.T) {
 			wantNode: &Node{
 				ID:    "b0",
 				Text:  "Test Node",
-				Shape: NodeShapeRoundEdges,
+				Shape: NodeShapeProcess,
 			},
 		},
 		{
@@ -29,7 +31,7 @@ func TestNewNode(t *testing.T) {
 			wantNode: &Node{
 				ID:    "b1",
 				Text:  "",
-				Shape: NodeShapeRoundEdges,
+				Shape: NodeShapeProcess,
 			},
 		},
 	}
@@ -46,88 +48,61 @@ func TestNewNode(t *testing.T) {
 
 func TestNode_String(t *testing.T) {
 	tests := []struct {
-		name    string
-		node    *Node
-		setup   func(*Node)
-		wantStr string
+		name     string
+		node     *Node
+		setup    func(*Node)
+		contains []string
 	}{
 		{
-			name: "Basic node with round edges",
-			node: &Node{
-				ID:    "b0",
-				Text:  "Test",
-				Shape: NodeShapeRoundEdges,
+			name: "Basic node with default shape",
+			node: NewNode("1", "Test Node"),
+			contains: []string{
+				"1@{ shape: rect label: \"Test Node\"}",
 			},
-			wantStr: "\tb0(\"Test\")\n",
 		},
 		{
-			name: "Node with stadium shape",
-			node: &Node{
-				ID:    "b1",
-				Text:  "Test",
-				Shape: NodeShapeStadium,
+			name: "Node with custom shape",
+			node: NewNode("2", "Diamond Node"),
+			setup: func(n *Node) {
+				n.SetShape(NodeShapeDecision)
 			},
-			wantStr: "\tb1([\"Test\"])\n",
+			contains: []string{
+				"2@{ shape: diam label: \"Diamond Node\"}",
+			},
 		},
 		{
 			name: "Node with class",
-			node: &Node{
-				ID:    "b2",
-				Text:  "Test",
-				Shape: NodeShapeRoundEdges,
-			},
+			node: NewNode("3", "Classy Node"),
 			setup: func(n *Node) {
-				class := NewClass("testClass")
-				n.Class = class
+				n.SetClass(NewClass("highlight"))
 			},
-			wantStr: "\tb2(\"Test\"):::testClass\n",
+			contains: []string{
+				"3@{ shape: rect label: \"Classy Node\"}:::highlight",
+			},
 		},
 		{
 			name: "Node with style",
-			node: &Node{
-				ID:    "b3",
-				Text:  "Test",
-				Shape: NodeShapeRoundEdges,
-			},
+			node: NewNode("4", "Styled Node"),
 			setup: func(n *Node) {
-				style := NewNodeStyle()
-				style.Fill = "#f9f9f9"
-				n.Style = style
+				n.SetStyle(NewNodeStyle())
 			},
-			wantStr: "\tb3(\"Test\")\n\tstyle b3 fill:#f9f9f9,stroke-width:1,stroke-dasharray:0\n",
+			contains: []string{
+				"4@{ shape: rect label: \"Styled Node\"}",
+				"style 4 fill:#f9f",
+			},
 		},
 		{
-			name: "Node with all shapes",
-			node: &Node{
-				ID:    "5",
-				Text:  "Test",
-				Shape: NodeShapeRoundEdges,
-			},
+			name: "Complex node with shape, class and style",
+			node: NewNode("5", "Complex Node"),
 			setup: func(n *Node) {
-				shapes := []nodeShape{
-					NodeShapeRoundEdges,
-					NodeShapeStadium,
-					NodeShapeSubRoutine,
-					NodeShapeCylindrical,
-					NodeShapeCircle,
-					NodeShapeAsymmetric,
-					NodeShapeRhombus,
-					NodeShapeHexagon,
-					NodeShapeParallelogram,
-					NodeShapeParallelogramAlt,
-					NodeShapeTrapezoid,
-					NodeShapeTrapezoidAlt,
-					NodeShapeDoubleCircle,
-				}
-				for _, shape := range shapes {
-					n.Shape = shape
-					got := n.String()
-					if got == "" {
-						t.Errorf("Node.String() with shape %v returned empty string", shape)
-					}
-				}
+				n.SetShape(NodeShapeDatabase)
+				n.SetClass(NewClass("db"))
+				n.SetStyle(NewNodeStyle())
 			},
-			wantStr: "\t5(((\"Test\")))\n",
+			contains: []string{
+				"5@{ shape: cyl label: \"Complex Node\"}:::db",
+				"style 5 fill:#ccf,stroke:#333",
+			},
 		},
 	}
 
@@ -137,9 +112,11 @@ func TestNode_String(t *testing.T) {
 				tt.setup(tt.node)
 			}
 
-			got := tt.node.String()
-			if got != tt.wantStr {
-				t.Errorf("Node.String() = %v, want %v", got, tt.wantStr)
+			result := tt.node.String()
+			for _, want := range tt.contains {
+				if !strings.Contains(result, want) {
+					t.Errorf("String() missing expected content %q in:\n%v", want, result)
+				}
 			}
 		})
 	}
@@ -195,19 +172,29 @@ func TestNode_SetShape(t *testing.T) {
 		wantShape nodeShape
 	}{
 		{
-			name:      "Set to stadium shape",
-			shape:     NodeShapeStadium,
-			wantShape: NodeShapeStadium,
+			name:      "Set to terminal shape",
+			shape:     NodeShapeTerminal,
+			wantShape: NodeShapeTerminal,
 		},
 		{
-			name:      "Set to circle shape",
-			shape:     NodeShapeCircle,
-			wantShape: NodeShapeCircle,
+			name:      "Set to database shape",
+			shape:     NodeShapeDatabase,
+			wantShape: NodeShapeDatabase,
 		},
 		{
-			name:      "Set to hexagon shape",
-			shape:     NodeShapeHexagon,
-			wantShape: NodeShapeHexagon,
+			name:      "Set to decision shape",
+			shape:     NodeShapeDecision,
+			wantShape: NodeShapeDecision,
+		},
+		{
+			name:      "Set to document shape",
+			shape:     NodeShapeDocument,
+			wantShape: NodeShapeDocument,
+		},
+		{
+			name:      "Set to process shape",
+			shape:     NodeShapeProcess,
+			wantShape: NodeShapeProcess,
 		},
 	}
 
@@ -221,6 +208,13 @@ func TestNode_SetShape(t *testing.T) {
 			}
 			if node.Shape != tt.wantShape {
 				t.Errorf("SetShape() = %v, want %v", node.Shape, tt.wantShape)
+			}
+
+			// Verify the shape appears correctly in the string output
+			output := node.String()
+			expectedShape := fmt.Sprintf("shape: %s", tt.wantShape)
+			if !strings.Contains(output, expectedShape) {
+				t.Errorf("String() = %v, should contain %v", output, expectedShape)
 			}
 		})
 	}

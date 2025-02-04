@@ -25,15 +25,15 @@ func NewSection(title string) *Section {
 }
 
 // AddEvent adds a new event to the section
-func (s *Section) AddEvent(timePeriod string, text string) *Event {
-	event := NewEvent(timePeriod, text)
-	s.Events = append(s.Events, event)
-	return event
+func (s *Section) AddEvent(title string, text string) *Section {
+	s.Events = append(s.Events, NewEvent(title, text))
+	return s
 }
 
 // AddSubEvent adds a new sub-event (without time period) to the section
-func (s *Section) AddSubEvent(text string) *Event {
-	return s.AddEvent("", text)
+func (s *Section) AddSubEvent(text string) *Section {
+	s.AddEvent("", text)
+	return s
 }
 
 // String generates the Mermaid syntax for the section

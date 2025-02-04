@@ -10,8 +10,8 @@ func TestNewEvent(t *testing.T) {
 	text := "Test Event"
 	event := NewEvent(timePeriod, text)
 
-	if event.TimePeriod != timePeriod {
-		t.Errorf("NewEvent().TimePeriod = %v, want %v", event.TimePeriod, timePeriod)
+	if event.Title != timePeriod {
+		t.Errorf("NewEvent().TimePeriod = %v, want %v", event.Title, timePeriod)
 	}
 	if event.Text != text {
 		t.Errorf("NewEvent().Text = %v, want %v", event.Text, text)

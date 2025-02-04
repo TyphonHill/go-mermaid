@@ -10,42 +10,52 @@ import (
 
 func main() {
 	diagram := flowchart.NewFlowchart()
-	diagram.EnableMarkdownFence()
-	diagram.Title = "Order Processing System"
+	diagram.SetTitle("Software Development Process")
 
-	// Create all nodes first
-	start := diagram.AddNode("Start")
-	cart := diagram.AddNode("Shopping Cart")
-	checkout := diagram.AddNode("Checkout")
-	validatePayment := diagram.AddNode("Validate Payment")
-	processPayment := diagram.AddNode("Process Payment")
-	paymentFailed := diagram.AddNode("Payment Failed")
-	checkInventory := diagram.AddNode("Check Inventory")
-	createOrder := diagram.AddNode("Create Order")
-	notifyWarehouse := diagram.AddNode("Notify Warehouse")
-	outOfStock := diagram.AddNode("Out of Stock")
+	// Define nodes with various shapes
+	start := diagram.AddNode("Start Project")
+	start.SetShape(flowchart.NodeShapeTerminal)
+
+	requirements := diagram.AddNode("Gather Requirements")
+	requirements.SetShape(flowchart.NodeShapeDocument)
+
+	design := diagram.AddNode("System Design")
+	design.SetShape(flowchart.NodeShapeProcess)
+
+	database := diagram.AddNode("Database Design")
+	database.SetShape(flowchart.NodeShapeDatabase)
+
+	coding := diagram.AddNode("Implementation")
+	coding.SetShape(flowchart.NodeShapeProcess)
+
+	testing := diagram.AddNode("Testing")
+	testing.SetShape(flowchart.NodeShapePrepare)
+
+	bugs := diagram.AddNode("Bugs Found?")
+	bugs.SetShape(flowchart.NodeShapeDecision)
+
+	deploy := diagram.AddNode("Deployment")
+	deploy.SetShape(flowchart.NodeShapeInternalStorage)
+
+	monitor := diagram.AddNode("Monitoring")
+	monitor.SetShape(flowchart.NodeShapeDisplay)
+
 	end := diagram.AddNode("End")
+	end.SetShape(flowchart.NodeShapeTerminal)
 
-	// Create subgraphs and add relevant links
-	userFlow := diagram.AddSubgraph("User Flow")
-	userFlow.AddLink(start, cart)
-	userFlow.AddLink(cart, checkout)
+	// Add links
+	diagram.AddLink(start, requirements)
+	diagram.AddLink(requirements, design)
+	diagram.AddLink(design, database)
+	diagram.AddLink(database, coding)
+	diagram.AddLink(coding, testing)
+	diagram.AddLink(testing, bugs)
+	diagram.AddLink(bugs, coding)
+	diagram.AddLink(bugs, deploy)
+	diagram.AddLink(deploy, monitor)
+	diagram.AddLink(monitor, end)
 
-	paymentFlow := diagram.AddSubgraph("Payment Processing")
-	paymentFlow.AddLink(checkout, validatePayment)
-	paymentFlow.AddLink(validatePayment, processPayment).Text = "Valid"
-	paymentFlow.AddLink(validatePayment, paymentFailed).Text = "Invalid"
-	paymentFlow.AddLink(paymentFailed, checkout).Text = "Retry"
-
-	fulfillmentFlow := diagram.AddSubgraph("Order Fulfillment")
-	fulfillmentFlow.AddLink(processPayment, checkInventory)
-	fulfillmentFlow.AddLink(checkInventory, createOrder).Text = "In Stock"
-	fulfillmentFlow.AddLink(checkInventory, outOfStock).Text = "No Stock"
-	fulfillmentFlow.AddLink(createOrder, notifyWarehouse)
-	fulfillmentFlow.AddLink(notifyWarehouse, end)
-	fulfillmentFlow.AddLink(outOfStock, cart).Text = "Update Cart"
-
-	// Write the diagram to README.md in the same directory as this source file
+	// Write the diagram to README.md
 	_, filename, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(filename)
 	readmePath := filepath.Join(dir, "README.md")

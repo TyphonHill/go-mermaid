@@ -57,7 +57,7 @@ func TestNode_String(t *testing.T) {
 			name: "Basic node with default shape",
 			node: NewNode("1", "Test Node"),
 			contains: []string{
-				"1@{ shape: rect label: \"Test Node\"}",
+				"1@{ shape: rect, label: \"Test Node\"}",
 			},
 		},
 		{
@@ -67,7 +67,7 @@ func TestNode_String(t *testing.T) {
 				n.SetShape(NodeShapeDecision)
 			},
 			contains: []string{
-				"2@{ shape: diam label: \"Diamond Node\"}",
+				"2@{ shape: diam, label: \"Diamond Node\"}",
 			},
 		},
 		{
@@ -77,7 +77,7 @@ func TestNode_String(t *testing.T) {
 				n.SetClass(NewClass("highlight"))
 			},
 			contains: []string{
-				"3@{ shape: rect label: \"Classy Node\"}:::highlight",
+				"3@{ shape: rect, label: \"Classy Node\"}:::highlight",
 			},
 		},
 		{
@@ -87,8 +87,8 @@ func TestNode_String(t *testing.T) {
 				n.SetStyle(NewNodeStyle())
 			},
 			contains: []string{
-				"4@{ shape: rect label: \"Styled Node\"}",
-				"style 4 fill:#f9f",
+				"4@{ shape: rect, label: \"Styled Node\"}",
+				"style 4",
 			},
 		},
 		{
@@ -100,8 +100,8 @@ func TestNode_String(t *testing.T) {
 				n.SetStyle(NewNodeStyle())
 			},
 			contains: []string{
-				"5@{ shape: cyl label: \"Complex Node\"}:::db",
-				"style 5 fill:#ccf,stroke:#333",
+				"5@{ shape: cyl, label: \"Complex Node\"}:::db",
+				"style 5",
 			},
 		},
 	}

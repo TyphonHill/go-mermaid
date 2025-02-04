@@ -9,32 +9,38 @@ import (
 )
 
 func main() {
+	// Create a new flowchart
 	diagram := flowchart.NewFlowchart()
-	diagram.EnableMarkdownFence()
-	diagram.Title = "Simple Login Flow"
+	diagram.SetTitle("Simple Process Flow")
 
-	// Create nodes
+	// Add nodes with different shapes
 	start := diagram.AddNode("Start")
-	login := diagram.AddNode("Login Form")
-	validate := diagram.AddNode("Validate")
-	success := diagram.AddNode("Success")
-	failure := diagram.AddNode("Failure")
+	start.SetShape(flowchart.NodeShapeTerminal)
+
+	input := diagram.AddNode("Get User Input")
+	input.SetShape(flowchart.NodeShapeManualInput)
+
+	process := diagram.AddNode("Process Data")
+	process.SetShape(flowchart.NodeShapeProcess)
+
+	decision := diagram.AddNode("Valid?")
+	decision.SetShape(flowchart.NodeShapeDecision)
+
+	output := diagram.AddNode("Display Result")
+	output.SetShape(flowchart.NodeShapeDisplay)
+
 	end := diagram.AddNode("End")
+	end.SetShape(flowchart.NodeShapeTerminal)
 
-	// Add connections
-	diagram.AddLink(start, login)
-	diagram.AddLink(login, validate)
+	// Add links between nodes
+	diagram.AddLink(start, input)
+	diagram.AddLink(input, process)
+	diagram.AddLink(process, decision)
+	diagram.AddLink(decision, output)
+	diagram.AddLink(decision, input)
+	diagram.AddLink(output, end)
 
-	successLink := diagram.AddLink(validate, success)
-	successLink.Text = "Valid"
-
-	failureLink := diagram.AddLink(validate, failure)
-	failureLink.Text = "Invalid"
-
-	diagram.AddLink(success, end)
-	diagram.AddLink(failure, login)
-
-	// Write the diagram to README.md in the same directory as this source file
+	// Write the diagram to README.md
 	_, filename, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(filename)
 	readmePath := filepath.Join(dir, "README.md")

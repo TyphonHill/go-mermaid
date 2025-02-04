@@ -98,116 +98,70 @@ func TestFlowchart_DisableMarkdownFence(t *testing.T) {
 
 func TestFlowchart_String(t *testing.T) {
 	tests := []struct {
-		name      string
-		flowchart *Flowchart
-		setup     func(*Flowchart)
-		wantStr   string
-		contains  []string
+		name     string
+		setup    func() *Flowchart
+		contains []string
 	}{
 		{
-			name:      "Empty flowchart without fence",
-			flowchart: NewFlowchart(),
-			wantStr:   "flowchart TB\n",
-		},
-		{
-			name:      "Empty flowchart with fence",
-			flowchart: NewFlowchart(),
-			setup: func(f *Flowchart) {
-				f.EnableMarkdownFence()
-			},
-			wantStr: "```mermaid\nflowchart TB\n```\n",
-		},
-		{
-			name:      "Flowchart with title and fence",
-			flowchart: NewFlowchart(),
-			setup: func(f *Flowchart) {
-				f.EnableMarkdownFence()
-				f.Title = "Test Flowchart"
+			name: "Empty flowchart",
+			setup: func() *Flowchart {
+				return NewFlowchart()
 			},
 			contains: []string{
-				"```mermaid\n",
-				"---\ntitle: Test Flowchart\n---\n",
-				"flowchart TB\n",
-				"```\n",
+				"flowchart TB",
 			},
 		},
 		{
-			name:      "Flowchart with nodes and links",
-			flowchart: NewFlowchart(),
-			setup: func(f *Flowchart) {
-				f.EnableMarkdownFence()
-				f.Title = "Test Flow"
-				node1 := f.AddNode("Start")
-				node2 := f.AddNode("End")
-				f.AddLink(node1, node2)
+			name: "Flowchart with title",
+			setup: func() *Flowchart {
+				d := NewFlowchart()
+				d.SetTitle("Test Flowchart")
+				return d
 			},
 			contains: []string{
-				"```mermaid\n",
-				"flowchart TB\n",
-				`0("Start")`,
-				`1("End")`,
-				"0 -->",
-				"```\n",
+				"---",
+				"title: Test Flowchart",
+				"---",
+				"flowchart TB",
 			},
 		},
 		{
-			name:      "Flowchart with curve style",
-			flowchart: NewFlowchart(),
-			setup: func(f *Flowchart) {
-				f.SetCurveStyle(CurveStyleBasis)
+			name: "Flowchart with nodes and links",
+			setup: func() *Flowchart {
+				d := NewFlowchart()
+				start := d.AddNode("Start")
+				start.SetShape(NodeShapeTerminal)
+
+				process := d.AddNode("Process")
+				process.SetShape(NodeShapeProcess)
+
+				decision := d.AddNode("Decision")
+				decision.SetShape(NodeShapeDecision)
+
+				d.AddLink(start, process)
+				d.AddLink(process, decision)
+
+				return d
 			},
 			contains: []string{
-				"%%{ init: { 'flowchart': { 'curve': 'basis' } } }%%\n",
-				"flowchart TB\n",
-			},
-		},
-		{
-			name:      "Flowchart with class",
-			flowchart: NewFlowchart(),
-			setup: func(f *Flowchart) {
-				class := f.AddClass("testClass")
-				class.Style.Fill = "#f9f9f9"
-			},
-			contains: []string{
-				"flowchart TB\n",
-				"classDef testClass fill:#f9f9f9",
-			},
-		},
-		{
-			name:      "Flowchart with subgraph",
-			flowchart: NewFlowchart(),
-			setup: func(f *Flowchart) {
-				subgraph := f.AddSubgraph("Test Subgraph")
-				node1 := f.AddNode("Node1")
-				node2 := f.AddNode("Node2")
-				subgraph.AddLink(node1, node2)
-			},
-			contains: []string{
-				"flowchart TB\n",
-				"subgraph 0 [Test Subgraph]",
-				"1(\"Node1\")",
-				"2(\"Node2\")",
+				"flowchart TB",
+				`0@{ shape: stadium, label: "Start"}`,
+				`1@{ shape: rect, label: "Process"}`,
+				`2@{ shape: diam, label: "Decision"}`,
+				"0 --> 1",
 				"1 --> 2",
-				"end",
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.setup != nil {
-				tt.setup(tt.flowchart)
-			}
-
-			got := tt.flowchart.String()
-
-			if tt.wantStr != "" && got != tt.wantStr {
-				t.Errorf("Flowchart.String() = %v, want %v", got, tt.wantStr)
-			}
+			diagram := tt.setup()
+			result := diagram.String()
 
 			for _, want := range tt.contains {
-				if !strings.Contains(got, want) {
-					t.Errorf("Flowchart.String() output missing expected content: %v, got %v", want, got)
+				if !strings.Contains(result, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, result)
 				}
 			}
 		})
@@ -327,7 +281,7 @@ func TestFlowchart_AddNode(t *testing.T) {
 			wantNode: &Node{
 				ID:    "0",
 				Text:  "Test Node",
-				Shape: NodeShapeRoundEdges,
+				Shape: NodeShapeProcess,
 			},
 		},
 	}

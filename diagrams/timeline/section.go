@@ -39,8 +39,8 @@ func (s *Section) String() string {
 		sb.WriteString(fmt.Sprintf(baseSectionTitle, s.Title))
 	}
 
-	for idx, event := range s.Events {
-		sb.WriteString(event.String(idx == 0))
+	for _, event := range s.Events {
+		sb.WriteString(event.String())
 	}
 
 	return sb.String()

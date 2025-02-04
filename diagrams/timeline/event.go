@@ -7,9 +7,8 @@ import (
 
 // Base string formats for timeline events
 const (
-	baseEventWithTitle         string = "\t\t%s : %s\n"
-	baseEventWithoutTitle      string = "\t\t: %s\n"
-	baseFirstEventWithoutTitle string = "\t\t%s\n"
+	eventTitle string = "\t\t%s "
+	eventTExt  string = "\t\t: %s\n"
 )
 
 // Event represents a single event in the timeline
@@ -34,21 +33,19 @@ func (e *Event) AddSubEvent(text string) *Event {
 }
 
 // String generates the Mermaid syntax for the event
-func (e *Event) String(isFirstEvent bool) string {
+func (e *Event) String() string {
 	var sb strings.Builder
 
 	if e.Title != "" {
-		sb.WriteString(fmt.Sprintf(baseEventWithTitle, e.Title, e.Text))
-	} else {
-		if isFirstEvent {
-			sb.WriteString(fmt.Sprintf(baseFirstEventWithoutTitle, e.Text))
-		} else {
-			sb.WriteString(fmt.Sprintf(baseEventWithoutTitle, e.Text))
-		}
+		sb.WriteString(fmt.Sprintf(eventTitle, e.Title))
+	}
+
+	if e.Text != "" {
+		sb.WriteString(fmt.Sprintf(eventTExt, e.Text))
 	}
 
 	for _, subEvent := range e.SubEvents {
-		sb.WriteString(subEvent.String(false))
+		sb.WriteString(subEvent.String())
 	}
 
 	return sb.String()

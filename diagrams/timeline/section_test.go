@@ -22,16 +22,18 @@ func TestSection_AddEvent(t *testing.T) {
 	timePeriod := "2024-01"
 	eventText := "Test Event"
 
-	event := section.AddEvent(timePeriod, eventText)
+	section.AddEvent(timePeriod, eventText)
 
-	if event.TimePeriod != timePeriod {
-		t.Errorf("AddEvent().TimePeriod = %v, want %v", event.TimePeriod, timePeriod)
-	}
-	if event.Text != eventText {
-		t.Errorf("AddEvent().Text = %v, want %v", event.Text, eventText)
-	}
 	if len(section.Events) != 1 {
 		t.Error("AddEvent() should add event to section")
+	}
+
+	event := section.Events[0]
+	if event.Title != timePeriod {
+		t.Errorf("Event.Title = %v, want %v", event.Title, timePeriod)
+	}
+	if event.Text != eventText {
+		t.Errorf("Event.Text = %v, want %v", event.Text, eventText)
 	}
 }
 
@@ -39,16 +41,18 @@ func TestSection_AddSubEvent(t *testing.T) {
 	section := NewSection("Test")
 	eventText := "Sub Event"
 
-	event := section.AddSubEvent(eventText)
+	section.AddSubEvent(eventText)
 
-	if event.TimePeriod != "" {
-		t.Errorf("AddSubEvent().TimePeriod = %v, want empty string", event.TimePeriod)
-	}
-	if event.Text != eventText {
-		t.Errorf("AddSubEvent().Text = %v, want %v", event.Text, eventText)
-	}
 	if len(section.Events) != 1 {
 		t.Error("AddSubEvent() should add event to section")
+	}
+
+	event := section.Events[0]
+	if event.Title != "" {
+		t.Errorf("Event.Title = %v, want empty string", event.Title)
+	}
+	if event.Text != eventText {
+		t.Errorf("Event.Text = %v, want %v", event.Text, eventText)
 	}
 }
 

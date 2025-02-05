@@ -1,8 +1,6 @@
 package userjourney
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -119,87 +117,6 @@ func TestDiagram_String(t *testing.T) {
 			for _, want := range tt.contains {
 				if !strings.Contains(result, want) {
 					t.Errorf("String() missing expected content %q in:\n%s", want, result)
-				}
-			}
-		})
-	}
-}
-
-func TestDiagram_RenderToFile(t *testing.T) {
-	// Create temp directory for test files
-	tempDir, err := os.MkdirTemp("", "userjourney_test_*")
-	if err != nil {
-		t.Fatalf("Failed to create temp directory: %v", err)
-	}
-	defer os.RemoveAll(tempDir)
-
-	tests := []struct {
-		name        string
-		diagram     *Diagram
-		filename    string
-		wantContent string
-		wantErr     bool
-	}{
-		{
-			name: "Write markdown file",
-			diagram: func() *Diagram {
-				d := NewDiagram()
-				d.SetTitle("Test Journey")
-				section := d.AddSection("Test")
-				section.AddTask("Task 1", 3)
-				return d
-			}(),
-			filename: "test.md",
-			wantContent: `journey
-	title Test Journey
-	section Test
-		Task 1: 3
-`,
-			wantErr: false,
-		},
-		{
-			name: "Write non-markdown file",
-			diagram: func() *Diagram {
-				d := NewDiagram()
-				d.SetTitle("Test Journey")
-				section := d.AddSection("Test")
-				section.AddTask("Task 1", 3)
-				return d
-			}(),
-			filename: "test.txt",
-			wantContent: `journey
-	title Test Journey
-	section Test
-		Task 1: 3
-`,
-			wantErr: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			path := filepath.Join(tempDir, tt.filename)
-
-			err := tt.diagram.RenderToFile(path)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("RenderToFile() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			if !tt.wantErr {
-				content, err := os.ReadFile(path)
-				if err != nil {
-					t.Fatalf("Failed to read rendered file: %v", err)
-				}
-
-				// For .md files, content should be wrapped in markdown fence
-				wantContent := tt.wantContent
-				if strings.HasSuffix(path, ".md") {
-					wantContent = "```mermaid\n" + tt.wantContent + "```\n"
-				}
-
-				if got := string(content); got != wantContent {
-					t.Errorf("RenderToFile() content mismatch:\nwant:\n%s\ngot:\n%s", wantContent, got)
 				}
 			}
 		})

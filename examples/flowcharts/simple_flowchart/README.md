@@ -1,4 +1,3 @@
-```mermaid
 ---
 title: Simple Process Flow
 ---
@@ -16,4 +15,3 @@ flowchart TB
 	3 --> 4
 	3 --> 1
 	4 --> 5
-```

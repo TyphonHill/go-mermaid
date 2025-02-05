@@ -74,7 +74,7 @@ func (f *Flowchart) SetCurveStyle(style curveStyle) *Flowchart {
 
 // RenderToFile saves the flowchart diagram to a file at the specified path.
 func (f *Flowchart) RenderToFile(path string) error {
-	return utils.RenderToFile(path, f.String(), f.IsMarkdownFenceEnabled())
+	return utils.RenderToFile(path, f.String())
 }
 
 // AddSubgraph adds a new subgraph to the flowchart and returns the created subgraph.

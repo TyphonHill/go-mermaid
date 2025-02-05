@@ -1,4 +1,3 @@
-```mermaid
 ---
 title: Software Development Process
 ---
@@ -24,4 +23,3 @@ flowchart TB
 	6 --> 7
 	7 --> 8
 	8 --> 9
-```

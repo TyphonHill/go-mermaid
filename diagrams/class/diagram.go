@@ -85,7 +85,7 @@ func (cd *ClassDiagram) String() string {
 
 // RenderToFile saves the diagram to a file at the specified path.
 func (cd *ClassDiagram) RenderToFile(path string) error {
-	return utils.RenderToFile(path, cd.String(), cd.IsMarkdownFenceEnabled())
+	return utils.RenderToFile(path, cd.String())
 }
 
 // AddNamespace creates and adds a new namespace to the class diagram.

@@ -1,4 +1,3 @@
-```mermaid
 timeline
 	title Software Development Lifecycle
 	section Planning
@@ -43,4 +42,3 @@ timeline
 		: User feedback collection and analysis
 		Month 3 		: Feature enhancement planning
 		: Documentation updates and maintenance
-```

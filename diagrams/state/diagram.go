@@ -60,5 +60,5 @@ func (d *Diagram) String() string {
 
 // RenderToFile saves the diagram to a file at the specified path.
 func (d *Diagram) RenderToFile(path string) error {
-	return utils.RenderToFile(path, d.String(), d.IsMarkdownFenceEnabled())
+	return utils.RenderToFile(path, d.String())
 }

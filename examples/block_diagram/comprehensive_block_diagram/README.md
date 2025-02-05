@@ -1,4 +1,3 @@
-```mermaid
 block-beta
 	columns 4
 	0("Dashboard"):4
@@ -34,4 +33,3 @@ block-beta
 	8 --> 11
 	8 --> 12
 	8 --> 13
-```

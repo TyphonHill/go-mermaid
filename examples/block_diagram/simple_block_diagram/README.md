@@ -1,4 +1,3 @@
-```mermaid
 block-beta
 	columns 3
 	0(["Start"])
@@ -7,4 +6,3 @@ block-beta
 	3(("End"))
 	0 --> 1
 	1 --> 2
-```

@@ -1,8 +1,6 @@
 package flowchart
 
 import (
-	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -163,105 +161,6 @@ func TestFlowchart_String(t *testing.T) {
 				if !strings.Contains(result, want) {
 					t.Errorf("String() missing expected content %q in:\n%s", want, result)
 				}
-			}
-		})
-	}
-}
-
-func TestFlowchart_RenderToFile(t *testing.T) {
-	// Create temp directory for test files
-	tempDir, err := os.MkdirTemp("", "flowchart_test_*")
-	if err != nil {
-		t.Fatalf("Failed to create temp directory: %v", err)
-	}
-	defer os.RemoveAll(tempDir)
-
-	// Create a sample flowchart
-	flowchart := NewFlowchart()
-	flowchart.Title = "Test Flowchart"
-	node1 := flowchart.AddNode("Start")
-	node2 := flowchart.AddNode("End")
-	flowchart.AddLink(node1, node2)
-
-	tests := []struct {
-		name           string
-		filename       string
-		setupFence     bool
-		expectFence    bool
-		expectError    bool
-		validateOutput func(string) bool
-	}{
-		{
-			name:        "Save as markdown file",
-			filename:    "flowchart.md",
-			setupFence:  false,
-			expectFence: true,
-			validateOutput: func(content string) bool {
-				return strings.HasPrefix(content, "```mermaid\n") &&
-					strings.HasSuffix(content, "```\n")
-			},
-		},
-		{
-			name:        "Save as text file with fencing enabled",
-			filename:    "flowchart.txt",
-			setupFence:  true,
-			expectFence: true,
-			validateOutput: func(content string) bool {
-				return strings.HasPrefix(content, "```mermaid\n") &&
-					strings.HasSuffix(content, "```\n")
-			},
-		},
-		{
-			name:        "Save to nested directory",
-			filename:    "nested/dir/flowchart.txt",
-			setupFence:  false,
-			expectFence: false,
-			validateOutput: func(content string) bool {
-				return strings.Contains(content, "Test Flowchart")
-			},
-		},
-		{
-			name:        "Save with invalid path",
-			filename:    string([]byte{0}),
-			expectError: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.setupFence {
-				flowchart.EnableMarkdownFence()
-			} else {
-				flowchart.DisableMarkdownFence()
-			}
-
-			path := filepath.Join(tempDir, tt.filename)
-			err := flowchart.RenderToFile(path)
-
-			if tt.expectError {
-				if err == nil {
-					t.Error("Expected error but got none")
-				}
-				return
-			}
-
-			if err != nil {
-				t.Fatalf("Unexpected error: %v", err)
-			}
-
-			content, err := os.ReadFile(path)
-			if err != nil {
-				t.Fatalf("Failed to read output file: %v", err)
-			}
-
-			if tt.validateOutput != nil {
-				if !tt.validateOutput(string(content)) {
-					t.Error("Output validation failed")
-				}
-			}
-
-			if flowchart.IsMarkdownFenceEnabled() != tt.setupFence {
-				t.Error("Flowchart fence state was permanently modified")
 			}
 		})
 	}

@@ -32,4 +32,5 @@ stateDiagram-v2
 	join --> idle: Order Complete
 	error --> idle: Reset Order
 	error --> [*]: Cancel Order
+
 ```

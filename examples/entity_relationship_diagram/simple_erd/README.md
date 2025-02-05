@@ -28,4 +28,5 @@ erDiagram
 	USER_TABLE ||--o{ POSTS : writes
 	POSTS ||--o{ COMMENTS : has
 	USER_TABLE ||--o{ COMMENTS : writes
+
 ```

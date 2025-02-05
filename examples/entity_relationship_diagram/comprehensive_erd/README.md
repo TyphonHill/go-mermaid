@@ -72,4 +72,5 @@ erDiagram
 	AUTHORS ||--o{ BOOK_AUTHORS : writes
 	BOOKS ||--o{ BOOK_CATEGORIES : has
 	CATEGORIES ||--o{ BOOK_CATEGORIES : categorizes
+
 ```

@@ -32,6 +32,6 @@ func (m *MarkdownFencer) WrapWithFence(content string) string {
 	var sb strings.Builder
 	sb.WriteString("```mermaid\n")
 	sb.WriteString(content)
-	sb.WriteString("```\n")
+	sb.WriteString("\n```\n")
 	return sb.String()
 }

@@ -27,4 +27,5 @@ autonumber
 	frontend->>browser: Order Confirmation
 	destroy payment
 	Note over browser,orders: Order processing complete
+
 ```

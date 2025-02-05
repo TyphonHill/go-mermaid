@@ -55,7 +55,7 @@ func TestDiagram_String(t *testing.T) {
 			setup: func(d *Diagram) {
 				d.EnableMarkdownFence()
 			},
-			wantStr: "```mermaid\nsequenceDiagram\n```\n",
+			wantStr: "```mermaid\nsequenceDiagram\n\n```\n",
 		},
 		{
 			name: "Diagram with title and fence",

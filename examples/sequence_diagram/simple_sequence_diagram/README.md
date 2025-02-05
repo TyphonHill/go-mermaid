@@ -11,4 +11,5 @@ sequenceDiagram
 		server-->db: Validate credentials
 			db->>server: User validated
 	server->>client: Return JWT token
+
 ```

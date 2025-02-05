@@ -19,4 +19,5 @@ classDiagram
 		+withdraw(amount:float) error
 	}
 	User -- Account : has
+
 ```

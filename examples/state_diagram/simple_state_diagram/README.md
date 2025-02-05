@@ -12,4 +12,5 @@ stateDiagram-v2
 	processing --> idle: Complete
 	processing --> error: Error Occurred
 	error --> idle: Reset
+
 ```

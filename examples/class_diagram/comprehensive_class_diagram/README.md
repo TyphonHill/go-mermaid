@@ -54,4 +54,5 @@ classDiagram
 	OrderItem -- Entity
 	Order -- OrderItem
 	User -- Order
+
 ```

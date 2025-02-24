@@ -10,6 +10,7 @@ import (
 
 func main() {
 	diagram := flowchart.NewFlowchart()
+	diagram.EnableMarkdownFence()
 	diagram.SetTitle("Software Development Process")
 
 	// Define nodes with various shapes

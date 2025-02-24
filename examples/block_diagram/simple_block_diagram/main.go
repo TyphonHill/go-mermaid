@@ -11,6 +11,7 @@ import (
 func main() {
 	// Create a new block diagram
 	diagram := block.NewDiagram()
+	diagram.EnableMarkdownFence()
 	diagram.SetColumns(3)
 
 	// Add blocks with different shapes and arrows

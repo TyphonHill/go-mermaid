@@ -1,3 +1,4 @@
+```mermaid
 timeline
 	title Simple Project Timeline
 	section Planning
@@ -15,3 +16,5 @@ timeline
 		: User acceptance testing
 		2024-06 		: Production deployment
 		: Post-deployment monitoring
+
+```

@@ -11,6 +11,7 @@ import (
 func main() {
 	// Create a new flowchart
 	diagram := flowchart.NewFlowchart()
+	diagram.EnableMarkdownFence()
 	diagram.SetTitle("Simple Process Flow")
 
 	// Add nodes with different shapes

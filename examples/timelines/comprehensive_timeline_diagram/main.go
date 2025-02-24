@@ -11,6 +11,7 @@ import (
 func main() {
 	// Create a new timeline diagram
 	diagram := timeline.NewDiagram()
+	diagram.EnableMarkdownFence()
 	diagram.SetTitle("Software Development Lifecycle")
 
 	// Planning Phase

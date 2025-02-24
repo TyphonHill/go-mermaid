@@ -10,6 +10,7 @@ import (
 
 func main() {
 	diagram := block.NewDiagram()
+	diagram.EnableMarkdownFence()
 	diagram.SetColumns(4)
 
 	// Different block styles and widths

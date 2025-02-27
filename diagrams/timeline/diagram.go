@@ -8,17 +8,50 @@ import (
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
 )
 
+type timelineTheme string
+
+const (
+	TimelineThemeBase       timelineTheme = "base"
+	TimelineThemeModernDark timelineTheme = "forest"
+	TimelineThemeDark       timelineTheme = "dark"
+	TimelineThemeDefault    timelineTheme = "default"
+	TimelineThemeNeutral    timelineTheme = "neutral"
+)
+
+const (
+	baseInitString string = "%%%%{init: { 'theme': '%s', 'timeline': {'disableMulticolor': %t}}}%%%%\n"
+)
+
 // Diagram represents a Mermaid timeline diagram
 type Diagram struct {
 	utils.BaseDiagram
-	Sections []*Section
+	Sections          []*Section
+	theme             timelineTheme
+	disableMulticolor bool
 }
 
 // NewDiagram creates a new timeline diagram
 func NewDiagram() *Diagram {
 	return &Diagram{
-		Sections: make([]*Section, 0),
+		Sections:          make([]*Section, 0),
+		theme:             TimelineThemeBase,
+		disableMulticolor: false,
 	}
+}
+
+// SetTheme sets the theme for the timeline diagram
+func (d *Diagram) SetTheme(theme timelineTheme) {
+	d.theme = theme
+}
+
+// EnableMultiColot enables the multi-color feature for the timeline diagram
+func (d *Diagram) EnableMultiColot() {
+	d.disableMulticolor = false
+}
+
+// DisableMultiColot disables the multi-color feature for the timeline diagram
+func (d *Diagram) DisableMultiColot() {
+	d.disableMulticolor = true
 }
 
 // AddSection creates and adds a new section to the timeline
@@ -32,6 +65,7 @@ func (d *Diagram) AddSection(title string) *Section {
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
+	sb.WriteString(fmt.Sprintf(baseInitString, d.theme, d.disableMulticolor))
 	sb.WriteString("timeline\n")
 
 	if d.Title != "" {

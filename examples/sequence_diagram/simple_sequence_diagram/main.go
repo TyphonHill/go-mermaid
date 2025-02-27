@@ -16,7 +16,7 @@ func main() {
 	diagram.EnableMarkdownFence()
 
 	// Set title
-	diagram.Title = "Login Flow"
+	diagram.SetTitle("Login Flow")
 
 	// Create actors
 	client := diagram.AddActor("client", "Client", sequenceDiagram.ActorParticipant)

@@ -2,15 +2,15 @@
 package state
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // Diagram represents a state diagram with states, transitions, and rendering options.
 type Diagram struct {
-	utils.BaseDiagram
+	basediagram.BaseDiagram
 	States      []*State
 	Transitions []*Transition
 }
@@ -18,6 +18,7 @@ type Diagram struct {
 // NewDiagram creates a new state diagram with default settings.
 func NewDiagram() *Diagram {
 	return &Diagram{
+		BaseDiagram: basediagram.NewBaseDiagram(),
 		States:      make([]*State, 0),
 		Transitions: make([]*Transition, 0),
 	}
@@ -41,10 +42,6 @@ func (d *Diagram) AddTransition(from, to *State, description string) *Transition
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	if d.Title != "" {
-		sb.WriteString(fmt.Sprintf("---\ntitle: %s\n---\n\n", d.Title))
-	}
-
 	sb.WriteString("stateDiagram-v2\n")
 
 	for _, state := range d.States {
@@ -55,7 +52,7 @@ func (d *Diagram) String() string {
 		sb.WriteString(transition.String(""))
 	}
 
-	return d.WrapWithFence(sb.String())
+	return d.BaseDiagram.String(sb.String())
 }
 
 // RenderToFile saves the diagram to a file at the specified path.

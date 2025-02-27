@@ -1,6 +1,10 @@
 package entityrelationship
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
+)
 
 // Cardinality represents the relationship cardinality
 type Cardinality string
@@ -55,5 +59,5 @@ func (r *Relationship) String() string {
 	if label == "" {
 		label = "relates"
 	}
-	return fmt.Sprintf("\t%s %s %s : %s\n", r.From.Name, string(r.Cardinality), r.To.Name, label)
+	return fmt.Sprintf(basediagram.Indentation+"%s %s %s : %s\n", r.From.Name, string(r.Cardinality), r.To.Name, label)
 }

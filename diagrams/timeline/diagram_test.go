@@ -11,9 +11,6 @@ func TestNewDiagram(t *testing.T) {
 	if len(diagram.Sections) != 0 {
 		t.Error("NewDiagram() should create empty sections slice")
 	}
-	if diagram.Title != "" {
-		t.Error("NewDiagram() should not set a title")
-	}
 	if diagram.IsMarkdownFenceEnabled() {
 		t.Error("NewDiagram() should not enable markdown fence by default")
 	}
@@ -38,19 +35,16 @@ func TestDiagram_String(t *testing.T) {
 			name: "Diagram with title",
 			setup: func() *Diagram {
 				d := NewDiagram()
-				d.SetTitle("Test Timeline")
 				return d
 			},
 			contains: []string{
 				"timeline",
-				"title Test Timeline",
 			},
 		},
 		{
 			name: "Complete diagram",
 			setup: func() *Diagram {
 				d := NewDiagram()
-				d.SetTitle("Project Timeline")
 
 				planning := d.AddSection("Planning")
 				planning.AddEvent("2024-01", "Project kickoff")
@@ -62,11 +56,12 @@ func TestDiagram_String(t *testing.T) {
 			},
 			contains: []string{
 				"timeline",
-				"title Project Timeline",
 				"section Planning",
-				"\t\t2024-01\n\t\t: Project kickoff",
+				"2024-01",
+				"Project kickoff",
 				"section Development",
-				"\t\t2024-02\n\t\t: Implementation",
+				"2024-02",
+				"Implementation",
 			},
 		},
 	}

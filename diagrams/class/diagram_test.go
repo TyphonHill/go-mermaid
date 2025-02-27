@@ -158,22 +158,9 @@ func TestClassDiagram_String(t *testing.T) {
 			},
 		},
 		{
-			name: "Diagram with title",
-			setup: func(cd *ClassDiagram) {
-				cd.EnableMarkdownFence()
-				cd.Title = "Test Class Diagram"
-			},
-			contains: []string{
-				"---\ntitle: Test Class Diagram\n---\n",
-				"classDiagram\n",
-				"direction TB\n",
-			},
-		},
-		{
 			name: "Diagram with full components",
 			setup: func(cd *ClassDiagram) {
 				cd.EnableMarkdownFence()
-				cd.Title = "Complex Diagram"
 
 				// Add namespace
 				ns := cd.AddNamespace("TestNamespace")
@@ -196,7 +183,6 @@ func TestClassDiagram_String(t *testing.T) {
 				cd.AddNote("Test Note", class1)
 			},
 			contains: []string{
-				"---\ntitle: Complex Diagram\n---\n",
 				"namespace TestNamespace",
 				"<<Service>>",
 				"testField",

@@ -3,6 +3,8 @@ package class
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // fieldVisibility represents the access modifier for a field in a class diagram.
@@ -26,7 +28,7 @@ const (
 
 // Formatting constants for field string representation.
 const (
-	baseFieldBaseString  string = "\t%s%s %s%s"
+	baseFieldBaseString  string = basediagram.Indentation + "%s%s %s%s"
 	baseFieldParamString string = "%s:%s,"
 )
 

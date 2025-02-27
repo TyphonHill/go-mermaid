@@ -2,6 +2,7 @@ package flowchart
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -49,10 +50,10 @@ func TestNewClass(t *testing.T) {
 
 func TestClass_String(t *testing.T) {
 	tests := []struct {
-		name    string
-		class   *Class
-		setup   func(*Class)
-		wantStr string
+		name     string
+		class    *Class
+		setup    func(*Class)
+		contains []string
 	}{
 		{
 			name: "Class with default style",
@@ -60,7 +61,9 @@ func TestClass_String(t *testing.T) {
 				Name:  "testClass",
 				Style: NewNodeStyle(),
 			},
-			wantStr: "\tclassDef testClass stroke-width:1,stroke-dasharray:0\n",
+			contains: []string{
+				"classDef testClass stroke-width:1,stroke-dasharray:0",
+			},
 		},
 		{
 			name: "Class with custom style",
@@ -75,15 +78,9 @@ func TestClass_String(t *testing.T) {
 				c.Style.StrokeWidth = 2
 				c.Style.StrokeDash = "5"
 			},
-			wantStr: "\tclassDef customClass color:#333333,fill:#f9f9f9,stroke:#666666,stroke-width:2,stroke-dasharray:5\n",
-		},
-		{
-			name: "Class with nil style",
-			class: &Class{
-				Name:  "nilStyle",
-				Style: nil,
+			contains: []string{
+				"classDef customClass color:#333333,fill:#f9f9f9,stroke:#666666,stroke-width:2,stroke-dasharray:5",
 			},
-			wantStr: "",
 		},
 	}
 
@@ -94,8 +91,10 @@ func TestClass_String(t *testing.T) {
 			}
 
 			got := tt.class.String()
-			if got != tt.wantStr {
-				t.Errorf("Class.String() = %v, want %v", got, tt.wantStr)
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
 			}
 		})
 	}

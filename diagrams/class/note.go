@@ -3,12 +3,14 @@ package class
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // Note constants for formatting the Mermaid syntax representation.
 const (
-	baseDiagramNoteString string = "\tnote \"%s\"\n"
-	baseClassNoteString   string = "\tnote for %s \"%s\"\n"
+	baseDiagramNoteString string = basediagram.Indentation + "note \"%s\"\n"
+	baseClassNoteString   string = basediagram.Indentation + "note for %s \"%s\"\n"
 )
 
 // Note represents an annotation or comment in a class diagram.

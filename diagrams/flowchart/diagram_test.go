@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // MockIDGenerator is a simple ID generator for testing
@@ -25,12 +27,13 @@ func TestNewFlowchart(t *testing.T) {
 		{
 			name: "Create new flowchart with default settings",
 			want: &Flowchart{
-				Direction:  FlowchartDirectionTopToBottom,
-				CurveStyle: CurveStyleNone,
-				classes:    make([]*Class, 0),
-				nodes:      make([]*Node, 0),
-				subgraphs:  make([]*Subgraph, 0),
-				links:      make([]*Link, 0),
+				BaseDiagram: basediagram.NewBaseDiagram(),
+				Direction:   FlowchartDirectionTopToBottom,
+				CurveStyle:  CurveStyleNone,
+				classes:     make([]*Class, 0),
+				nodes:       make([]*Node, 0),
+				subgraphs:   make([]*Subgraph, 0),
+				links:       make([]*Link, 0),
 			},
 		},
 	}

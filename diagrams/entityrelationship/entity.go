@@ -3,6 +3,8 @@ package entityrelationship
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // DataType represents the type of an attribute
@@ -79,9 +81,9 @@ func (e *Entity) String() string {
 	var sb strings.Builder
 
 	if e.Alias != "" {
-		sb.WriteString(fmt.Sprintf("\t%s [%s] {\n", e.Name, e.Alias))
+		sb.WriteString(fmt.Sprintf(basediagram.Indentation+"%s [%s] {\n", e.Name, e.Alias))
 	} else {
-		sb.WriteString(fmt.Sprintf("\t%s {\n", e.Name))
+		sb.WriteString(fmt.Sprintf(basediagram.Indentation+"%s {\n", e.Name))
 	}
 
 	for _, attr := range e.Attributes {
@@ -93,9 +95,9 @@ func (e *Entity) String() string {
 		} else if attr.FK {
 			keys = " FK"
 		}
-		sb.WriteString(fmt.Sprintf("\t\t%s %s%s\n", attr.Type, attr.Name, keys))
+		sb.WriteString(fmt.Sprintf(basediagram.Indentation+basediagram.Indentation+"%s %s%s\n", attr.Type, attr.Name, keys))
 	}
 
-	sb.WriteString("\t}\n")
+	sb.WriteString(basediagram.Indentation + "}\n")
 	return sb.String()
 }

@@ -3,6 +3,8 @@ package class
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // relationType represents the type of relationship between classes.
@@ -43,7 +45,7 @@ const (
 
 // Formatting constants for relation string representation.
 const (
-	baseRelationString     string = "\t%s %s%s%s%s%s %s%s\n"
+	baseRelationString     string = basediagram.Indentation + "%s %s%s%s%s%s %s%s\n"
 	baseRelationTextString string = " : %s"
 )
 

@@ -3,12 +3,14 @@ package timeline
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // Base string formats for timeline events
 const (
-	eventTitle string = "\t\t%s\n"
-	eventText  string = "\t\t: %s\n"
+	eventTitle string = basediagram.Indentation + basediagram.Indentation + "%s\n"
+	eventText  string = basediagram.Indentation + basediagram.Indentation + ": %s\n"
 )
 
 // Event represents a single event in the timeline

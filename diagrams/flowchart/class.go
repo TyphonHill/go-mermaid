@@ -3,10 +3,12 @@ package flowchart
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 const (
-	baseClassString string = "\tclassDef %s %s\n"
+	baseClassString string = basediagram.Indentation + "classDef %s %s\n"
 )
 
 // Classes are a convenient way of creating a node style since you can attach them directly to a node.

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 type classDiagramDirection string
@@ -20,15 +21,14 @@ const (
 )
 
 const (
-	baseClassDiagramTitleString     string = "---\ntitle: %s\n---\n\n"
 	baseClassDiagramString          string = "classDiagram\n"
-	baseClassDiagramDirectionString string = "\tdirection %s\n"
+	baseClassDiagramDirectionString string = basediagram.Indentation + "direction %s\n"
 )
 
 // ClassDiagram represents a Mermaid class diagram with various diagram components
 // such as classes, namespaces, relations, and notes.
 type ClassDiagram struct {
-	utils.BaseDiagram
+	basediagram.BaseDiagram
 	Direction  classDiagramDirection
 	namespaces []*Namespace
 	notes      []*Note
@@ -46,19 +46,15 @@ func (cd *ClassDiagram) SetDirection(direction classDiagramDirection) *ClassDiag
 // The default direction is set to top-to-bottom.
 func NewClassDiagram() (newClassDiagram *ClassDiagram) {
 	newClassDiagram = &ClassDiagram{
-		Direction: ClassDiagramDirectionTopToBottom,
+		BaseDiagram: basediagram.NewBaseDiagram(),
+		Direction:   ClassDiagramDirectionTopToBottom,
 	}
 	return
 }
 
 // String generates the Mermaid syntax representation of the class diagram.
-// It includes title, direction, notes, namespaces, classes, and relations.
 func (cd *ClassDiagram) String() string {
 	var sb strings.Builder
-
-	if len(cd.Title) > 0 {
-		sb.WriteString(fmt.Sprintf(string(baseClassDiagramTitleString), cd.Title))
-	}
 
 	sb.WriteString(baseClassDiagramString)
 
@@ -80,7 +76,7 @@ func (cd *ClassDiagram) String() string {
 		sb.WriteString(relation.String())
 	}
 
-	return cd.WrapWithFence(sb.String())
+	return cd.BaseDiagram.String(sb.String())
 }
 
 // RenderToFile saves the diagram to a file at the specified path.

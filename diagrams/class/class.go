@@ -4,6 +4,8 @@ package class
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 type classAnnotation string
@@ -19,11 +21,11 @@ const (
 
 // Mermaid class syntax templates
 const (
-	baseClassStartString      string = "\tclass %s%s{\n"
-	baseClassEndString        string = "\t}\n"
+	baseClassStartString      string = basediagram.Indentation + "class %s%s{\n"
+	baseClassEndString        string = basediagram.Indentation + "}\n"
 	baseClassLabelString      string = "[\"%s\"]"
-	baseClassAnnotationString string = "\t\t%s\n"
-	baseClassMemberString     string = "\t%s\n"
+	baseClassAnnotationString string = basediagram.Indentation + "%s\n"
+	baseClassMemberString     string = basediagram.Indentation + "%s\n"
 )
 
 // Class represents a class in a Mermaid class diagram

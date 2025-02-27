@@ -1,23 +1,27 @@
 ```mermaid
 ---
 title: Order Processing State Machine
+config:
+    theme: default
+    maxTextSize: 50000
+    maxEdges: 500
+    fontSize: 16
 ---
-
 stateDiagram-v2
-	state "Order Idle" as idle
-	note left of idle: System waiting for new orders
-	state "Validating Order" as validating
-	state "Processing Order" as processing
-	state processing {
-    	state "Payment Pending" as payment_pending
-    	state "Order Fulfillment" as fulfillment
-	}
-	note right of processing: Payment and fulfillment processing
-	state "Error State" as error
-	note right of error: Error handling and recovery
-	state decision <<choice>>
-	state fork <<fork>>
-	state join <<join>>
+    state "Order Idle" as idle
+    note left of idle: System waiting for new orders
+    state "Validating Order" as validating
+    state "Processing Order" as processing
+    state processing {
+        state "Payment Pending" as payment_pending
+        state "Order Fulfillment" as fulfillment
+    }
+    note right of processing: Payment and fulfillment processing
+    state "Error State" as error
+    note right of error: Error handling and recovery
+    state decision <<choice>>
+    state fork <<fork>>
+    state join <<join>>
 	[*] --> idle: New Order
 	idle --> validating: Submit Order
 	validating --> decision: Validation Complete

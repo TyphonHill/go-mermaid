@@ -2,35 +2,30 @@
 package userjourney
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // Base string formats for user journey diagrams
 const (
 	baseDiagramType  string = "journey\n"
-	baseDiagramTitle string = "\ttitle %s\n"
+	baseDiagramTitle string = basediagram.Indentation + "title %s\n"
 )
 
 // Diagram represents a Mermaid User Journey diagram
 type Diagram struct {
-	utils.BaseDiagram
+	basediagram.BaseDiagram
 	Sections []*Section
 }
 
 // NewDiagram creates a new User Journey diagram
 func NewDiagram() *Diagram {
 	return &Diagram{
-		Sections: make([]*Section, 0),
+		BaseDiagram: basediagram.NewBaseDiagram(),
+		Sections:    make([]*Section, 0),
 	}
-}
-
-// SetTitle sets the diagram title and returns the diagram for chaining
-func (d *Diagram) SetTitle(title string) *Diagram {
-	d.Title = title
-	return d
 }
 
 // AddSection adds a new section to the diagram
@@ -46,15 +41,11 @@ func (d *Diagram) String() string {
 
 	sb.WriteString(baseDiagramType)
 
-	if d.Title != "" {
-		sb.WriteString(fmt.Sprintf(baseDiagramTitle, d.Title))
-	}
-
 	for _, section := range d.Sections {
 		sb.WriteString(section.String())
 	}
 
-	return d.WrapWithFence(sb.String())
+	return d.BaseDiagram.String(sb.String())
 }
 
 // RenderToFile renders the diagram to a file

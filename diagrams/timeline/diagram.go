@@ -2,10 +2,10 @@
 package timeline
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 type timelineTheme string
@@ -24,7 +24,7 @@ const (
 
 // Diagram represents a Mermaid timeline diagram
 type Diagram struct {
-	utils.BaseDiagram
+	basediagram.BaseDiagram
 	Sections          []*Section
 	theme             timelineTheme
 	disableMulticolor bool
@@ -33,6 +33,7 @@ type Diagram struct {
 // NewDiagram creates a new timeline diagram
 func NewDiagram() *Diagram {
 	return &Diagram{
+		BaseDiagram:       basediagram.NewBaseDiagram(),
 		Sections:          make([]*Section, 0),
 		theme:             TimelineThemeBase,
 		disableMulticolor: false,
@@ -65,18 +66,13 @@ func (d *Diagram) AddSection(title string) *Section {
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf(baseInitString, d.theme, d.disableMulticolor))
 	sb.WriteString("timeline\n")
-
-	if d.Title != "" {
-		sb.WriteString(fmt.Sprintf("\ttitle %s\n", d.Title))
-	}
 
 	for _, section := range d.Sections {
 		sb.WriteString(section.String())
 	}
 
-	return d.WrapWithFence(sb.String())
+	return d.BaseDiagram.String(sb.String())
 }
 
 // RenderToFile saves the diagram to a file at the specified path

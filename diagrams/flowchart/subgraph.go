@@ -5,14 +5,15 @@ import (
 	"strings"
 
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 const (
-	baseSubgraphString          string = "\tsubgraph %s [%s]\n"
-	baseSubgraphDirectionString string = "\t\tdirection %s\n"
-	baseSubgraphEndString       string = "\tend\n"
-	baseSubgraphLinkString      string = "\t%s"
-	baseSubgraphSubgraphString  string = "\t%s"
+	baseSubgraphString          string = basediagram.Indentation + "subgraph %s [%s]\n"
+	baseSubgraphDirectionString string = basediagram.Indentation + "direction %s\n"
+	baseSubgraphEndString       string = basediagram.Indentation + "end\n"
+	baseSubgraphLinkString      string = basediagram.Indentation + "%s"
+	baseSubgraphSubgraphString  string = basediagram.Indentation + "%s"
 )
 
 // List of possible Subgraph directions.

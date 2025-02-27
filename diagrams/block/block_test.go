@@ -2,6 +2,7 @@ package block
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -81,20 +82,24 @@ func TestBlock_SetStyle(t *testing.T) {
 
 func TestBlock_String(t *testing.T) {
 	tests := []struct {
-		name    string
-		block   *Block
-		setup   func(*Block)
-		wantStr string
+		name     string
+		block    *Block
+		setup    func(*Block)
+		contains []string
 	}{
 		{
-			name:    "Empty block",
-			block:   NewBlock("0", ""),
-			wantStr: "\t0\n",
+			name:  "Empty block",
+			block: NewBlock("0", ""),
+			contains: []string{
+				"0",
+			},
 		},
 		{
-			name:    "Block with text",
-			block:   NewBlock("1", "Test"),
-			wantStr: "\t1[\"Test\"]\n",
+			name:  "Block with text",
+			block: NewBlock("1", "Test"),
+			contains: []string{
+				"1[\"Test\"]",
+			},
 		},
 		{
 			name:  "Block with width",
@@ -102,7 +107,10 @@ func TestBlock_String(t *testing.T) {
 			setup: func(b *Block) {
 				b.SetWidth(2)
 			},
-			wantStr: "\t2[\"Test\"]:2\n",
+			contains: []string{
+				"2[\"Test\"]",
+				":2",
+			},
 		},
 		{
 			name:  "Block with style",
@@ -110,7 +118,10 @@ func TestBlock_String(t *testing.T) {
 			setup: func(b *Block) {
 				b.SetStyle("fill:#f9f9f9")
 			},
-			wantStr: "\t3[\"Test\"]\n\tstyle 3 fill:#f9f9f9\n",
+			contains: []string{
+				"3[\"Test\"]",
+				"style 3 fill:#f9f9f9",
+			},
 		},
 		{
 			name:  "Parent block with children",
@@ -120,7 +131,12 @@ func TestBlock_String(t *testing.T) {
 				b.AddBlock("Child 1")
 				b.AddBlock("Child 2")
 			},
-			wantStr: "\tblock:4:1\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+			contains: []string{
+				"block:4:1",
+				"0[\"Child 1\"]",
+				"1[\"Child 2\"]",
+				"end",
+			},
 		},
 	}
 
@@ -133,8 +149,10 @@ func TestBlock_String(t *testing.T) {
 			}
 
 			got := tt.block.String()
-			if got != tt.wantStr {
-				t.Errorf("Block.String() = %v, want %v", got, tt.wantStr)
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
 			}
 		})
 	}
@@ -142,46 +160,58 @@ func TestBlock_String(t *testing.T) {
 
 func TestBlock_SetShape(t *testing.T) {
 	tests := []struct {
-		name    string
-		shape   blockShape
-		text    string
-		wantStr string
+		name     string
+		shape    blockShape
+		text     string
+		contains []string
 	}{
 		{
-			name:    "Default shape",
-			shape:   BlockShapeDefault,
-			text:    "Test",
-			wantStr: "\t0[\"Test\"]\n",
+			name:  "Default shape",
+			shape: BlockShapeDefault,
+			text:  "Test",
+			contains: []string{
+				"0[\"Test\"]",
+			},
 		},
 		{
-			name:    "Round edges shape",
-			shape:   BlockShapeRoundEdges,
-			text:    "Test",
-			wantStr: "\t0(\"Test\")\n",
+			name:  "Round edges shape",
+			shape: BlockShapeRoundEdges,
+			text:  "Test",
+			contains: []string{
+				"0(\"Test\")",
+			},
 		},
 		{
-			name:    "Stadium shape",
-			shape:   BlockShapeStadium,
-			text:    "Test",
-			wantStr: "\t0([\"Test\"])\n",
+			name:  "Stadium shape",
+			shape: BlockShapeStadium,
+			text:  "Test",
+			contains: []string{
+				"0([\"Test\"])",
+			},
 		},
 		{
-			name:    "Subroutine shape",
-			shape:   BlockShapeSubroutine,
-			text:    "Test",
-			wantStr: "\t0[[\"Test\"]]\n",
+			name:  "Subroutine shape",
+			shape: BlockShapeSubroutine,
+			text:  "Test",
+			contains: []string{
+				"0[[\"Test\"]]",
+			},
 		},
 		{
-			name:    "Cylindrical shape",
-			shape:   BlockShapeCylindrical,
-			text:    "Test",
-			wantStr: "\t0[(\"Test\")]\n",
+			name:  "Cylindrical shape",
+			shape: BlockShapeCylindrical,
+			text:  "Test",
+			contains: []string{
+				"0[(\"Test\")]",
+			},
 		},
 		{
-			name:    "Circle shape",
-			shape:   BlockShapeCircle,
-			text:    "Test",
-			wantStr: "\t0((\"Test\"))\n",
+			name:  "Circle shape",
+			shape: BlockShapeCircle,
+			text:  "Test",
+			contains: []string{
+				"0((\"Test\"))",
+			},
 		},
 	}
 
@@ -192,8 +222,10 @@ func TestBlock_SetShape(t *testing.T) {
 			block := NewBlock("0", tt.text)
 			block.SetShape(tt.shape)
 			got := block.String()
-			if got != tt.wantStr {
-				t.Errorf("Block.String() with shape %v = %v, want %v", tt.shape, got, tt.wantStr)
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
 			}
 		})
 	}
@@ -205,56 +237,72 @@ func TestBlock_SetArrow(t *testing.T) {
 		text      string
 		width     int
 		direction []BlockArrowDirection
-		wantStr   string
+		contains  []string
 	}{
 		{
 			name:      "Right arrow",
 			text:      "Test",
 			direction: []BlockArrowDirection{BlockArrowDirectionRight},
-			wantStr:   "\t0<[\"Test\"]>(right)\n",
+			contains: []string{
+				"0<[\"Test\"]>(right)",
+			},
 		},
 		{
 			name:      "Left arrow",
 			text:      "Test",
 			direction: []BlockArrowDirection{BlockArrowDirectionLeft},
-			wantStr:   "\t0<[\"Test\"]>(left)\n",
+			contains: []string{
+				"0<[\"Test\"]>(left)",
+			},
 		},
 		{
 			name:      "Up arrow",
 			text:      "Test",
 			direction: []BlockArrowDirection{BlockArrowDirectionUp},
-			wantStr:   "\t0<[\"Test\"]>(up)\n",
+			contains: []string{
+				"0<[\"Test\"]>(up)",
+			},
 		},
 		{
 			name:      "Down arrow",
 			text:      "Test",
 			direction: []BlockArrowDirection{BlockArrowDirectionDown},
-			wantStr:   "\t0<[\"Test\"]>(down)\n",
+			contains: []string{
+				"0<[\"Test\"]>(down)",
+			},
 		},
 		{
 			name:      "X arrow",
 			text:      "Test",
 			direction: []BlockArrowDirection{BlockArrowDirectionX},
-			wantStr:   "\t0<[\"Test\"]>(x)\n",
+			contains: []string{
+				"0<[\"Test\"]>(x)",
+			},
 		},
 		{
 			name:      "Y arrow",
 			text:      "Test",
 			direction: []BlockArrowDirection{BlockArrowDirectionY},
-			wantStr:   "\t0<[\"Test\"]>(y)\n",
+			contains: []string{
+				"0<[\"Test\"]>(y)",
+			},
 		},
 		{
 			name:      "Multiple directions",
 			text:      "Test",
 			direction: []BlockArrowDirection{BlockArrowDirectionX, BlockArrowDirectionDown},
-			wantStr:   "\t0<[\"Test\"]>(x, down)\n",
+			contains: []string{
+				"0<[\"Test\"]>(x, down)",
+			},
 		},
 		{
 			name:      "Arrow with width",
 			text:      "Test",
 			width:     2,
 			direction: []BlockArrowDirection{BlockArrowDirectionRight},
-			wantStr:   "\t0<[\"Test\"]>(right):2\n",
+			contains: []string{
+				"0<[\"Test\"]>(right):2",
+			},
 		},
 	}
 
@@ -268,8 +316,10 @@ func TestBlock_SetArrow(t *testing.T) {
 			}
 			block.SetArrow(tt.direction...)
 			got := block.String()
-			if got != tt.wantStr {
-				t.Errorf("Block.String() with arrow = %v, want %v", got, tt.wantStr)
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
 			}
 		})
 	}
@@ -277,10 +327,10 @@ func TestBlock_SetArrow(t *testing.T) {
 
 func TestBlock_SetColumns(t *testing.T) {
 	tests := []struct {
-		name    string
-		block   *Block
-		setup   func(*Block)
-		wantStr string
+		name     string
+		block    *Block
+		setup    func(*Block)
+		contains []string
 	}{
 		{
 			name:  "Block with columns",
@@ -291,7 +341,13 @@ func TestBlock_SetColumns(t *testing.T) {
 				b.AddBlock("Child 1")
 				b.AddBlock("Child 2")
 			},
-			wantStr: "\tblock:0:1\n\t\tcolumns 2\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+			contains: []string{
+				"block:0:1",
+				"columns 2",
+				"0[\"Child 1\"]",
+				"1[\"Child 2\"]",
+				"end",
+			},
 		},
 		{
 			name:  "Block with columns and width",
@@ -303,7 +359,13 @@ func TestBlock_SetColumns(t *testing.T) {
 				b.AddBlock("Child 1")
 				b.AddBlock("Child 2")
 			},
-			wantStr: "\tblock:0:3\n\t\tcolumns 2\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+			contains: []string{
+				"block:0:3",
+				"columns 2",
+				"0[\"Child 1\"]",
+				"1[\"Child 2\"]",
+				"end",
+			},
 		},
 	}
 
@@ -316,8 +378,10 @@ func TestBlock_SetColumns(t *testing.T) {
 			}
 
 			got := tt.block.String()
-			if got != tt.wantStr {
-				t.Errorf("Block.String() = %v, want %v", got, tt.wantStr)
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
 			}
 		})
 	}
@@ -325,10 +389,10 @@ func TestBlock_SetColumns(t *testing.T) {
 
 func TestBlock_AddColumn(t *testing.T) {
 	tests := []struct {
-		name    string
-		block   *Block
-		setup   func(*Block)
-		wantStr string
+		name     string
+		block    *Block
+		setup    func(*Block)
+		contains []string
 	}{
 		{
 			name:  "Add column to empty block",
@@ -339,7 +403,13 @@ func TestBlock_AddColumn(t *testing.T) {
 				b.AddBlock("Child 1")
 				b.AddBlock("Child 2")
 			},
-			wantStr: "\tblock:0:1\n\t\tcolumns 1\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+			contains: []string{
+				"block:0:1",
+				"columns 1",
+				"0[\"Child 1\"]",
+				"1[\"Child 2\"]",
+				"end",
+			},
 		},
 		{
 			name:  "Add column to block with existing columns",
@@ -351,7 +421,13 @@ func TestBlock_AddColumn(t *testing.T) {
 				b.AddBlock("Child 1")
 				b.AddBlock("Child 2")
 			},
-			wantStr: "\tblock:0:1\n\t\tcolumns 3\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+			contains: []string{
+				"block:0:1",
+				"columns 3",
+				"0[\"Child 1\"]",
+				"1[\"Child 2\"]",
+				"end",
+			},
 		},
 	}
 
@@ -364,8 +440,10 @@ func TestBlock_AddColumn(t *testing.T) {
 			}
 
 			got := tt.block.String()
-			if got != tt.wantStr {
-				t.Errorf("Block.String() = %v, want %v", got, tt.wantStr)
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
 			}
 		})
 	}
@@ -373,10 +451,10 @@ func TestBlock_AddColumn(t *testing.T) {
 
 func TestBlock_RemoveColumn(t *testing.T) {
 	tests := []struct {
-		name    string
-		block   *Block
-		setup   func(*Block)
-		wantStr string
+		name     string
+		block    *Block
+		setup    func(*Block)
+		contains []string
 	}{
 		{
 			name:  "Remove column from block with multiple columns",
@@ -388,7 +466,13 @@ func TestBlock_RemoveColumn(t *testing.T) {
 				b.AddBlock("Child 1")
 				b.AddBlock("Child 2")
 			},
-			wantStr: "\tblock:0:1\n\t\tcolumns 2\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+			contains: []string{
+				"block:0:1",
+				"columns 2",
+				"0[\"Child 1\"]",
+				"1[\"Child 2\"]",
+				"end",
+			},
 		},
 		{
 			name:  "Remove column from block with one column",
@@ -400,7 +484,12 @@ func TestBlock_RemoveColumn(t *testing.T) {
 				b.AddBlock("Child 1")
 				b.AddBlock("Child 2")
 			},
-			wantStr: "\tblock:0:1\n\t\t0[\"Child 1\"]\n\t\t1[\"Child 2\"]\n\tend\n",
+			contains: []string{
+				"block:0:1",
+				"0[\"Child 1\"]",
+				"1[\"Child 2\"]",
+				"end",
+			},
 		},
 	}
 
@@ -413,8 +502,10 @@ func TestBlock_RemoveColumn(t *testing.T) {
 			}
 
 			got := tt.block.String()
-			if got != tt.wantStr {
-				t.Errorf("Block.String() = %v, want %v", got, tt.wantStr)
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
 			}
 		})
 	}

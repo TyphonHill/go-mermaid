@@ -16,7 +16,7 @@ func main() {
 	diagram.EnableMarkdownFence()
 
 	// Set title and enable autonumbering
-	diagram.Title = "E-commerce Order Processing Flow"
+	diagram.SetTitle("E-commerce Order Processing Flow")
 	diagram.EnableAutoNumber()
 
 	// Create initial actors

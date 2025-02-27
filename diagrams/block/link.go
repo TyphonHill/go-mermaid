@@ -1,11 +1,15 @@
 package block
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
+)
 
 // Mermaid link syntax templates
 const (
-	tplLinkWithText = "\t%s -- \"%s\" --> %s\n"
-	tplLink         = "\t%s --> %s\n"
+	tplLinkWithText = basediagram.Indentation + "%s -- \"%s\" --> %s\n"
+	tplLink         = basediagram.Indentation + "%s --> %s\n"
 )
 
 // Link represents a connection between two blocks

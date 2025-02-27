@@ -2,15 +2,15 @@
 package entityrelationship
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // Diagram represents an entity relationship diagram
 type Diagram struct {
-	utils.BaseDiagram
+	basediagram.BaseDiagram
 	Entities      []*Entity
 	Relationships []*Relationship
 }
@@ -18,6 +18,7 @@ type Diagram struct {
 // NewDiagram creates a new ERD diagram
 func NewDiagram() *Diagram {
 	return &Diagram{
+		BaseDiagram:   basediagram.NewBaseDiagram(),
 		Entities:      make([]*Entity, 0),
 		Relationships: make([]*Relationship, 0),
 	}
@@ -41,10 +42,6 @@ func (d *Diagram) AddRelationship(from, to *Entity) *Relationship {
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	if d.Title != "" {
-		sb.WriteString(fmt.Sprintf("---\ntitle: %s\n---\n\n", d.Title))
-	}
-
 	sb.WriteString("erDiagram\n")
 
 	// Add entities
@@ -60,7 +57,7 @@ func (d *Diagram) String() string {
 		}
 	}
 
-	return d.WrapWithFence(sb.String())
+	return d.BaseDiagram.String(sb.String())
 }
 
 // RenderToFile saves the diagram to a file at the specified path.

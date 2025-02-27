@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 func TestNewDiagram(t *testing.T) {
@@ -14,9 +16,10 @@ func TestNewDiagram(t *testing.T) {
 		{
 			name: "Create new diagram with default settings",
 			want: &Diagram{
-				Actors:     make([]*Actor, 0),
-				Messages:   make([]*Message, 0),
-				autonumber: false,
+				BaseDiagram: basediagram.NewBaseDiagram(),
+				Actors:      make([]*Actor, 0),
+				Messages:    make([]*Message, 0),
+				autonumber:  false,
 			},
 		},
 	}
@@ -43,69 +46,36 @@ func TestDiagram_String(t *testing.T) {
 		contains []string
 	}{
 		{
-			name:    "Empty diagram without fence",
-			diagram: NewDiagram(),
-			wantStr: "sequenceDiagram\n",
-		},
-		{
-			name:    "Empty diagram with fence",
+			name:    "Diagram with actors and messages",
 			diagram: NewDiagram(),
 			setup: func(d *Diagram) {
-				d.EnableMarkdownFence()
-			},
-			wantStr: "```mermaid\nsequenceDiagram\n\n```\n",
-		},
-		{
-			name: "Diagram with title and fence",
-			setup: func(d *Diagram) {
-				d.EnableMarkdownFence()
-				d.Title = "Test Sequence"
-			},
-			diagram: NewDiagram(),
-			contains: []string{
-				"```mermaid\n",
-				"---\ntitle: Test Sequence\n---\n",
-				"sequenceDiagram\n",
-				"```\n",
-			},
-		},
-		{
-			name:    "Diagram with actors and messages with fence",
-			diagram: NewDiagram(),
-			setup: func(d *Diagram) {
-				d.EnableMarkdownFence()
-				d.Title = "Interaction Flow"
+				d.SetTitle("Interaction Flow")
 				d.AddActor("user", "User", ActorParticipant)
 				d.AddActor("system", "System", ActorActor)
 				d.AddMessage(actor1, actor2, MessageSolid, "Request")
 				d.AddMessage(actor2, actor1, MessageResponse, "Response")
 			},
 			contains: []string{
-				"```mermaid\n",
 				"participant user as User",
 				"actor system as System",
 				"user-->system: Request",
 				"system->>user: Response",
-				"```\n",
 			},
 		},
 		{
-			name:    "Diagram with autonumbering and fence",
+			name:    "Diagram with autonumbering",
 			diagram: NewDiagram(),
 			setup: func(d *Diagram) {
-				d.EnableMarkdownFence()
 				d.EnableAutoNumber()
 				d.AddActor("user", "User", ActorParticipant)
 				d.AddActor("system", "System", ActorActor)
 				d.AddMessage(actor1, actor2, MessageSolid, "Request")
 			},
 			contains: []string{
-				"```mermaid\n",
 				"autonumber",
 				"participant user as User",
 				"actor system as System",
 				"user-->system: Request",
-				"```\n",
 			},
 		},
 	}

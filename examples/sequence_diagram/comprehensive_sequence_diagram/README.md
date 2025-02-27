@@ -1,15 +1,19 @@
 ```mermaid
 ---
 title: E-commerce Order Processing Flow
+config:
+    theme: default
+    maxTextSize: 50000
+    maxEdges: 500
+    fontSize: 16
 ---
-
 sequenceDiagram
 autonumber
-	participant browser as Web Browser
-	participant frontend as Frontend Server
-	actor orders as Order Service
-	participant payment as Payment Service
-	participant inventory as Inventory Service
+    participant browser as Web Browser
+    participant frontend as Frontend Server
+    actor orders as Order Service
+    participant payment as Payment Service
+    participant inventory as Inventory Service
 	Note over browser,frontend: Customer places a new order
 	browser-->frontend: Submit Order
 		frontend-->payment: Process Payment

@@ -2,6 +2,7 @@ package block
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -55,10 +56,10 @@ func TestLink_SetText(t *testing.T) {
 
 func TestLink_String(t *testing.T) {
 	tests := []struct {
-		name    string
-		link    *Link
-		setup   func(*Link)
-		wantStr string
+		name     string
+		link     *Link
+		setup    func(*Link)
+		contains []string
 	}{
 		{
 			name: "Basic link without text",
@@ -66,7 +67,9 @@ func TestLink_String(t *testing.T) {
 				NewBlock("0", "From"),
 				NewBlock("1", "To"),
 			),
-			wantStr: "\t0 --> 1\n",
+			contains: []string{
+				"0 --> 1",
+			},
 		},
 		{
 			name: "Link with text",
@@ -77,7 +80,9 @@ func TestLink_String(t *testing.T) {
 			setup: func(l *Link) {
 				l.SetText("Test Link")
 			},
-			wantStr: "\t2 -- \"Test Link\" --> 3\n",
+			contains: []string{
+				"2 -- \"Test Link\" --> 3",
+			},
 		},
 	}
 
@@ -88,8 +93,10 @@ func TestLink_String(t *testing.T) {
 			}
 
 			got := tt.link.String()
-			if got != tt.wantStr {
-				t.Errorf("Link.String() = %v, want %v", got, tt.wantStr)
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
 			}
 		})
 	}

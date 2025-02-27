@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 type flowchartDirection string
@@ -40,7 +41,6 @@ const (
 )
 
 const (
-	baseTitleString              string = "---\ntitle: %s\n---\n\n"
 	baseCurveStyleString         string = "%%%%{ init: { 'flowchart': { 'curve': '%s' } } }%%%%\n"
 	baseFlowchartDirectionString string = "flowchart %s\n"
 )
@@ -50,7 +50,7 @@ const (
 // multi-directional arrows, and any linking to and from subgraphs.
 // Reference: https://mermaid.js.org/syntax/flowchart.html
 type Flowchart struct {
-	utils.BaseDiagram
+	basediagram.BaseDiagram
 	Direction   flowchartDirection
 	CurveStyle  curveStyle
 	classes     []*Class
@@ -58,6 +58,20 @@ type Flowchart struct {
 	subgraphs   []*Subgraph
 	links       []*Link
 	idGenerator utils.IDGenerator
+}
+
+// NewFlowchart creates a new flowchart diagram
+func NewFlowchart() *Flowchart {
+	return &Flowchart{
+		BaseDiagram: basediagram.NewBaseDiagram(),
+		Direction:   FlowchartDirectionTopToBottom,
+		CurveStyle:  CurveStyleNone,
+		classes:     make([]*Class, 0),
+		nodes:       make([]*Node, 0),
+		subgraphs:   make([]*Subgraph, 0),
+		links:       make([]*Link, 0),
+		idGenerator: utils.NewIDGenerator(),
+	}
 }
 
 // SetDirection sets the flowchart direction and returns the flowchart for chaining
@@ -117,10 +131,6 @@ func (f *Flowchart) AddClass(name string) (newClass *Class) {
 func (f *Flowchart) String() string {
 	var sb strings.Builder
 
-	if len(f.Title) > 0 {
-		sb.WriteString(fmt.Sprintf(string(baseTitleString), f.Title))
-	}
-
 	if f.CurveStyle != CurveStyleNone {
 		sb.WriteString(fmt.Sprintf(string(baseCurveStyleString), string(f.CurveStyle)))
 	}
@@ -143,18 +153,5 @@ func (f *Flowchart) String() string {
 		sb.WriteString(link.String())
 	}
 
-	return f.WrapWithFence(sb.String())
-}
-
-// NewFlowchart creates a new flowchart diagram
-func NewFlowchart() *Flowchart {
-	return &Flowchart{
-		Direction:   FlowchartDirectionTopToBottom,
-		CurveStyle:  CurveStyleNone,
-		classes:     make([]*Class, 0),
-		nodes:       make([]*Node, 0),
-		subgraphs:   make([]*Subgraph, 0),
-		links:       make([]*Link, 0),
-		idGenerator: utils.NewIDGenerator(),
-	}
+	return f.BaseDiagram.String(sb.String())
 }

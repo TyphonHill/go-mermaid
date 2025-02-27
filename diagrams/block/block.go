@@ -3,21 +3,23 @@ package block
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // Mermaid block syntax templates
 const (
-	tplSpace        = "\tspace\n"
-	tplBlockStart   = "\tblock:%s:%d\n"
-	tplBlockSimple  = "\tblock:%s\n"
-	tplColumns      = "\t\tcolumns %d\n"
-	tplChildBlock   = "\t\t%s%s\n"
-	tplChildSimple  = "\t\t%s\n"
-	tplBlockEnd     = "\tend\n"
-	tplBlockWidth   = "\t%s%s:%d\n"
-	tplBlockNoWidth = "\t%s%s\n"
-	tplBlockID      = "\t%s\n"
-	tplStyle        = "\tstyle %s %s\n"
+	tplSpace        = basediagram.Indentation + "space\n"
+	tplBlockStart   = basediagram.Indentation + "block:%s:%d\n"
+	tplBlockSimple  = basediagram.Indentation + "block:%s\n"
+	tplColumns      = basediagram.Indentation + "columns %d\n"
+	tplChildBlock   = basediagram.Indentation + "%s%s\n"
+	tplChildSimple  = basediagram.Indentation + "%s\n"
+	tplBlockEnd     = basediagram.Indentation + "end\n"
+	tplBlockWidth   = basediagram.Indentation + "%s%s:%d\n"
+	tplBlockNoWidth = basediagram.Indentation + "%s%s\n"
+	tplBlockID      = basediagram.Indentation + "%s\n"
+	tplStyle        = basediagram.Indentation + "style %s %s\n"
 )
 
 // BlockShape defines the visual appearance of a block

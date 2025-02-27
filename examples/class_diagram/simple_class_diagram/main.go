@@ -11,7 +11,7 @@ import (
 func main() {
 	diagram := classDiagram.NewClassDiagram()
 	diagram.EnableMarkdownFence()
-	diagram.Title = "Simple Class Diagram"
+	diagram.SetTitle("Simple Class Diagram")
 
 	// Create classes
 	user := diagram.AddClass("User", nil)

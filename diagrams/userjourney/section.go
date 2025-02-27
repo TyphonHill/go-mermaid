@@ -3,13 +3,15 @@ package userjourney
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // Base string formats for user journey sections and tasks
 const (
-	baseSectionTitle   string = "\tsection %s\n"
-	baseTaskWithPartic string = "\t\t%s: %d: %s\n"
-	baseTaskNoPartic   string = "\t\t%s: %d\n"
+	baseSectionTitle   string = basediagram.Indentation + "section %s\n"
+	baseTaskWithPartic string = basediagram.Indentation + basediagram.Indentation + "%s: %d: %s\n"
+	baseTaskNoPartic   string = basediagram.Indentation + basediagram.Indentation + "%s: %d\n"
 )
 
 // Section represents a section in the user journey

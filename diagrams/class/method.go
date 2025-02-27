@@ -3,6 +3,8 @@ package class
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // methodVisibility represents the access modifier for a method
@@ -27,7 +29,7 @@ const (
 
 // Mermaid method syntax templates
 const (
-	baseMethodBaseString  string = "\t%s%s(%s)%s %s"
+	baseMethodBaseString  string = basediagram.Indentation + "%s%s(%s)%s %s"
 	baseMethodParamString string = "%s:%s,"
 )
 

@@ -3,11 +3,13 @@ package timeline
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // Base string formats for timeline sections
 const (
-	baseSectionTitle string = "\tsection %s\n"
+	baseSectionTitle string = basediagram.Indentation + "section %s\n"
 )
 
 // Section represents a section in the timeline diagram

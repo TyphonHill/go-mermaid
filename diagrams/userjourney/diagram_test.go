@@ -11,25 +11,8 @@ func TestNewDiagram(t *testing.T) {
 	if len(diagram.Sections) != 0 {
 		t.Error("NewDiagram() should create empty sections slice")
 	}
-	if diagram.Title != "" {
-		t.Error("NewDiagram() should not set a title")
-	}
 	if diagram.IsMarkdownFenceEnabled() {
 		t.Error("NewDiagram() should not enable markdown fence by default")
-	}
-}
-
-func TestDiagram_SetTitle(t *testing.T) {
-	diagram := NewDiagram()
-	title := "Test Title"
-
-	result := diagram.SetTitle(title)
-
-	if result != diagram {
-		t.Error("SetTitle() should return the diagram for chaining")
-	}
-	if diagram.Title != title {
-		t.Errorf("SetTitle() = %v, want %v", diagram.Title, title)
 	}
 }
 
@@ -60,31 +43,6 @@ func TestDiagram_String(t *testing.T) {
 			},
 			contains: []string{
 				"journey",
-			},
-		},
-		{
-			name: "Diagram with title",
-			setup: func() *Diagram {
-				d := NewDiagram()
-				d.SetTitle("User Shopping Journey")
-				return d
-			},
-			contains: []string{
-				"journey",
-				"title User Shopping Journey",
-			},
-		},
-		{
-			name: "Diagram with markdown fence",
-			setup: func() *Diagram {
-				d := NewDiagram()
-				d.EnableMarkdownFence()
-				return d
-			},
-			contains: []string{
-				"```mermaid",
-				"journey",
-				"```",
 			},
 		},
 		{

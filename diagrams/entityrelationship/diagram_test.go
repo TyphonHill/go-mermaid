@@ -15,9 +15,6 @@ func TestNewDiagram(t *testing.T) {
 	if len(diagram.Relationships) != 0 {
 		t.Error("NewDiagram() should create empty relationships slice")
 	}
-	if diagram.Title != "" {
-		t.Error("NewDiagram() should not set a title")
-	}
 	if diagram.IsMarkdownFenceEnabled() {
 		t.Error("NewDiagram() should not enable markdown fence by default")
 	}

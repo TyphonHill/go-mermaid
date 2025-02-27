@@ -3,6 +3,8 @@ package state
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // StateType represents the different types of states in a state diagram.
@@ -21,15 +23,15 @@ const (
 
 // Base string formats for state diagram elements
 const (
-	baseStartState     string = "\t[*] --> %s\n"
-	baseEndState       string = "\t%s --> [*]\n"
-	baseChoiceState    string = "\tstate %s <<choice>>\n"
-	baseForkState      string = "\tstate %s <<fork>>\n"
-	baseJoinState      string = "\tstate %s <<join>>\n"
-	baseNormalState    string = "\tstate %q as %s\n"
-	baseCompositeStart string = "\tstate %s {\n"
-	baseCompositeEnd   string = "\t}\n"
-	baseNote           string = "\tnote %s of %s: %s\n"
+	baseStartState     string = basediagram.Indentation + "[*] --> %s\n"
+	baseEndState       string = basediagram.Indentation + "%s --> [*]\n"
+	baseChoiceState    string = basediagram.Indentation + "state %s <<choice>>\n"
+	baseForkState      string = basediagram.Indentation + "state %s <<fork>>\n"
+	baseJoinState      string = basediagram.Indentation + "state %s <<join>>\n"
+	baseNormalState    string = basediagram.Indentation + "state %q as %s\n"
+	baseCompositeStart string = basediagram.Indentation + "state %s {\n"
+	baseCompositeEnd   string = basediagram.Indentation + "}\n"
+	baseNote           string = basediagram.Indentation + "note %s of %s: %s\n"
 )
 
 // NotePosition represents the positioning of a note in a state diagram.

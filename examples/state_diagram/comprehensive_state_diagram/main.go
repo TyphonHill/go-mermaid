@@ -11,7 +11,7 @@ import (
 func main() {
 	diagram := stateDiagram.NewDiagram()
 	diagram.EnableMarkdownFence()
-	diagram.Title = "Order Processing State Machine"
+	diagram.SetTitle("Order Processing State Machine")
 
 	// Create main states
 	idle := diagram.AddState("idle", "Order Idle", stateDiagram.StateNormal)

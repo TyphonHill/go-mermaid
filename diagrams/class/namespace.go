@@ -3,12 +3,14 @@ package class
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // Namespace constants for formatting the Mermaid syntax representation.
 const (
-	baseNamespaceStartString string = "\tnamespace %s{\n"
-	baseNamespaceEndString   string = "\t}\n"
+	baseNamespaceStartString string = basediagram.Indentation + "namespace %s{\n"
+	baseNamespaceEndString   string = basediagram.Indentation + "}\n"
 )
 
 // Namespace represents a container for grouping related classes
@@ -47,7 +49,7 @@ func (n *Namespace) String(curIndentation string) string {
 		sb.WriteString(fmt.Sprintf(string(baseNamespaceStartString), n.Name))
 
 		for _, class := range n.Classes {
-			sb.WriteString(class.String(curIndentation + "\t%s"))
+			sb.WriteString(class.String(curIndentation + basediagram.Indentation + "%s"))
 		}
 
 		sb.WriteString(baseNamespaceEndString)

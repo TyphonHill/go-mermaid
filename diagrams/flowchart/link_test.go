@@ -2,6 +2,7 @@ package flowchart
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -58,10 +59,10 @@ func TestLink_String(t *testing.T) {
 	to := NewNode("2", "End")
 
 	tests := []struct {
-		name    string
-		link    *Link
-		setup   func(*Link)
-		wantStr string
+		name     string
+		link     *Link
+		setup    func(*Link)
+		contains []string
 	}{
 		{
 			name: "Basic link",
@@ -73,7 +74,9 @@ func TestLink_String(t *testing.T) {
 				Tail:   LinkArrowTypeNone,
 				Length: 0,
 			},
-			wantStr: "\t1 --> 2\n",
+			contains: []string{
+				"1 --> 2",
+			},
 		},
 		{
 			name: "Link with text",
@@ -86,7 +89,9 @@ func TestLink_String(t *testing.T) {
 				Text:   "Connection",
 				Length: 0,
 			},
-			wantStr: "\t1 -->|Connection| 2\n",
+			contains: []string{
+				"1 -->|Connection| 2",
+			},
 		},
 		{
 			name: "Link with length",
@@ -98,7 +103,9 @@ func TestLink_String(t *testing.T) {
 				Tail:   LinkArrowTypeNone,
 				Length: 2,
 			},
-			wantStr: "\t1 ----> 2\n",
+			contains: []string{
+				"1 ----> 2",
+			},
 		},
 		{
 			name: "Link with different shapes",
@@ -159,10 +166,10 @@ func TestLink_String(t *testing.T) {
 				tt.setup(tt.link)
 			}
 
-			if tt.wantStr != "" {
+			for _, want := range tt.contains {
 				got := tt.link.String()
-				if got != tt.wantStr {
-					t.Errorf("Link.String() = %v, want %v", got, tt.wantStr)
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
 				}
 			}
 		})

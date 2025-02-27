@@ -125,8 +125,8 @@ func TestSubgraph_String(t *testing.T) {
 			subgraph:    NewSubgraph("1", "Test"),
 			indentation: "%s",
 			contains: []string{
-				"\tsubgraph 1 [Test]",
-				"\tend",
+				"subgraph 1 [Test]",
+				"end",
 			},
 		},
 		{
@@ -137,9 +137,9 @@ func TestSubgraph_String(t *testing.T) {
 			},
 			indentation: "%s",
 			contains: []string{
-				"\tsubgraph 1 [Test]",
-				"\t\tdirection LR",
-				"\tend",
+				"subgraph 1 [Test]",
+				"direction LR",
+				"end",
 			},
 		},
 		{
@@ -154,9 +154,9 @@ func TestSubgraph_String(t *testing.T) {
 			},
 			indentation: "%s",
 			contains: []string{
-				"\tsubgraph 1 [Parent]",
-				"\tsubgraph 0 [Child]",
-				"\tend",
+				"subgraph 1 [Parent]",
+				"subgraph 0 [Child]",
+				"end",
 			},
 		},
 		{
@@ -169,9 +169,9 @@ func TestSubgraph_String(t *testing.T) {
 			},
 			indentation: "\t",
 			contains: []string{
-				"\tsubgraph 1 [Test]",
-				"\t\t1 --> 2\n",
-				"\tend",
+				"subgraph 1 [Test]",
+				"1 --> 2",
+				"end",
 			},
 		},
 	}

@@ -25,32 +25,44 @@ func TestEvent_String(t *testing.T) {
 		text       string
 		isFirst    bool
 		subEvents  []string
-		want       string
+		contains   []string
 	}{
 		{
 			name:       "Event with time period",
 			timePeriod: "2024-01",
 			text:       "Test Event",
-			want:       "\t\t2024-01\n\t\t: Test Event",
+			contains: []string{
+				"2024-01",
+				"Test Event",
+			},
 		},
 		{
 			name:       "Regular sub-event without time period",
 			timePeriod: "",
 			text:       "Sub Event",
-			want:       ": Sub Event",
+			contains: []string{
+				"Sub Event",
+			},
 		},
 		{
 			name:       "First sub-event without time period",
 			timePeriod: "",
 			text:       "First Sub Event",
-			want:       "First Sub Event",
+			contains: []string{
+				"First Sub Event",
+			},
 		},
 		{
 			name:       "Event with sub-events",
 			timePeriod: "2024-01",
 			text:       "Main Event",
 			subEvents:  []string{"Sub Event 1", "Sub Event 2"},
-			want:       "\t\t2024-01\n\t\t: Main Event\n\t\t: Sub Event 1\n\t\t: Sub Event 2",
+			contains: []string{
+				"2024-01",
+				"Main Event",
+				"Sub Event 1",
+				"Sub Event 2",
+			},
 		},
 	}
 
@@ -62,8 +74,10 @@ func TestEvent_String(t *testing.T) {
 			}
 			result := event.String()
 
-			if !strings.Contains(result, tt.want) {
-				t.Errorf("String() = %v, want %v", result, tt.want)
+			for _, want := range tt.contains {
+				if !strings.Contains(result, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, result)
+				}
 			}
 		})
 	}

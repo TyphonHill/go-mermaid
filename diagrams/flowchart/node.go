@@ -3,6 +3,8 @@ package flowchart
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 type nodeShape string
@@ -59,9 +61,9 @@ const (
 )
 
 const (
-	baseNodeShapeString string = "\t%s@{ shape: %s, label: \"%s\"}"
+	baseNodeShapeString string = basediagram.Indentation + "%s@{ shape: %s, label: \"%s\"}"
 	baseNodeClassString string = ":::%s"
-	baseNodeStyleString string = "\tstyle %s %s\n"
+	baseNodeStyleString string = basediagram.Indentation + "style %s %s\n"
 )
 
 // Node represents a node in a flowchart

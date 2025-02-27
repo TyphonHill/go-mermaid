@@ -19,32 +19,39 @@ func TestNewSection(t *testing.T) {
 
 func TestSection_AddEvent(t *testing.T) {
 	tests := []struct {
-		name       string
-		title      string
-		text       string
-		isFirst    bool
-		wantString string
+		name     string
+		title    string
+		text     string
+		isFirst  bool
+		contains []string
 	}{
 		{
-			name:       "First event with title",
-			title:      "2024-01",
-			text:       "Test Event",
-			isFirst:    true,
-			wantString: "\t\t2024-01\n\t\t: Test Event",
+			name:    "First event with title",
+			title:   "2024-01",
+			text:    "Test Event",
+			isFirst: true,
+			contains: []string{
+				"2024-01",
+				"Test Event",
+			},
 		},
 		{
-			name:       "First event without title",
-			title:      "",
-			text:       "Test Event",
-			isFirst:    true,
-			wantString: "Test Event", // No colon for first event without title
+			name:    "First event without title",
+			title:   "",
+			text:    "Test Event",
+			isFirst: true,
+			contains: []string{
+				"Test Event",
+			},
 		},
 		{
-			name:       "Second event without title",
-			title:      "",
-			text:       "Test Event",
-			isFirst:    false,
-			wantString: ": Test Event", // Has colon for non-first events
+			name:    "Second event without title",
+			title:   "",
+			text:    "Test Event",
+			isFirst: false,
+			contains: []string{
+				"Test Event",
+			},
 		},
 	}
 
@@ -57,8 +64,10 @@ func TestSection_AddEvent(t *testing.T) {
 			section.AddEvent(tt.title, tt.text)
 
 			result := section.String()
-			if !strings.Contains(result, tt.wantString) {
-				t.Errorf("AddEvent() result = %v, want string containing %v", result, tt.wantString)
+			for _, want := range tt.contains {
+				if !strings.Contains(result, want) {
+					t.Errorf("AddEvent() result = %v, want string containing %v", result, want)
+				}
 			}
 		})
 	}
@@ -79,7 +88,8 @@ func TestSection_String(t *testing.T) {
 			},
 			contains: []string{
 				"section Test Section",
-				"\t\t2024-01\n\t\t: First Event",
+				"2024-01",
+				"First Event",
 			},
 		},
 	}

@@ -11,7 +11,7 @@ import (
 func main() {
 	diagram := classDiagram.NewClassDiagram()
 	diagram.EnableMarkdownFence()
-	diagram.Title = "E-commerce System Class Diagram"
+	diagram.SetTitle("E-commerce System Class Diagram")
 
 	// Create namespaces
 	modelNS := diagram.AddNamespace("Models")

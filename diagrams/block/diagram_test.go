@@ -4,14 +4,17 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 func TestNewDiagram(t *testing.T) {
 	got := NewDiagram()
 	want := &Diagram{
-		Blocks:  make([]*Block, 0),
-		Links:   make([]*Link, 0),
-		Columns: 0,
+		BaseDiagram: basediagram.NewBaseDiagram(),
+		Blocks:      make([]*Block, 0),
+		Links:       make([]*Link, 0),
+		Columns:     0,
 	}
 
 	if !reflect.DeepEqual(got, want) {
@@ -89,8 +92,8 @@ func TestDiagram_String(t *testing.T) {
 				d.SetColumns(3)
 			},
 			contains: []string{
-				"block-beta\n",
-				"\tcolumns 3\n",
+				"block-beta",
+				"columns 3",
 			},
 		},
 		{

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // Global ID generator for the package
@@ -14,12 +15,12 @@ var idGenerator = utils.NewIDGenerator()
 // Mermaid diagram syntax templates
 const (
 	tplDiagramStart = "block-beta\n"
-	tplDiagramCols  = "\tcolumns %d\n"
+	tplDiagramCols  = basediagram.Indentation + "columns %d\n"
 )
 
 // Diagram represents a Mermaid block diagram
 type Diagram struct {
-	utils.BaseDiagram
+	basediagram.BaseDiagram
 	Blocks  []*Block
 	Links   []*Link
 	Columns int
@@ -28,9 +29,10 @@ type Diagram struct {
 // NewDiagram creates a new block diagram
 func NewDiagram() *Diagram {
 	return &Diagram{
-		Blocks:  make([]*Block, 0),
-		Links:   make([]*Link, 0),
-		Columns: 0,
+		BaseDiagram: basediagram.NewBaseDiagram(),
+		Blocks:      make([]*Block, 0),
+		Links:       make([]*Link, 0),
+		Columns:     0,
 	}
 }
 
@@ -95,7 +97,7 @@ func (d *Diagram) String() string {
 		sb.WriteString(link.String())
 	}
 
-	return d.WrapWithFence(sb.String())
+	return d.BaseDiagram.String(sb.String())
 }
 
 // RenderToFile saves the diagram to a file at the specified path

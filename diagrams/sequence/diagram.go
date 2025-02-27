@@ -6,11 +6,12 @@ import (
 	"strings"
 
 	"github.com/TyphonHill/go-mermaid/diagrams/utils"
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 // Diagram represents a sequence diagram with actors, messages, and rendering options.
 type Diagram struct {
-	utils.BaseDiagram
+	basediagram.BaseDiagram
 	Actors     []*Actor
 	Messages   []*Message
 	autonumber bool
@@ -19,9 +20,10 @@ type Diagram struct {
 // NewDiagram creates a new sequence diagram with default settings.
 func NewDiagram() *Diagram {
 	return &Diagram{
-		Actors:     make([]*Actor, 0),
-		Messages:   make([]*Message, 0),
-		autonumber: false,
+		BaseDiagram: basediagram.NewBaseDiagram(),
+		Actors:      make([]*Actor, 0),
+		Messages:    make([]*Message, 0),
+		autonumber:  false,
 	}
 }
 
@@ -71,10 +73,6 @@ func (d *Diagram) AddMessage(from, to *Actor, msgType MessageType, text string) 
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	if d.Title != "" {
-		sb.WriteString(fmt.Sprintf("---\ntitle: %s\n---\n\n", d.Title))
-	}
-
 	sb.WriteString("sequenceDiagram\n")
 
 	if d.autonumber {
@@ -82,7 +80,7 @@ func (d *Diagram) String() string {
 	}
 
 	for _, actor := range d.Actors {
-		sb.WriteString(fmt.Sprintf("\t%s %s as %s\n",
+		sb.WriteString(fmt.Sprintf(basediagram.Indentation+"%s %s as %s\n",
 			actor.Type, actor.ID, actor.Name))
 	}
 
@@ -90,7 +88,7 @@ func (d *Diagram) String() string {
 		sb.WriteString(message.String(""))
 	}
 
-	return d.WrapWithFence(sb.String())
+	return d.BaseDiagram.String(sb.String())
 }
 
 // RenderToFile saves the diagram to a file at the specified path.

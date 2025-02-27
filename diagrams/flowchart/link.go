@@ -3,6 +3,8 @@ package flowchart
 import (
 	"fmt"
 	"strings"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 type linkShape string
@@ -28,7 +30,7 @@ const (
 )
 
 const (
-	baseLinkString     string = "\t%s %s%s%s%s %s\n"
+	baseLinkString     string = basediagram.Indentation + "%s %s%s%s%s %s\n"
 	baseLinkTextString string = "|%s|"
 )
 

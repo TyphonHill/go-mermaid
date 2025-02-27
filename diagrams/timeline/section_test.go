@@ -30,7 +30,7 @@ func TestSection_AddEvent(t *testing.T) {
 			title:      "2024-01",
 			text:       "Test Event",
 			isFirst:    true,
-			wantString: "2024-01 \t\t: Test Event",
+			wantString: "\t\t2024-01\n\t\t: Test Event",
 		},
 		{
 			name:       "First event without title",
@@ -79,7 +79,7 @@ func TestSection_String(t *testing.T) {
 			},
 			contains: []string{
 				"section Test Section",
-				"2024-01 \t\t: First Event",
+				"\t\t2024-01\n\t\t: First Event",
 			},
 		},
 	}

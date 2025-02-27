@@ -31,7 +31,7 @@ func TestEvent_String(t *testing.T) {
 			name:       "Event with time period",
 			timePeriod: "2024-01",
 			text:       "Test Event",
-			want:       "2024-01 \t\t: Test Event",
+			want:       "\t\t2024-01\n\t\t: Test Event",
 		},
 		{
 			name:       "Regular sub-event without time period",
@@ -50,7 +50,7 @@ func TestEvent_String(t *testing.T) {
 			timePeriod: "2024-01",
 			text:       "Main Event",
 			subEvents:  []string{"Sub Event 1", "Sub Event 2"},
-			want:       "2024-01 \t\t: Main Event\n\t\t: Sub Event 1\n\t\t: Sub Event 2",
+			want:       "\t\t2024-01\n\t\t: Main Event\n\t\t: Sub Event 1\n\t\t: Sub Event 2",
 		},
 	}
 

@@ -7,8 +7,8 @@ import (
 
 // Base string formats for timeline events
 const (
-	eventTitle string = "\t\t%s "
-	eventTExt  string = "\t\t: %s\n"
+	eventTitle string = "\t\t%s\n"
+	eventText  string = "\t\t: %s\n"
 )
 
 // Event represents a single event in the timeline
@@ -41,7 +41,7 @@ func (e *Event) String() string {
 	}
 
 	if e.Text != "" {
-		sb.WriteString(fmt.Sprintf(eventTExt, e.Text))
+		sb.WriteString(fmt.Sprintf(eventText, e.Text))
 	}
 
 	for _, subEvent := range e.SubEvents {

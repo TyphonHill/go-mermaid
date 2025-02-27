@@ -13,6 +13,7 @@ func main() {
 	diagram := timeline.NewDiagram()
 	diagram.EnableMarkdownFence()
 	diagram.SetTitle("Simple Project Timeline")
+	diagram.DisableMultiColot()
 
 	// Add a Planning section with events
 	planning := diagram.AddSection("Planning")

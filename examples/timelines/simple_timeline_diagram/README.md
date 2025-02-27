@@ -1,4 +1,5 @@
 ```mermaid
+%%{init: { 'theme': 'base', 'timeline': {'disableMulticolor': true}}}%%
 timeline
 	title Simple Project Timeline
 	section Planning

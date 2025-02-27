@@ -13,6 +13,7 @@ func main() {
 	diagram := timeline.NewDiagram()
 	diagram.EnableMarkdownFence()
 	diagram.SetTitle("Software Development Lifecycle")
+	diagram.SetTheme(timeline.TimelineThemeDark)
 
 	// Planning Phase
 	planning := diagram.AddSection("Planning")

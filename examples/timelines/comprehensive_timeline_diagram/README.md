@@ -1,4 +1,5 @@
 ```mermaid
+%%{init: { 'theme': 'dark', 'timeline': {'disableMulticolor': false}}}%%
 timeline
 	title Software Development Lifecycle
 	section Planning

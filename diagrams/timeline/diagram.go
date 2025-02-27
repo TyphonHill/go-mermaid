@@ -11,11 +11,11 @@ import (
 type timelineTheme string
 
 const (
-	TimelineThemeBase       timelineTheme = "base"
-	TimelineThemeModernDark timelineTheme = "forest"
-	TimelineThemeDark       timelineTheme = "dark"
-	TimelineThemeDefault    timelineTheme = "default"
-	TimelineThemeNeutral    timelineTheme = "neutral"
+	TimelineThemeBase    timelineTheme = "base"
+	TimelineThemeForest  timelineTheme = "forest"
+	TimelineThemeDark    timelineTheme = "dark"
+	TimelineThemeDefault timelineTheme = "default"
+	TimelineThemeNeutral timelineTheme = "neutral"
 )
 
 const (

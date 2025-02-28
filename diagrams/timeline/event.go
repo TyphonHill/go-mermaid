@@ -9,8 +9,8 @@ import (
 
 // Base string formats for timeline events
 const (
-	eventTitle string = basediagram.Indentation + basediagram.Indentation + "%s\n"
-	eventText  string = basediagram.Indentation + basediagram.Indentation + ": %s\n"
+	eventTitle string = basediagram.Indentation + "%s\n"
+	eventText  string = basediagram.Indentation + ": %s\n"
 )
 
 // Event represents a single event in the timeline

@@ -14,13 +14,13 @@ var idGenerator = utils.NewIDGenerator()
 
 // Mermaid diagram syntax templates
 const (
-	tplDiagramStart = "block-beta\n"
+	baseDiagramType = "block-beta\n"
 	tplDiagramCols  = basediagram.Indentation + "columns %d\n"
 )
 
 // Diagram represents a Mermaid block diagram
 type Diagram struct {
-	basediagram.BaseDiagram
+	basediagram.BaseDiagram[BlockConfigurationProperties]
 	Blocks  []*Block
 	Links   []*Link
 	Columns int
@@ -29,7 +29,7 @@ type Diagram struct {
 // NewDiagram creates a new block diagram
 func NewDiagram() *Diagram {
 	return &Diagram{
-		BaseDiagram: basediagram.NewBaseDiagram(),
+		BaseDiagram: basediagram.NewBaseDiagram(NewBlockConfigurationProperties()),
 		Blocks:      make([]*Block, 0),
 		Links:       make([]*Link, 0),
 		Columns:     0,
@@ -83,7 +83,7 @@ func (d *Diagram) AddLink(from, to *Block) *Link {
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	sb.WriteString(tplDiagramStart)
+	sb.WriteString(baseDiagramType)
 
 	if d.Columns > 0 {
 		sb.WriteString(fmt.Sprintf(tplDiagramCols, d.Columns))

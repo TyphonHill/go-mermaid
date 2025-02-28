@@ -6,7 +6,7 @@ import (
 )
 
 type ConfigurationProperties struct {
-	theme       Theme
+	Theme
 	maxTextSize int
 	maxEdges    int
 	fontSize    int
@@ -14,15 +14,20 @@ type ConfigurationProperties struct {
 
 const (
 	configPropertyBase        = "config:\n"
-	configPropertyTheme       = "%stheme: %s\n"
 	configPropertyMaxTextSize = "%smaxTextSize: %d\n"
 	configPropertyMaxEdges    = "%smaxEdges: %d\n"
 	configPropertyFontSize    = "%sfontSize: %d\n"
 )
 
-func (c *ConfigurationProperties) SetTheme(theme Theme) *ConfigurationProperties {
-	c.theme = theme
-	return c
+func NewConfigurationProperties() ConfigurationProperties {
+	return ConfigurationProperties{
+		Theme: Theme{
+			Name: ThemeDefault,
+		},
+		maxTextSize: 50000,
+		maxEdges:    500,
+		fontSize:    16,
+	}
 }
 
 func (c *ConfigurationProperties) SetMaxTextSize(maxTextSize int) *ConfigurationProperties {
@@ -44,7 +49,9 @@ func (c *ConfigurationProperties) String() string {
 	var sb strings.Builder
 
 	sb.WriteString(configPropertyBase)
-	sb.WriteString(fmt.Sprintf(configPropertyTheme, Indentation, c.theme))
+
+	sb.WriteString(c.Theme.String())
+
 	sb.WriteString(fmt.Sprintf(configPropertyMaxTextSize, Indentation, c.maxTextSize))
 	sb.WriteString(fmt.Sprintf(configPropertyMaxEdges, Indentation, c.maxEdges))
 	sb.WriteString(fmt.Sprintf(configPropertyFontSize, Indentation, c.fontSize))

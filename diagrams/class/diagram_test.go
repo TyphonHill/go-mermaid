@@ -42,55 +42,6 @@ func TestNewClassDiagram(t *testing.T) {
 	}
 }
 
-func TestClassDiagram_EnableMarkdownFence(t *testing.T) {
-	tests := []struct {
-		name      string
-		diagram   *ClassDiagram
-		wantFence bool
-	}{
-		{
-			name:      "Enable markdown fence",
-			diagram:   NewClassDiagram(),
-			wantFence: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.diagram.EnableMarkdownFence()
-			if !tt.diagram.IsMarkdownFenceEnabled() {
-				t.Error("EnableMarkdownFence() did not enable markdown fence")
-			}
-		})
-	}
-}
-
-func TestClassDiagram_DisableMarkdownFence(t *testing.T) {
-	tests := []struct {
-		name      string
-		diagram   *ClassDiagram
-		wantFence bool
-	}{
-		{
-			name:      "Disable markdown fence",
-			diagram:   NewClassDiagram(),
-			wantFence: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// First enable it
-			tt.diagram.EnableMarkdownFence()
-			// Then disable it
-			tt.diagram.DisableMarkdownFence()
-			if tt.diagram.IsMarkdownFenceEnabled() {
-				t.Error("DisableMarkdownFence() did not disable markdown fence")
-			}
-		})
-	}
-}
-
 func TestClassDiagram_AddComponents(t *testing.T) {
 	diagram := NewClassDiagram()
 
@@ -148,20 +99,15 @@ func TestClassDiagram_String(t *testing.T) {
 		{
 			name: "Empty diagram",
 			setup: func(cd *ClassDiagram) {
-				cd.EnableMarkdownFence()
 			},
 			contains: []string{
-				"```mermaid\n",
 				"classDiagram\n",
 				"direction TB\n",
-				"```\n",
 			},
 		},
 		{
 			name: "Diagram with full components",
 			setup: func(cd *ClassDiagram) {
-				cd.EnableMarkdownFence()
-
 				// Add namespace
 				ns := cd.AddNamespace("TestNamespace")
 

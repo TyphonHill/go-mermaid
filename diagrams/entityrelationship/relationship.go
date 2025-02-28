@@ -9,6 +9,10 @@ import (
 // Cardinality represents the relationship cardinality
 type Cardinality string
 
+const (
+	baseRelationshipString = basediagram.Indentation + "%s %s %s : %s\n"
+)
+
 // Common relationship patterns
 const (
 	OneToZeroOrMore Cardinality = "||--o{" // One to many (optional)
@@ -59,5 +63,5 @@ func (r *Relationship) String() string {
 	if label == "" {
 		label = "relates"
 	}
-	return fmt.Sprintf(basediagram.Indentation+"%s %s %s : %s\n", r.From.Name, string(r.Cardinality), r.To.Name, label)
+	return fmt.Sprintf(string(baseRelationshipString), r.From.Name, string(r.Cardinality), r.To.Name, label)
 }

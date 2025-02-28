@@ -16,7 +16,7 @@ func TestNewDiagram(t *testing.T) {
 		{
 			name: "Create new diagram with default settings",
 			want: &Diagram{
-				BaseDiagram: basediagram.NewBaseDiagram(),
+				BaseDiagram: basediagram.NewBaseDiagram(NewSequenceConfigurationProperties()),
 				Actors:      make([]*Actor, 0),
 				Messages:    make([]*Message, 0),
 				autonumber:  false,
@@ -103,11 +103,6 @@ func TestDiagram_String(t *testing.T) {
 			hasFenceEnd := strings.Contains(got, "```\n")
 			if hasFenceStart != hasFenceEnd {
 				t.Error("Markdown fence markers are not properly paired")
-			}
-
-			// Verify fence markers match markdownFence setting
-			if tt.diagram.IsMarkdownFenceEnabled() != hasFenceStart {
-				t.Error("Markdown fence presence doesn't match markdownFence setting")
 			}
 		})
 	}

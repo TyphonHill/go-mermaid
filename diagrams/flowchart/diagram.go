@@ -50,7 +50,7 @@ const (
 // multi-directional arrows, and any linking to and from subgraphs.
 // Reference: https://mermaid.js.org/syntax/flowchart.html
 type Flowchart struct {
-	basediagram.BaseDiagram
+	basediagram.BaseDiagram[FlowchartConfigurationProperties]
 	Direction   flowchartDirection
 	CurveStyle  curveStyle
 	classes     []*Class
@@ -63,7 +63,7 @@ type Flowchart struct {
 // NewFlowchart creates a new flowchart diagram
 func NewFlowchart() *Flowchart {
 	return &Flowchart{
-		BaseDiagram: basediagram.NewBaseDiagram(),
+		BaseDiagram: basediagram.NewBaseDiagram(NewFlowchartConfigurationProperties()),
 		Direction:   FlowchartDirectionTopToBottom,
 		CurveStyle:  CurveStyleNone,
 		classes:     make([]*Class, 0),

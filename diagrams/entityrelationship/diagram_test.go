@@ -15,9 +15,6 @@ func TestNewDiagram(t *testing.T) {
 	if len(diagram.Relationships) != 0 {
 		t.Error("NewDiagram() should create empty relationships slice")
 	}
-	if diagram.IsMarkdownFenceEnabled() {
-		t.Error("NewDiagram() should not enable markdown fence by default")
-	}
 }
 
 func TestDiagram_AddEntity(t *testing.T) {
@@ -83,13 +80,10 @@ func TestDiagram_String(t *testing.T) {
 			name: "Diagram with markdown fence",
 			setup: func() *Diagram {
 				d := NewDiagram()
-				d.EnableMarkdownFence()
 				return d
 			},
 			contains: []string{
-				"```mermaid",
 				"erDiagram",
-				"```",
 			},
 		},
 		{
@@ -152,20 +146,17 @@ func TestDiagram_RenderToFile(t *testing.T) {
 			diagram: func() *Diagram {
 				d := NewDiagram()
 				d.SetTitle("Test ERD")
-				d.EnableMarkdownFence()
 				user := d.AddEntity("USER")
 				user.AddAttribute("id", TypeInteger).SetPrimaryKey()
 				return d
 			}(),
 			wantErr: false,
 			wantContent: []string{
-				"```mermaid",
 				"title: Test ERD",
 				"erDiagram",
 				"USER {",
 				"int id PK",
 				"}",
-				"```",
 			},
 		},
 		{

@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	"github.com/TyphonHill/go-mermaid/diagrams/timeline"
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 func main() {
@@ -13,7 +14,9 @@ func main() {
 	diagram := timeline.NewDiagram()
 	diagram.EnableMarkdownFence()
 	diagram.SetTitle("Software Development Lifecycle")
-	diagram.SetTheme(timeline.TimelineThemeDark)
+	diagram.Config.SetTheme(basediagram.ThemeDark)
+	diagram.Config.SetFontFamily("Arial")
+	diagram.Config.SetDarkMode(false)
 
 	// Planning Phase
 	planning := diagram.AddSection("Planning")

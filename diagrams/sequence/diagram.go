@@ -9,9 +9,14 @@ import (
 	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
+// Base string formats for sequence diagrams
+const (
+	baseDiagramType string = "sequenceDiagram\n"
+)
+
 // Diagram represents a sequence diagram with actors, messages, and rendering options.
 type Diagram struct {
-	basediagram.BaseDiagram
+	basediagram.BaseDiagram[SequenceConfigurationProperties]
 	Actors     []*Actor
 	Messages   []*Message
 	autonumber bool
@@ -20,7 +25,7 @@ type Diagram struct {
 // NewDiagram creates a new sequence diagram with default settings.
 func NewDiagram() *Diagram {
 	return &Diagram{
-		BaseDiagram: basediagram.NewBaseDiagram(),
+		BaseDiagram: basediagram.NewBaseDiagram(NewSequenceConfigurationProperties()),
 		Actors:      make([]*Actor, 0),
 		Messages:    make([]*Message, 0),
 		autonumber:  false,
@@ -73,7 +78,7 @@ func (d *Diagram) AddMessage(from, to *Actor, msgType MessageType, text string) 
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	sb.WriteString("sequenceDiagram\n")
+	sb.WriteString(baseDiagramType)
 
 	if d.autonumber {
 		sb.WriteString("autonumber\n")

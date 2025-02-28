@@ -21,14 +21,14 @@ const (
 )
 
 const (
-	baseClassDiagramString          string = "classDiagram\n"
+	baseDiagramType                 string = "classDiagram\n"
 	baseClassDiagramDirectionString string = basediagram.Indentation + "direction %s\n"
 )
 
 // ClassDiagram represents a Mermaid class diagram with various diagram components
 // such as classes, namespaces, relations, and notes.
 type ClassDiagram struct {
-	basediagram.BaseDiagram
+	basediagram.BaseDiagram[ClassConfigurationProperties]
 	Direction  classDiagramDirection
 	namespaces []*Namespace
 	notes      []*Note
@@ -46,7 +46,7 @@ func (cd *ClassDiagram) SetDirection(direction classDiagramDirection) *ClassDiag
 // The default direction is set to top-to-bottom.
 func NewClassDiagram() (newClassDiagram *ClassDiagram) {
 	newClassDiagram = &ClassDiagram{
-		BaseDiagram: basediagram.NewBaseDiagram(),
+		BaseDiagram: basediagram.NewBaseDiagram(NewClassConfigurationProperties()),
 		Direction:   ClassDiagramDirectionTopToBottom,
 	}
 	return
@@ -56,7 +56,7 @@ func NewClassDiagram() (newClassDiagram *ClassDiagram) {
 func (cd *ClassDiagram) String() string {
 	var sb strings.Builder
 
-	sb.WriteString(baseClassDiagramString)
+	sb.WriteString(baseDiagramType)
 
 	sb.WriteString(fmt.Sprintf(string(baseClassDiagramDirectionString), string(cd.Direction)))
 

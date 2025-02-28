@@ -1,6 +1,5 @@
 ```mermaid
 ---
-title: 
 config:
     theme: default
     maxTextSize: 50000

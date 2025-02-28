@@ -11,7 +11,7 @@ import (
 func TestNewDiagram(t *testing.T) {
 	got := NewDiagram()
 	want := &Diagram{
-		BaseDiagram: basediagram.NewBaseDiagram(),
+		BaseDiagram: basediagram.NewBaseDiagram(NewBlockConfigurationProperties()),
 		Blocks:      make([]*Block, 0),
 		Links:       make([]*Link, 0),
 		Columns:     0,

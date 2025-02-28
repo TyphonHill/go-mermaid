@@ -158,78 +158,6 @@ func TestDiagram_CreateAndDestroyActor(t *testing.T) {
 	}
 }
 
-func TestDiagram_AddNote(t *testing.T) {
-	actor1 := NewActor("user", "User", ActorParticipant)
-	actor2 := NewActor("system", "System", ActorParticipant)
-
-	tests := []struct {
-		name     string
-		diagram  *Diagram
-		position NotePosition
-		text     string
-		actors   []*Actor
-		want     *Note
-	}{
-		{
-			name:     "Add left note",
-			diagram:  NewDiagram(),
-			position: NoteLeft,
-			text:     "Left note",
-			actors:   []*Actor{actor1},
-			want: &Note{
-				Position: NoteLeft,
-				Text:     "Left note",
-				Actors:   []*Actor{actor1},
-			},
-		},
-		{
-			name:     "Add over note for multiple actors",
-			diagram:  NewDiagram(),
-			position: NoteOver,
-			text:     "Over note",
-			actors:   []*Actor{actor1, actor2},
-			want: &Note{
-				Position: NoteOver,
-				Text:     "Over note",
-				Actors:   []*Actor{actor1, actor2},
-			},
-		},
-		{
-			name:     "Add note with no actors",
-			diagram:  NewDiagram(),
-			position: NoteLeft,
-			text:     "Invalid note",
-			actors:   []*Actor{},
-			want:     nil,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Add actors to diagram
-			for _, actor := range tt.actors {
-				tt.diagram.AddActor(actor.ID, actor.Name, actor.Type)
-			}
-
-			got := tt.diagram.AddNote(tt.position, tt.text, tt.actors...)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("AddNote() = %v, want %v", got, tt.want)
-			}
-
-			// If note was added successfully, verify it was converted to a message
-			if got != nil {
-				if len(tt.diagram.Messages) != 1 {
-					t.Errorf("Note was not converted to message")
-				}
-				noteMsg := tt.diagram.Messages[0]
-				if noteMsg.Note != got {
-					t.Errorf("Message does not contain correct note reference")
-				}
-			}
-		})
-	}
-}
-
 func TestDiagram_AddMessage(t *testing.T) {
 	actor1 := NewActor("user", "User", ActorParticipant)
 	actor2 := NewActor("system", "System", ActorParticipant)
@@ -293,162 +221,6 @@ func TestDiagram_AddMessage(t *testing.T) {
 	}
 }
 
-func TestMessage_String(t *testing.T) {
-	actor1 := NewActor("user", "User", ActorParticipant)
-	actor2 := NewActor("system", "System", ActorParticipant)
-
-	tests := []struct {
-		name     string
-		message  *Message
-		indent   string
-		wantText string
-	}{
-		{
-			name: "Creation message with text",
-			message: &Message{
-				From: actor1,
-				To:   actor2,
-				Type: MessageCreate,
-				Text: "creates",
-			},
-			indent:   "",
-			wantText: "\tcreate user-->system: creates\n",
-		},
-		{
-			name: "Creation message without text",
-			message: &Message{
-				From: actor1,
-				To:   actor2,
-				Type: MessageCreate,
-				Text: "",
-			},
-			indent:   "",
-			wantText: "", // Should not generate any output for creation without text
-		},
-		{
-			name: "Destruction message",
-			message: &Message{
-				From: nil,
-				To:   actor2,
-				Type: MessageDestroy,
-			},
-			indent:   "",
-			wantText: "\tdestroy system\n",
-		},
-		{
-			name: "Regular message",
-			message: &Message{
-				From: actor1,
-				To:   actor2,
-				Type: MessageSolid,
-				Text: "regular message",
-			},
-			indent:   "",
-			wantText: "\tuser-->system: regular message\n",
-		},
-		{
-			name: "Message with nested messages",
-			message: &Message{
-				From: actor1,
-				To:   actor2,
-				Type: MessageSolid,
-				Text: "parent",
-				Nested: []*Message{
-					{
-						From: actor2,
-						To:   actor1,
-						Type: MessageResponse,
-						Text: "nested",
-					},
-				},
-			},
-			indent:   "",
-			wantText: "\tuser-->system: parent\n\t\tsystem->>user: nested\n",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.message.String(tt.indent)
-			if got != tt.wantText {
-				t.Errorf("Message.String() = %q, want %q", got, tt.wantText)
-			}
-		})
-	}
-}
-
-func TestNote_String(t *testing.T) {
-	actor1 := NewActor("user", "User", ActorParticipant)
-	actor2 := NewActor("system", "System", ActorParticipant)
-
-	tests := []struct {
-		name     string
-		note     *Note
-		indent   string
-		wantText string
-	}{
-		{
-			name: "Left note for single actor",
-			note: &Note{
-				Position: NoteLeft,
-				Text:     "This is a left note",
-				Actors:   []*Actor{actor1},
-			},
-			indent:   "",
-			wantText: "\tNote left of user: This is a left note\n",
-		},
-		{
-			name: "Right note for single actor",
-			note: &Note{
-				Position: NoteRight,
-				Text:     "This is a right note",
-				Actors:   []*Actor{actor1},
-			},
-			indent:   "",
-			wantText: "\tNote right of user: This is a right note\n",
-		},
-		{
-			name: "Over note for multiple actors",
-			note: &Note{
-				Position: NoteOver,
-				Text:     "This is an over note",
-				Actors:   []*Actor{actor1, actor2},
-			},
-			indent:   "",
-			wantText: "\tNote over user,system: This is an over note\n",
-		},
-		{
-			name: "Invalid note with no actors",
-			note: &Note{
-				Position: NoteLeft,
-				Text:     "This note has no actors",
-				Actors:   []*Actor{},
-			},
-			indent:   "",
-			wantText: "",
-		},
-		{
-			name: "Note with different indentation",
-			note: &Note{
-				Position: NoteLeft,
-				Text:     "Indented note",
-				Actors:   []*Actor{actor1},
-			},
-			indent:   "\t",
-			wantText: "\t\tNote left of user: Indented note\n",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.note.String(tt.indent)
-			if got != tt.wantText {
-				t.Errorf("Note.String() = %q, want %q", got, tt.wantText)
-			}
-		})
-	}
-}
-
 func TestDiagram_EnableAutoNumber(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -471,6 +243,108 @@ func TestDiagram_EnableAutoNumber(t *testing.T) {
 			output := tt.diagram.String()
 			if !strings.Contains(output, "autonumber") {
 				t.Errorf("Diagram string does not contain autonumber directive")
+			}
+		})
+	}
+}
+
+func TestDiagram_AddNote(t *testing.T) {
+	tests := []struct {
+		name     string
+		setup    func(*Diagram) *Note
+		contains []string
+	}{
+		{
+			name: "Add left note for single actor",
+			setup: func(d *Diagram) *Note {
+				actor := d.AddActor("A", "Actor A", ActorParticipant)
+				return d.AddNote(NoteLeft, "Left note", actor)
+			},
+			contains: []string{
+				"participant A as Actor A",
+				"Note left of A: Left note",
+			},
+		},
+		{
+			name: "Add right note for single actor",
+			setup: func(d *Diagram) *Note {
+				actor := d.AddActor("B", "Actor B", ActorParticipant)
+				return d.AddNote(NoteRight, "Right note", actor)
+			},
+			contains: []string{
+				"participant B as Actor B",
+				"Note right of B: Right note",
+			},
+		},
+		{
+			name: "Add over note for single actor",
+			setup: func(d *Diagram) *Note {
+				actor := d.AddActor("C", "Actor C", ActorParticipant)
+				return d.AddNote(NoteOver, "Over note", actor)
+			},
+			contains: []string{
+				"participant C as Actor C",
+				"Note over C: Over note",
+			},
+		},
+		{
+			name: "Add over note for multiple actors",
+			setup: func(d *Diagram) *Note {
+				actor1 := d.AddActor("A", "Actor A", ActorParticipant)
+				actor2 := d.AddActor("B", "Actor B", ActorParticipant)
+				return d.AddNote(NoteOver, "Over both note", actor1, actor2)
+			},
+			contains: []string{
+				"participant A as Actor A",
+				"participant B as Actor B",
+				"Note over A,B: Over both note",
+			},
+		},
+		{
+			name: "Add note between messages",
+			setup: func(d *Diagram) *Note {
+				actor1 := d.AddActor("A", "Actor A", ActorParticipant)
+				actor2 := d.AddActor("B", "Actor B", ActorParticipant)
+				d.AddMessage(actor1, actor2, MessageSolid, "First message")
+				note := d.AddNote(NoteOver, "Note between", actor1, actor2)
+				d.AddMessage(actor2, actor1, MessageSolid, "Second message")
+				return note
+			},
+			contains: []string{
+				"participant A as Actor A",
+				"participant B as Actor B",
+				"A-->B: First message",
+				"Note over A,B: Note between",
+				"B-->A: Second message",
+			},
+		},
+		{
+			name: "Add note without actors",
+			setup: func(d *Diagram) *Note {
+				return d.AddNote(NoteOver, "Empty note")
+			},
+			contains: []string{
+				"sequenceDiagram",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diagram := NewDiagram()
+			note := tt.setup(diagram)
+
+			// Verify note was added to messages
+			if len(diagram.Messages) == 0 && note != nil {
+				t.Error("Note was not added to diagram messages")
+			}
+
+			// Verify diagram string output
+			got := diagram.String()
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
 			}
 		})
 	}

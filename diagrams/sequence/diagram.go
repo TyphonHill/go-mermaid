@@ -101,19 +101,13 @@ func (d *Diagram) RenderToFile(path string) error {
 	return utils.RenderToFile(path, d.String())
 }
 
-// AddNote adds a note to the diagram positioned relative to one or more actors.
 func (d *Diagram) AddNote(position NotePosition, text string, actors ...*Actor) *Note {
-	if len(actors) == 0 {
-		return nil
-	}
-	note := NewNote(position, text, actors...)
+	note := newNote(position, text, actors...)
+
 	msg := &Message{
-		From: actors[0],
-		To:   actors[0],
-		Type: MessageType(position),
-		Text: text,
 		Note: note,
 	}
 	d.Messages = append(d.Messages, msg)
+
 	return note
 }

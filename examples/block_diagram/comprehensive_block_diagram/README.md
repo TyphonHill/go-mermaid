@@ -24,7 +24,7 @@ block-beta
     10((("Cache")))
     end
     style 5 fill:#BFE,stroke:#333
-    space
+    space:2
     11(["Visualizations"]):2
     style 11 fill:#FBE,stroke:#333
     12<["Alerts"]>(x, y)

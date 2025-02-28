@@ -10,6 +10,7 @@ import (
 // Mermaid block syntax templates
 const (
 	tplSpace        = basediagram.Indentation + "space\n"
+	tplSpaceWidth   = basediagram.Indentation + "space:%d\n"
 	tplBlockStart   = basediagram.Indentation + "block:%s:%d\n"
 	tplBlockSimple  = basediagram.Indentation + "block:%s\n"
 	tplColumns      = basediagram.Indentation + "columns %d\n"
@@ -123,7 +124,11 @@ func (b *Block) String() string {
 	var sb strings.Builder
 
 	if b.IsSpace {
-		sb.WriteString(tplSpace)
+		if b.Width > 0 {
+			sb.WriteString(fmt.Sprintf(tplSpaceWidth, b.Width))
+		} else {
+			sb.WriteString(tplSpace)
+		}
 		return sb.String()
 	}
 
@@ -150,7 +155,6 @@ func (b *Block) String() string {
 		}
 		sb.WriteString(tplBlockEnd)
 	} else {
-		// Single block
 		if b.Text != "" {
 			if b.isArrow {
 				if b.Width > 1 {

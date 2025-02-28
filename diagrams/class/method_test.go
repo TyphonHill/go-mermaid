@@ -142,3 +142,141 @@ func TestMethod_String(t *testing.T) {
 		})
 	}
 }
+
+func TestMethod_SetVisibility(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     *Method
+		visibility methodVisibility
+		want       methodVisibility
+	}{
+		{
+			name:       "Set public visibility",
+			method:     NewMethod("test"),
+			visibility: MethodVisibilityPublic,
+			want:       MethodVisibilityPublic,
+		},
+		{
+			name:       "Set private visibility",
+			method:     NewMethod("test"),
+			visibility: MethodVisibilityPrivate,
+			want:       MethodVisibilityPrivate,
+		},
+		{
+			name:       "Set protected visibility",
+			method:     NewMethod("test"),
+			visibility: MethodVisibilityProtected,
+			want:       MethodVisibilityProtected,
+		},
+		{
+			name:       "Set internal visibility",
+			method:     NewMethod("test"),
+			visibility: MethodVisibilityInternal,
+			want:       MethodVisibilityInternal,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.method.SetVisibility(tt.visibility)
+
+			if result != tt.method {
+				t.Error("SetVisibility() should return method for chaining")
+			}
+
+			if tt.method.Visibility != tt.want {
+				t.Errorf("SetVisibility() = %v, want %v", tt.method.Visibility, tt.want)
+			}
+		})
+	}
+}
+
+func TestMethod_SetReturnType(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     *Method
+		returnType string
+		want       string
+	}{
+		{
+			name:       "Set void return type",
+			method:     NewMethod("test"),
+			returnType: "void",
+			want:       "void",
+		},
+		{
+			name:       "Set string return type",
+			method:     NewMethod("test"),
+			returnType: "string",
+			want:       "string",
+		},
+		{
+			name:       "Set custom type",
+			method:     NewMethod("test"),
+			returnType: "MyClass",
+			want:       "MyClass",
+		},
+		{
+			name:       "Change return type",
+			method:     NewMethod("test"),
+			returnType: "int",
+			want:       "int",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.method.SetReturnType(tt.returnType)
+
+			if result != tt.method {
+				t.Error("SetReturnType() should return method for chaining")
+			}
+
+			if tt.method.ReturnType != tt.want {
+				t.Errorf("SetReturnType() = %v, want %v", tt.method.ReturnType, tt.want)
+			}
+		})
+	}
+}
+
+func TestMethod_SetClassifier(t *testing.T) {
+	tests := []struct {
+		name       string
+		method     *Method
+		classifier methodClassifier
+		want       methodClassifier
+	}{
+		{
+			name:       "Set abstract classifier",
+			method:     NewMethod("test"),
+			classifier: MethodClassifierAbstract,
+			want:       MethodClassifierAbstract,
+		},
+		{
+			name:       "Set static classifier",
+			method:     NewMethod("test"),
+			classifier: MethodClassifierStatic,
+			want:       MethodClassifierStatic,
+		},
+		{
+			name:       "Change classifier",
+			method:     NewMethod("test"),
+			classifier: MethodClassifierStatic,
+			want:       MethodClassifierStatic,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.method.SetClassifier(tt.classifier)
+
+			if result != tt.method {
+				t.Error("SetClassifier() should return method for chaining")
+			}
+
+			if tt.method.Classifier != tt.want {
+				t.Errorf("SetClassifier() = %v, want %v", tt.method.Classifier, tt.want)
+			}
+		})
+	}
+}

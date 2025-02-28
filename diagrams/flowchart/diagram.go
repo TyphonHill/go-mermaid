@@ -41,7 +41,6 @@ const (
 )
 
 const (
-	baseCurveStyleString         string = "%%%%{ init: { 'flowchart': { 'curve': '%s' } } }%%%%\n"
 	baseFlowchartDirectionString string = "flowchart %s\n"
 )
 
@@ -77,12 +76,6 @@ func NewFlowchart() *Flowchart {
 // SetDirection sets the flowchart direction and returns the flowchart for chaining
 func (f *Flowchart) SetDirection(direction flowchartDirection) *Flowchart {
 	f.Direction = direction
-	return f
-}
-
-// SetCurveStyle sets the flowchart curve style and returns the flowchart for chaining
-func (f *Flowchart) SetCurveStyle(style curveStyle) *Flowchart {
-	f.CurveStyle = style
 	return f
 }
 
@@ -130,10 +123,6 @@ func (f *Flowchart) AddClass(name string) (newClass *Class) {
 // String generates a Mermaid flowchart string representation
 func (f *Flowchart) String() string {
 	var sb strings.Builder
-
-	if f.CurveStyle != CurveStyleNone {
-		sb.WriteString(fmt.Sprintf(string(baseCurveStyleString), string(f.CurveStyle)))
-	}
 
 	sb.WriteString(fmt.Sprintf(string(baseFlowchartDirectionString), string(f.Direction)))
 

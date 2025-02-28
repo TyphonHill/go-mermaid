@@ -18,6 +18,12 @@ const (
 	TypeDateTime DataType = "datetime"
 )
 
+const (
+	baseEntityNoAliasString   = basediagram.Indentation + "%s {\n"
+	baseEntityWithAliasString = basediagram.Indentation + "%s [%s] {\n"
+	baseEntityAttributeString = basediagram.Indentation + basediagram.Indentation + "%s %s%s\n"
+)
+
 // Entity represents a table or entity in the ERD
 type Entity struct {
 	Name       string
@@ -81,9 +87,9 @@ func (e *Entity) String() string {
 	var sb strings.Builder
 
 	if e.Alias != "" {
-		sb.WriteString(fmt.Sprintf(basediagram.Indentation+"%s [%s] {\n", e.Name, e.Alias))
+		sb.WriteString(fmt.Sprintf(string(baseEntityWithAliasString), e.Name, e.Alias))
 	} else {
-		sb.WriteString(fmt.Sprintf(basediagram.Indentation+"%s {\n", e.Name))
+		sb.WriteString(fmt.Sprintf(string(baseEntityNoAliasString), e.Name))
 	}
 
 	for _, attr := range e.Attributes {
@@ -95,7 +101,7 @@ func (e *Entity) String() string {
 		} else if attr.FK {
 			keys = " FK"
 		}
-		sb.WriteString(fmt.Sprintf(basediagram.Indentation+basediagram.Indentation+"%s %s%s\n", attr.Type, attr.Name, keys))
+		sb.WriteString(fmt.Sprintf(string(baseEntityAttributeString), attr.Type, attr.Name, keys))
 	}
 
 	sb.WriteString(basediagram.Indentation + "}\n")

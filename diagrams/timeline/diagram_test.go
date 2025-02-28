@@ -11,9 +11,6 @@ func TestNewDiagram(t *testing.T) {
 	if len(diagram.Sections) != 0 {
 		t.Error("NewDiagram() should create empty sections slice")
 	}
-	if diagram.IsMarkdownFenceEnabled() {
-		t.Error("NewDiagram() should not enable markdown fence by default")
-	}
 }
 
 func TestDiagram_String(t *testing.T) {

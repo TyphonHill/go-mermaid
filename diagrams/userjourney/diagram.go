@@ -10,20 +10,19 @@ import (
 
 // Base string formats for user journey diagrams
 const (
-	baseDiagramType  string = "journey\n"
-	baseDiagramTitle string = basediagram.Indentation + "title %s\n"
+	baseDiagramType string = "journey\n"
 )
 
 // Diagram represents a Mermaid User Journey diagram
 type Diagram struct {
-	basediagram.BaseDiagram
+	basediagram.BaseDiagram[JourneyConfigurationProperties]
 	Sections []*Section
 }
 
 // NewDiagram creates a new User Journey diagram
 func NewDiagram() *Diagram {
 	return &Diagram{
-		BaseDiagram: basediagram.NewBaseDiagram(),
+		BaseDiagram: basediagram.NewBaseDiagram(NewJourneyConfigurationProperties()),
 		Sections:    make([]*Section, 0),
 	}
 }

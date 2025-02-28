@@ -8,9 +8,14 @@ import (
 	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
+// Base string formats for entity relationship diagrams
+const (
+	baseDiagramType string = "erDiagram\n"
+)
+
 // Diagram represents an entity relationship diagram
 type Diagram struct {
-	basediagram.BaseDiagram
+	basediagram.BaseDiagram[ErConfigurationProperties]
 	Entities      []*Entity
 	Relationships []*Relationship
 }
@@ -18,7 +23,7 @@ type Diagram struct {
 // NewDiagram creates a new ERD diagram
 func NewDiagram() *Diagram {
 	return &Diagram{
-		BaseDiagram:   basediagram.NewBaseDiagram(),
+		BaseDiagram:   basediagram.NewBaseDiagram(NewErConfigurationProperties()),
 		Entities:      make([]*Entity, 0),
 		Relationships: make([]*Relationship, 0),
 	}
@@ -42,7 +47,7 @@ func (d *Diagram) AddRelationship(from, to *Entity) *Relationship {
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	sb.WriteString("erDiagram\n")
+	sb.WriteString(baseDiagramType)
 
 	// Add entities
 	for _, entity := range d.Entities {

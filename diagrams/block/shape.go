@@ -8,6 +8,10 @@ import (
 // BlockArrowDirection specifies the direction of a block arrow
 type BlockArrowDirection string
 
+const (
+	baseBlockArrowShape = `<["%s"]>(%s)`
+)
+
 // Available arrow directions for block arrows
 const (
 	BlockArrowDirectionRight BlockArrowDirection = "right"
@@ -25,5 +29,5 @@ func BlockArrowShape(text string, directions ...BlockArrowDirection) string {
 		strs[i] = string(d)
 	}
 	dirStr := strings.Join(strs, ", ")
-	return fmt.Sprintf(`<["%s"]>(%s)`, text, dirStr)
+	return fmt.Sprintf(baseBlockArrowShape, text, dirStr)
 }

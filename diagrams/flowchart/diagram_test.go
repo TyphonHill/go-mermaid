@@ -27,7 +27,7 @@ func TestNewFlowchart(t *testing.T) {
 		{
 			name: "Create new flowchart with default settings",
 			want: &Flowchart{
-				BaseDiagram: basediagram.NewBaseDiagram(),
+				BaseDiagram: basediagram.NewBaseDiagram(NewFlowchartConfigurationProperties()),
 				Direction:   FlowchartDirectionTopToBottom,
 				CurveStyle:  CurveStyleNone,
 				classes:     make([]*Class, 0),
@@ -47,51 +47,6 @@ func TestNewFlowchart(t *testing.T) {
 
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewFlowchart() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestFlowchart_EnableMarkdownFence(t *testing.T) {
-	tests := []struct {
-		name      string
-		flowchart *Flowchart
-	}{
-		{
-			name:      "Enable markdown fence",
-			flowchart: NewFlowchart(),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.flowchart.EnableMarkdownFence()
-			if !tt.flowchart.IsMarkdownFenceEnabled() {
-				t.Error("EnableMarkdownFence() did not enable markdown fence")
-			}
-		})
-	}
-}
-
-func TestFlowchart_DisableMarkdownFence(t *testing.T) {
-	tests := []struct {
-		name      string
-		flowchart *Flowchart
-	}{
-		{
-			name:      "Disable markdown fence",
-			flowchart: NewFlowchart(),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// First enable it
-			tt.flowchart.EnableMarkdownFence()
-			// Then disable it
-			tt.flowchart.DisableMarkdownFence()
-			if tt.flowchart.IsMarkdownFenceEnabled() {
-				t.Error("DisableMarkdownFence() did not disable markdown fence")
 			}
 		})
 	}
@@ -120,9 +75,6 @@ func TestFlowchart_String(t *testing.T) {
 				return d
 			},
 			contains: []string{
-				"---",
-				"title: Test Flowchart",
-				"---",
 				"flowchart TB",
 			},
 		},

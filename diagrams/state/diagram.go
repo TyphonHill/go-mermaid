@@ -8,9 +8,14 @@ import (
 	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
+// Base string formats for state diagrams
+const (
+	baseDiagramType string = "stateDiagram-v2\n"
+)
+
 // Diagram represents a state diagram with states, transitions, and rendering options.
 type Diagram struct {
-	basediagram.BaseDiagram
+	basediagram.BaseDiagram[StateConfigurationProperties]
 	States      []*State
 	Transitions []*Transition
 }
@@ -18,7 +23,7 @@ type Diagram struct {
 // NewDiagram creates a new state diagram with default settings.
 func NewDiagram() *Diagram {
 	return &Diagram{
-		BaseDiagram: basediagram.NewBaseDiagram(),
+		BaseDiagram: basediagram.NewBaseDiagram(NewStateConfigurationProperties()),
 		States:      make([]*State, 0),
 		Transitions: make([]*Transition, 0),
 	}
@@ -42,7 +47,7 @@ func (d *Diagram) AddTransition(from, to *State, description string) *Transition
 func (d *Diagram) String() string {
 	var sb strings.Builder
 
-	sb.WriteString("stateDiagram-v2\n")
+	sb.WriteString(baseDiagramType)
 
 	for _, state := range d.States {
 		sb.WriteString(state.String(""))

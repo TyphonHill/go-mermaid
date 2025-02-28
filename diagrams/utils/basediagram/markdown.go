@@ -2,9 +2,20 @@ package basediagram
 
 import "strings"
 
+const (
+	markdownFenceStart = "```mermaid\n"
+	markdownFenceEnd   = "\n```\n"
+)
+
 // MarkdownFencer provides common functionality for handling markdown fence state
 type MarkdownFencer struct {
 	markdownFence bool
+}
+
+func NewMarkdownFencer() MarkdownFencer {
+	return MarkdownFencer{
+		markdownFence: false,
+	}
 }
 
 // EnableMarkdownFence enables markdown fence in output and returns receiver for chaining
@@ -30,8 +41,8 @@ func (m *MarkdownFencer) WrapWithFence(content string) string {
 	}
 
 	var sb strings.Builder
-	sb.WriteString("```mermaid\n")
+	sb.WriteString(markdownFenceStart)
 	sb.WriteString(content)
-	sb.WriteString("\n```\n")
+	sb.WriteString(markdownFenceEnd)
 	return sb.String()
 }

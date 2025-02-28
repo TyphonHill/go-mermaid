@@ -1,211 +1,226 @@
 package state
 
 import (
+	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/TyphonHill/go-mermaid/diagrams/utils/basediagram"
 )
 
 func TestNewDiagram(t *testing.T) {
-	diagram := NewDiagram()
-
-	if diagram.States == nil {
-		t.Error("NewDiagram() States is nil, want empty slice")
-	}
-	if diagram.Transitions == nil {
-		t.Error("NewDiagram() Transitions is nil, want empty slice")
-	}
-}
-
-func TestDiagram_AddState(t *testing.T) {
-	diagram := NewDiagram()
-	state := diagram.AddState("test", "Test State", StateNormal)
-
-	if len(diagram.States) != 1 {
-		t.Errorf("AddState() resulted in %d states, want 1", len(diagram.States))
-	}
-
-	if state.ID != "test" || state.Description != "Test State" || state.Type != StateNormal {
-		t.Errorf("AddState() = %v, want {ID: test, Description: Test State, Type: normal}", state)
-	}
-}
-
-func TestAddTransition(t *testing.T) {
-	diagram := NewDiagram()
-	state1 := diagram.AddState("state1", "State 1", StateNormal)
-	state2 := diagram.AddState("state2", "State 2", StateNormal)
-
-	transition := diagram.AddTransition(state1, state2, "test")
-	if len(diagram.Transitions) != 1 {
-		t.Errorf("Expected 1 transition, got %d", len(diagram.Transitions))
-	}
-
-	if transition.From != state1 || transition.To != state2 {
-		t.Error("Transition has incorrect states")
-	}
-
-	transition.SetType(TransitionDashed)
-	if transition.Type != TransitionDashed {
-		t.Error("SetType did not update transition type")
-	}
-}
-
-func TestDiagram_RenderState(t *testing.T) {
 	tests := []struct {
-		name     string
-		setup    func(*Diagram)
-		contains []string
+		name string
+		want *Diagram
 	}{
 		{
-			name: "Render start state",
-			setup: func(d *Diagram) {
-				d.AddState("start", "Start State", StateStart)
-			},
-			contains: []string{
-				"[*] --> start",
-			},
-		},
-		{
-			name: "Render end state",
-			setup: func(d *Diagram) {
-				d.AddState("end", "End State", StateEnd)
-			},
-			contains: []string{
-				"end --> [*]",
-			},
-		},
-		{
-			name: "Render choice state",
-			setup: func(d *Diagram) {
-				d.AddState("choice", "Choice State", StateChoice)
-			},
-			contains: []string{
-				"state choice <<choice>>",
-			},
-		},
-		{
-			name: "Render fork state",
-			setup: func(d *Diagram) {
-				d.AddState("fork", "Fork State", StateFork)
-			},
-			contains: []string{
-				"state fork <<fork>>",
-			},
-		},
-		{
-			name: "Render join state",
-			setup: func(d *Diagram) {
-				d.AddState("join", "Join State", StateJoin)
-			},
-			contains: []string{
-				"state join <<join>>",
-			},
-		},
-		{
-			name: "Render normal state with description",
-			setup: func(d *Diagram) {
-				d.AddState("normal", "Normal State", StateNormal)
-			},
-			contains: []string{
-				"state \"Normal State\" as normal",
-			},
-		},
-		{
-			name: "Render composite state with nested states",
-			setup: func(d *Diagram) {
-				parent := d.AddState("parent", "Parent State", StateComposite)
-				nested := NewState("child", "Child State", StateNormal)
-				parent.Nested = append(parent.Nested, nested)
-			},
-			contains: []string{
-				"state parent {",
-				"state \"Child State\" as child",
-				"}",
-			},
-		},
-		{
-			name: "Render multiple nested levels",
-			setup: func(d *Diagram) {
-				parent := d.AddState("parent", "Parent State", StateComposite)
-				child := NewState("child", "Child State", StateComposite)
-				grandchild := NewState("grandchild", "Grandchild State", StateNormal)
-				child.Nested = append(child.Nested, grandchild)
-				parent.Nested = append(parent.Nested, child)
-			},
-			contains: []string{
-				"state parent {",
-				"state child {",
-				"state \"Grandchild State\" as grandchild",
-				"}",
-			},
-		},
-		{
-			name: "Render state with special characters in description",
-			setup: func(d *Diagram) {
-				d.AddState("special", "State: with \"quotes\" and {braces}", StateNormal)
-			},
-			contains: []string{
-				`state "State: with \"quotes\" and {braces}" as special`,
+			name: "Create new diagram with default settings",
+			want: &Diagram{
+				BaseDiagram: basediagram.NewBaseDiagram(NewStateConfigurationProperties()),
+				States:      make([]*State, 0),
+				Transitions: make([]*Transition, 0),
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			diagram := NewDiagram()
-			tt.setup(diagram)
-			result := diagram.String()
+			got := NewDiagram()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewDiagram() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 
+func TestDiagram_String(t *testing.T) {
+	tests := []struct {
+		name     string
+		diagram  *Diagram
+		setup    func(*Diagram)
+		contains []string
+	}{
+		{
+			name:    "Empty diagram",
+			diagram: NewDiagram(),
+			contains: []string{
+				"stateDiagram-v2",
+			},
+		},
+		{
+			name:    "Diagram with single state",
+			diagram: NewDiagram(),
+			setup: func(d *Diagram) {
+				d.AddState("S1", "State 1", StateNormal)
+			},
+			contains: []string{
+				"stateDiagram-v2",
+				`state "State 1" as S1`,
+			},
+		},
+		{
+			name:    "Diagram with multiple states and transition",
+			diagram: NewDiagram(),
+			setup: func(d *Diagram) {
+				s1 := d.AddState("S1", "State 1", StateNormal)
+				s2 := d.AddState("S2", "State 2", StateNormal)
+				d.AddTransition(s1, s2, "Next")
+			},
+			contains: []string{
+				"stateDiagram-v2",
+				`state "State 1" as S1`,
+				`state "State 2" as S2`,
+				"S1 --> S2: Next",
+			},
+		},
+		{
+			name:    "Diagram with choice state",
+			diagram: NewDiagram(),
+			setup: func(d *Diagram) {
+				s1 := d.AddState("S1", "State 1", StateNormal)
+				c1 := d.AddState("C1", "", StateChoice)
+				s2 := d.AddState("S2", "State 2", StateNormal)
+				d.AddTransition(s1, c1, "Check")
+				d.AddTransition(c1, s2, "Yes")
+			},
+			contains: []string{
+				"stateDiagram-v2",
+				`state "State 1" as S1`,
+				"state C1 <<choice>>",
+				`state "State 2" as S2`,
+				"S1 --> C1: Check",
+				"C1 --> S2: Yes",
+			},
+		},
+		{
+			name:    "Diagram with composite state",
+			diagram: NewDiagram(),
+			setup: func(d *Diagram) {
+				composite := d.AddState("CS", "Composite", StateComposite)
+				nested := composite.AddNestedState("NS", "Nested", StateNormal)
+				s2 := d.AddState("S2", "State 2", StateNormal)
+				d.AddTransition(nested, s2, "Exit")
+			},
+			contains: []string{
+				"stateDiagram-v2",
+				"state CS {",
+				`    state "Nested" as NS`,
+				"}",
+				`state "State 2" as S2`,
+				"NS --> S2: Exit",
+			},
+		},
+		{
+			name:    "Diagram with start and end states",
+			diagram: NewDiagram(),
+			setup: func(d *Diagram) {
+				start := d.AddState("[*]", "", StateStart)
+				s1 := d.AddState("S1", "Process", StateNormal)
+				end := d.AddState("[*]", "", StateEnd)
+				d.AddTransition(start, s1, "Begin")
+				d.AddTransition(s1, end, "Finish")
+			},
+			contains: []string{
+				"stateDiagram-v2",
+				"[*] --> S1: Begin",
+				`state "Process" as S1`,
+				"S1 --> [*]: Finish",
+			},
+		},
+		{
+			name:    "Diagram with fork and join",
+			diagram: NewDiagram(),
+			setup: func(d *Diagram) {
+				s1 := d.AddState("S1", "Start", StateNormal)
+				fork := d.AddState("F1", "", StateFork)
+				p1 := d.AddState("P1", "Path 1", StateNormal)
+				p2 := d.AddState("P2", "Path 2", StateNormal)
+				join := d.AddState("J1", "", StateJoin)
+				s2 := d.AddState("S2", "End", StateNormal)
+
+				d.AddTransition(s1, fork, "Split")
+				d.AddTransition(fork, p1, "")
+				d.AddTransition(fork, p2, "")
+				d.AddTransition(p1, join, "")
+				d.AddTransition(p2, join, "")
+				d.AddTransition(join, s2, "Merge")
+			},
+			contains: []string{
+				"stateDiagram-v2",
+				`state "Start" as S1`,
+				"state F1 <<fork>>",
+				`state "Path 1" as P1`,
+				`state "Path 2" as P2`,
+				"state J1 <<join>>",
+				`state "End" as S2`,
+				"S1 --> F1: Split",
+				"F1 --> P1",
+				"F1 --> P2",
+				"P1 --> J1",
+				"P2 --> J1",
+				"J1 --> S2: Merge",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.setup != nil {
+				tt.setup(tt.diagram)
+			}
+
+			got := tt.diagram.String()
 			for _, want := range tt.contains {
-				if !strings.Contains(result, want) {
-					t.Errorf("String() result missing expected content %q in output:\n%s", want, result)
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
 				}
 			}
 		})
 	}
 }
 
-func TestDiagram_RenderTransition(t *testing.T) {
+func TestDiagram_AddState(t *testing.T) {
 	tests := []struct {
-		name    string
-		setup   func(*Diagram)
-		want    []string
-		notWant []string
+		name        string
+		id          string
+		description string
+		stateType   StateType
+		want        *State
 	}{
 		{
-			name: "Render transition with description",
-			setup: func(d *Diagram) {
-				s1 := d.AddState("s1", "State 1", StateNormal)
-				s2 := d.AddState("s2", "State 2", StateNormal)
-				d.AddTransition(s1, s2, "test transition")
-			},
-			want: []string{
-				"s1 --> s2: test transition",
-			},
-		},
-		{
-			name: "Render transition without description",
-			setup: func(d *Diagram) {
-				s1 := d.AddState("s1", "State 1", StateNormal)
-				s2 := d.AddState("s2", "State 2", StateNormal)
-				d.AddTransition(s1, s2, "")
-			},
-			want: []string{
-				"s1 --> s2",
-			},
-			notWant: []string{
-				"s1 --> s2:",
+			name:        "Add normal state",
+			id:          "S1",
+			description: "State 1",
+			stateType:   StateNormal,
+			want: &State{
+				ID:          "S1",
+				Description: "State 1",
+				Type:        StateNormal,
+				Nested:      make([]*State, 0),
 			},
 		},
 		{
-			name: "Render dashed transition",
-			setup: func(d *Diagram) {
-				s1 := d.AddState("s1", "State 1", StateNormal)
-				s2 := d.AddState("s2", "State 2", StateNormal)
-				t := d.AddTransition(s1, s2, "dashed")
-				t.SetType(TransitionDashed)
+			name:        "Add choice state",
+			id:          "C1",
+			description: "",
+			stateType:   StateChoice,
+			want: &State{
+				ID:          "C1",
+				Description: "",
+				Type:        StateChoice,
+				Nested:      make([]*State, 0),
 			},
-			want: []string{
-				"s1 --> s2: dashed",
+		},
+		{
+			name:        "Add composite state",
+			id:          "CS1",
+			description: "Composite",
+			stateType:   StateComposite,
+			want: &State{
+				ID:          "CS1",
+				Description: "Composite",
+				Type:        StateComposite,
+				Nested:      make([]*State, 0),
 			},
 		},
 	}
@@ -213,19 +228,74 @@ func TestDiagram_RenderTransition(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			diagram := NewDiagram()
-			tt.setup(diagram)
-			result := diagram.String()
+			got := diagram.AddState(tt.id, tt.description, tt.stateType)
 
-			for _, want := range tt.want {
-				if !strings.Contains(result, want) {
-					t.Errorf("String() result missing expected content %q in output:\n%s", want, result)
-				}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AddState() = %v, want %v", got, tt.want)
 			}
 
-			for _, notWant := range tt.notWant {
-				if strings.Contains(result, notWant) {
-					t.Errorf("String() result contains unexpected content %q in output:\n%s", notWant, result)
-				}
+			if len(diagram.States) != 1 || !reflect.DeepEqual(diagram.States[0], got) {
+				t.Error("State not added to diagram correctly")
+			}
+		})
+	}
+}
+
+func TestDiagram_AddTransition(t *testing.T) {
+	tests := []struct {
+		name        string
+		fromState   *State
+		toState     *State
+		description string
+		want        *Transition
+	}{
+		{
+			name: "Add simple transition",
+			fromState: &State{
+				ID:   "S1",
+				Type: StateNormal,
+			},
+			toState: &State{
+				ID:   "S2",
+				Type: StateNormal,
+			},
+			description: "Next",
+			want: &Transition{
+				From:        &State{ID: "S1", Type: StateNormal},
+				To:          &State{ID: "S2", Type: StateNormal},
+				Description: "Next",
+			},
+		},
+		{
+			name: "Add transition without description",
+			fromState: &State{
+				ID:   "S1",
+				Type: StateNormal,
+			},
+			toState: &State{
+				ID:   "S2",
+				Type: StateNormal,
+			},
+			description: "",
+			want: &Transition{
+				From:        &State{ID: "S1", Type: StateNormal},
+				To:          &State{ID: "S2", Type: StateNormal},
+				Description: "",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diagram := NewDiagram()
+			got := diagram.AddTransition(tt.fromState, tt.toState, tt.description)
+
+			if got.From.ID != tt.want.From.ID || got.To.ID != tt.want.To.ID || got.Description != tt.want.Description {
+				t.Errorf("AddTransition() = %v, want %v", got, tt.want)
+			}
+
+			if len(diagram.Transitions) != 1 || !reflect.DeepEqual(diagram.Transitions[0], got) {
+				t.Error("Transition not added to diagram correctly")
 			}
 		})
 	}

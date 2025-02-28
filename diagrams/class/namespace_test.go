@@ -144,3 +144,70 @@ func TestNamespace_String(t *testing.T) {
 		})
 	}
 }
+
+func TestNamespace_AddNamespace(t *testing.T) {
+	tests := []struct {
+		name          string
+		parentName    string
+		childName     string
+		wantChildren  int
+		wantChildName string
+	}{
+		{
+			name:          "Add single namespace",
+			parentName:    "parent",
+			childName:     "child",
+			wantChildren:  1,
+			wantChildName: "child",
+		},
+		{
+			name:          "Add namespace with special characters",
+			parentName:    "root",
+			childName:     "child.namespace",
+			wantChildren:  1,
+			wantChildName: "child.namespace",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			parent := NewNamespace(tt.parentName)
+			child := parent.AddNamespace(tt.childName)
+
+			// Check if child was returned
+			if child == nil {
+				t.Error("AddNamespace() returned nil")
+			}
+
+			// Check if child was added to parent's children
+			if len(parent.Children) != tt.wantChildren {
+				t.Errorf("AddNamespace() parent has %v children, want %v", len(parent.Children), tt.wantChildren)
+			}
+
+			// Check if child has correct name
+			if child.Name != tt.wantChildName {
+				t.Errorf("AddNamespace() child name = %v, want %v", child.Name, tt.wantChildName)
+			}
+
+			// Check if child is properly initialized
+			if child.Classes == nil {
+				t.Error("AddNamespace() child Classes slice not initialized")
+			}
+			if child.Children == nil {
+				t.Error("AddNamespace() child Children slice not initialized")
+			}
+
+			// Check if child is in parent's children slice
+			found := false
+			for _, c := range parent.Children {
+				if c == child {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Error("AddNamespace() child not found in parent's Children slice")
+			}
+		})
+	}
+}

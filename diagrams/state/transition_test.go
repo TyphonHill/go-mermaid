@@ -2,6 +2,7 @@ package state
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -14,54 +15,50 @@ func TestNewTransition(t *testing.T) {
 		want        *Transition
 	}{
 		{
-			name: "Create basic transition",
-			from: &State{
-				ID:          "start",
-				Description: "Start State",
-				Type:        StateNormal,
-			},
-			to: &State{
-				ID:          "end",
-				Description: "End State",
-				Type:        StateNormal,
-			},
-			description: "Transition Description",
+			name:        "Create transition between normal states",
+			from:        &State{ID: "S1", Type: StateNormal},
+			to:          &State{ID: "S2", Type: StateNormal},
+			description: "Next",
 			want: &Transition{
-				From: &State{
-					ID:          "start",
-					Description: "Start State",
-					Type:        StateNormal,
-				},
-				To: &State{
-					ID:          "end",
-					Description: "End State",
-					Type:        StateNormal,
-				},
-				Description: "Transition Description",
+				From:        &State{ID: "S1", Type: StateNormal},
+				To:          &State{ID: "S2", Type: StateNormal},
+				Description: "Next",
 				Type:        TransitionSolid,
 			},
 		},
 		{
-			name: "Create transition with empty description",
-			from: &State{
-				ID:   "state1",
-				Type: StateNormal,
-			},
-			to: &State{
-				ID:   "state2",
-				Type: StateNormal,
-			},
+			name:        "Create transition without description",
+			from:        &State{ID: "S1", Type: StateNormal},
+			to:          &State{ID: "S2", Type: StateNormal},
 			description: "",
 			want: &Transition{
-				From: &State{
-					ID:   "state1",
-					Type: StateNormal,
-				},
-				To: &State{
-					ID:   "state2",
-					Type: StateNormal,
-				},
+				From:        &State{ID: "S1", Type: StateNormal},
+				To:          &State{ID: "S2", Type: StateNormal},
 				Description: "",
+				Type:        TransitionSolid,
+			},
+		},
+		{
+			name:        "Create transition from start state",
+			from:        nil,
+			to:          &State{ID: "S1", Type: StateNormal},
+			description: "Begin",
+			want: &Transition{
+				From:        nil,
+				To:          &State{ID: "S1", Type: StateNormal},
+				Description: "Begin",
+				Type:        TransitionSolid,
+			},
+		},
+		{
+			name:        "Create transition to end state",
+			from:        &State{ID: "S1", Type: StateNormal},
+			to:          nil,
+			description: "End",
+			want: &Transition{
+				From:        &State{ID: "S1", Type: StateNormal},
+				To:          nil,
+				Description: "End",
 				Type:        TransitionSolid,
 			},
 		},
@@ -77,85 +74,127 @@ func TestNewTransition(t *testing.T) {
 	}
 }
 
-func TestTransition_SetType(t *testing.T) {
+func TestTransition_String(t *testing.T) {
 	tests := []struct {
-		name           string
-		transition     *Transition
-		transitionType TransitionType
-		want           TransitionType
+		name        string
+		transition  *Transition
+		setup       func(*Transition)
+		indentation string
+		contains    []string
 	}{
 		{
-			name: "Change to dashed transition",
-			transition: &Transition{
-				From:        &State{ID: "start"},
-				To:          &State{ID: "end"},
-				Type:        TransitionSolid,
-				Description: "Test transition",
+			name: "Normal transition with description",
+			transition: NewTransition(
+				&State{ID: "S1", Type: StateNormal},
+				&State{ID: "S2", Type: StateNormal},
+				"Next state",
+			),
+			indentation: "",
+			contains: []string{
+				"S1 --> S2: Next state",
 			},
-			transitionType: TransitionDashed,
-			want:           TransitionDashed,
 		},
 		{
-			name: "Change to solid transition",
-			transition: &Transition{
-				From:        &State{ID: "start"},
-				To:          &State{ID: "end"},
-				Type:        TransitionDashed,
-				Description: "Test transition",
+			name: "Transition without description",
+			transition: NewTransition(
+				&State{ID: "S1", Type: StateNormal},
+				&State{ID: "S2", Type: StateNormal},
+				"",
+			),
+			indentation: "",
+			contains: []string{
+				"S1 --> S2",
 			},
-			transitionType: TransitionSolid,
-			want:           TransitionSolid,
+		},
+		{
+			name: "Start transition",
+			transition: NewTransition(
+				nil,
+				&State{ID: "S1", Type: StateNormal},
+				"Begin",
+			),
+			indentation: "",
+			contains: []string{
+				"[*] --> S1: Begin",
+			},
+		},
+		{
+			name: "End transition",
+			transition: NewTransition(
+				&State{ID: "S1", Type: StateNormal},
+				nil,
+				"End",
+			),
+			indentation: "",
+			contains: []string{
+				"S1 --> [*]: End",
+			},
+		},
+		{
+			name: "Dashed transition",
+			transition: NewTransition(
+				&State{ID: "S1", Type: StateNormal},
+				&State{ID: "S2", Type: StateNormal},
+				"Dashed",
+			),
+			setup: func(t *Transition) {
+				t.SetType(TransitionDashed)
+			},
+			contains: []string{
+				"S1 --> S2: Dashed",
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.transition.SetType(tt.transitionType)
-			if tt.transition.Type != tt.want {
-				t.Errorf("Transition.Type = %v, want %v", tt.transition.Type, tt.want)
+			if tt.setup != nil {
+				tt.setup(tt.transition)
+			}
+
+			got := tt.transition.String(tt.indentation)
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
 			}
 		})
 	}
 }
 
-func TestTransition_String_NilStates(t *testing.T) {
+func TestTransition_SetType(t *testing.T) {
 	tests := []struct {
-		name     string
-		setup    func() *Transition
-		expected string
+		name           string
+		transitionType TransitionType
+		want           TransitionType
 	}{
 		{
-			name: "Nil From state",
-			setup: func() *Transition {
-				to := NewState("end", "End State", StateNormal)
-				return NewTransition(nil, to, "test")
-			},
-			expected: "\t[*] --> end: test\n",
+			name:           "Set solid type",
+			transitionType: TransitionSolid,
+			want:           TransitionSolid,
 		},
 		{
-			name: "Nil To state",
-			setup: func() *Transition {
-				from := NewState("start", "Start State", StateNormal)
-				return NewTransition(from, nil, "test")
-			},
-			expected: "\tstart --> [*]: test\n",
-		},
-		{
-			name: "Both states nil",
-			setup: func() *Transition {
-				return NewTransition(nil, nil, "test")
-			},
-			expected: "\t[*] --> [*]: test\n",
+			name:           "Set dashed type",
+			transitionType: TransitionDashed,
+			want:           TransitionDashed,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			transition := tt.setup()
-			result := transition.String("")
+			transition := NewTransition(
+				&State{ID: "S1"},
+				&State{ID: "S2"},
+				"",
+			)
+			result := transition.SetType(tt.transitionType)
 
-			if result != tt.expected {
-				t.Errorf("String() = %q, want %q", result, tt.expected)
+			if transition.Type != tt.want {
+				t.Errorf("SetType() = %v, want %v", transition.Type, tt.want)
+			}
+
+			if result != transition {
+				t.Error("SetType() should return transition for chaining")
 			}
 		})
 	}

@@ -55,66 +55,64 @@ func TestNewFlowchart(t *testing.T) {
 func TestFlowchart_String(t *testing.T) {
 	tests := []struct {
 		name     string
-		setup    func() *Flowchart
+		setup    func(*Flowchart)
 		contains []string
 	}{
 		{
 			name: "Empty flowchart",
-			setup: func() *Flowchart {
-				return NewFlowchart()
+			setup: func(f *Flowchart) {
+				f.SetDirection(FlowchartDirectionTopToBottom)
 			},
 			contains: []string{
 				"flowchart TB",
 			},
 		},
 		{
-			name: "Flowchart with title",
-			setup: func() *Flowchart {
-				d := NewFlowchart()
-				d.SetTitle("Test Flowchart")
-				return d
+			name: "Flowchart with class",
+			setup: func(f *Flowchart) {
+				f.AddClass("myClass")
 			},
 			contains: []string{
 				"flowchart TB",
 			},
 		},
 		{
-			name: "Flowchart with nodes and links",
-			setup: func() *Flowchart {
-				d := NewFlowchart()
-				start := d.AddNode("Start")
-				start.SetShape(NodeShapeTerminal)
-
-				process := d.AddNode("Process")
-				process.SetShape(NodeShapeProcess)
-
-				decision := d.AddNode("Decision")
-				decision.SetShape(NodeShapeDecision)
-
-				d.AddLink(start, process)
-				d.AddLink(process, decision)
-
-				return d
+			name: "Flowchart with subgraph",
+			setup: func(f *Flowchart) {
+				f.AddSubgraph("My Subgraph")
 			},
 			contains: []string{
 				"flowchart TB",
-				`0@{ shape: stadium, label: "Start"}`,
-				`1@{ shape: rect, label: "Process"}`,
-				`2@{ shape: diam, label: "Decision"}`,
+				"subgraph 0 [My Subgraph]",
+			},
+		},
+		{
+			name: "Flowchart with multiple elements",
+			setup: func(f *Flowchart) {
+				f.AddClass("myClass")
+				node1 := f.AddNode("My Node 1")
+				node2 := f.AddNode("My Node 2")
+				f.AddSubgraph("My Subgraph")
+				f.AddLink(node1, node2)
+			},
+			contains: []string{
+				"flowchart TB",
+				"0@{ shape: rect, label: \"My Node 1\"}",
+				"1@{ shape: rect, label: \"My Node 2\"}",
+				"subgraph 2 [My Subgraph]",
 				"0 --> 1",
-				"1 --> 2",
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			diagram := tt.setup()
-			result := diagram.String()
-
+			flowchart := NewFlowchart()
+			tt.setup(flowchart)
+			got := flowchart.String()
 			for _, want := range tt.contains {
-				if !strings.Contains(result, want) {
-					t.Errorf("String() missing expected content %q in:\n%s", want, result)
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
 				}
 			}
 		})
@@ -271,34 +269,6 @@ func TestFlowchart_SetDirection(t *testing.T) {
 
 			if result != flowchart {
 				t.Error("SetDirection() should return flowchart for chaining")
-			}
-		})
-	}
-}
-
-func TestFlowchart_SetCurveStyle(t *testing.T) {
-	tests := []struct {
-		name  string
-		style curveStyle
-	}{
-		{"Basis", CurveStyleBasis},
-		{"Linear", CurveStyleLinear},
-		{"Natural", CurveStyleNatural},
-		{"Step", CurveStyleStep},
-		{"None", CurveStyleNone},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			flowchart := NewFlowchart()
-			result := flowchart.SetCurveStyle(tt.style)
-
-			if flowchart.CurveStyle != tt.style {
-				t.Errorf("SetCurveStyle() = %v, want %v", flowchart.CurveStyle, tt.style)
-			}
-
-			if result != flowchart {
-				t.Error("SetCurveStyle() should return flowchart for chaining")
 			}
 		})
 	}

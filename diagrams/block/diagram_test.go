@@ -159,3 +159,87 @@ func TestDiagram_RemoveColumn(t *testing.T) {
 		t.Error("RemoveColumn() should return diagram for chaining")
 	}
 }
+
+func TestDiagram_AddSpace(t *testing.T) {
+	tests := []struct {
+		name     string
+		setup    func(*Diagram)
+		contains []string
+	}{
+		{
+			name: "Add single space",
+			setup: func(d *Diagram) {
+				d.AddSpace()
+			},
+			contains: []string{
+				"space",
+			},
+		},
+		{
+			name: "Add multiple spaces",
+			setup: func(d *Diagram) {
+				d.AddSpace()
+				d.AddSpace()
+			},
+			contains: []string{
+				"space",
+				"space",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diagram := NewDiagram()
+			tt.setup(diagram)
+			got := diagram.String()
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
+			}
+		})
+	}
+}
+
+func TestDiagram_AddSpaceWithWidth(t *testing.T) {
+	tests := []struct {
+		name     string
+		setup    func(*Diagram)
+		contains []string
+	}{
+		{
+			name: "Add space with width 2",
+			setup: func(d *Diagram) {
+				d.AddSpaceWithWidth(2)
+			},
+			contains: []string{
+				"space:2",
+			},
+		},
+		{
+			name: "Add multiple spaces with different widths",
+			setup: func(d *Diagram) {
+				d.AddSpaceWithWidth(2)
+				d.AddSpaceWithWidth(3)
+			},
+			contains: []string{
+				"space:2",
+				"space:3",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diagram := NewDiagram()
+			tt.setup(diagram)
+			got := diagram.String()
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("String() missing expected content %q in:\n%s", want, got)
+				}
+			}
+		})
+	}
+}

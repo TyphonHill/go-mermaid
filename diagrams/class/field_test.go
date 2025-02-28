@@ -114,3 +114,51 @@ func TestField_String(t *testing.T) {
 		})
 	}
 }
+
+func TestField_SetVisibility(t *testing.T) {
+	tests := []struct {
+		name       string
+		field      *Field
+		visibility fieldVisibility
+		want       fieldVisibility
+	}{
+		{
+			name:       "Set public visibility",
+			field:      NewField("test", "string"),
+			visibility: FieldVisibilityPublic,
+			want:       FieldVisibilityPublic,
+		},
+		{
+			name:       "Set private visibility",
+			field:      NewField("test", "string"),
+			visibility: FieldVisibilityPrivate,
+			want:       FieldVisibilityPrivate,
+		},
+		{
+			name:       "Set protected visibility",
+			field:      NewField("test", "string"),
+			visibility: FieldVisibilityProtected,
+			want:       FieldVisibilityProtected,
+		},
+		{
+			name:       "Set internal visibility",
+			field:      NewField("test", "string"),
+			visibility: FieldVisibilityInternal,
+			want:       FieldVisibilityInternal,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.field.SetVisibility(tt.visibility)
+
+			if result != tt.field {
+				t.Error("SetVisibility() should return field for chaining")
+			}
+
+			if tt.field.Visibility != tt.want {
+				t.Errorf("SetVisibility() = %v, want %v", tt.field.Visibility, tt.want)
+			}
+		})
+	}
+}

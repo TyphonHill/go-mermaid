@@ -138,6 +138,63 @@ func TestBlock_String(t *testing.T) {
 				"end",
 			},
 		},
+		{
+			name: "Space block",
+			block: &Block{
+				IsSpace: true,
+			},
+			contains: []string{
+				"space\n",
+			},
+		},
+		{
+			name:  "Parent block with zero width",
+			block: NewBlock("0", "Parent"),
+			setup: func(b *Block) {
+				b.Width = 0
+				b.AddBlock("Child")
+			},
+			contains: []string{
+				"block:0",
+				"0[\"Child\"]",
+				"end",
+			},
+		},
+		{
+			name:  "Parent block with arrow child",
+			block: NewBlock("0", "Parent"),
+			setup: func(b *Block) {
+				child := b.AddBlock("Child")
+				child.SetArrow(BlockArrowDirectionRight)
+			},
+			contains: []string{
+				"block:0:1",
+				"0<[\"Child\"]>(right)",
+				"end",
+			},
+		},
+		{
+			name:  "Parent block with empty text child",
+			block: NewBlock("0", "Parent"),
+			setup: func(b *Block) {
+				b.AddBlock("")
+			},
+			contains: []string{
+				"block:0:1",
+				"0",
+				"end",
+			},
+		},
+		{
+			name:  "Empty single block with width greater than 1",
+			block: NewBlock("0", ""),
+			setup: func(b *Block) {
+				b.Width = 2
+			},
+			contains: []string{
+				"0:2",
+			},
+		},
 	}
 
 	for _, tt := range tests {

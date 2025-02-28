@@ -30,8 +30,8 @@ type Note struct {
 	Actors   []*Actor
 }
 
-// NewNote creates a new Note with the specified properties.
-func NewNote(position NotePosition, text string, actors ...*Actor) *Note {
+// newNote creates a new Note with the specified properties.
+func newNote(position NotePosition, text string, actors ...*Actor) *Note {
 	return &Note{
 		Position: position,
 		Text:     text,

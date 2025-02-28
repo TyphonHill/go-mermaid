@@ -4,8 +4,8 @@ title: Software Development Lifecycle
 config:
     theme: dark
     themeVariables:
-        darkMode: false
         fontFamily: Arial
+        darkMode: false
     maxTextSize: 50000
     maxEdges: 500
     fontSize: 16
